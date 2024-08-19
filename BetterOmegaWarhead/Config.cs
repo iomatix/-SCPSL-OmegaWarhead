@@ -14,6 +14,15 @@
         [Description("Indicates that the player can stop OmegaWarhead after activation.")]
         public bool isStopAllowed { get; set; } = false;
 
+        [Description("Red channel of the lights color in the rooms during OmegaWarhead event")]
+        public float LightsColorR { get; set; } = 0.05f;
+
+        [Description("Green channel of the lights color in the rooms during OmegaWarhead event")]
+        public float LightsColorG { get; set; } = 0.85f;
+
+        [Description("Blue channel of the lights color in the rooms during OmegaWarhead event")]
+        public float LightsColorB { get; set; } = 0.35f;
+
         [Description("Broadcast that will appear when the rescue helicopter is coming.")]
         public string HelicopterMessage { get; set; } = "<color=blue>RESCUE HELICOPTER COMING TO SURFACE IN:</color> ";
 

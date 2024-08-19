@@ -37,12 +37,13 @@
         }
         public void OnWarheadStart(StartingEventArgs ev)
         {
-            if (!_plugin.Methods.isOmegaActivated())
+            if (_plugin.Methods.isOmegaActivated())
             {
                 ev.IsAllowed = _plugin.Config.isStopAllowed;
             }
             else if (!_plugin.Methods.isOmegaActivated() && (float)Loader.Random.NextDouble() * 100 < _plugin.Config.ReplaceAlphaChance)
             {
+                ev.IsAllowed = _plugin.Config.isStopAllowed;
                 _plugin.Methods.ActivateOmegaWarhead();
             }
 

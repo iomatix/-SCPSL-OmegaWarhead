@@ -52,7 +52,7 @@
         public bool ActivateOmegaWarhead()
         {
             OmegaActivated = true;
-            ChangeRoomColors(Color.cyan);
+            ChangeRoomColors(new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB));
 
             SendCassieMessage(_plugin.Config.Cassie);
             BroadcastOmegaActivation();
