@@ -18,9 +18,9 @@ namespace BetterOmegaWarhead.Commands
         {
             if (sender.CheckPermission("omegawarhead"))
             {
-                if (!Plugin.Singleton.handler.OmegaActivated)
+                if (!Plugin.Singleton.Methods.isOmegaActivated())
                 {
-                    Plugin.Singleton.handler.OmegaWarhead();
+                    Plugin.Singleton.Methods.ActivateOmegaWarhead();
                     response = "Omega Warhead activated.";
                     return false;
                 }
