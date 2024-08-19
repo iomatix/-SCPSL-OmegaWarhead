@@ -4,7 +4,6 @@
     using Exiled.API.Features;
     using Exiled.Events.EventArgs.Server;
     using Exiled.Events.EventArgs.Warhead;
-    using Exiled.Events.Features;
     using Exiled.Loader;
     using MEC;
 
@@ -45,6 +44,15 @@
             {
                 ev.IsAllowed = _plugin.Config.isStopAllowed;
                 _plugin.Methods.ActivateOmegaWarhead();
+            }
+
+        }
+
+        public void OnWarheadStop(StartingEventArgs ev)
+        {
+            if (_plugin.Methods.isOmegaActivated() && ev.IsAllowed)
+            {
+                _plugin.Methods.StopOmega();
             }
 
         }

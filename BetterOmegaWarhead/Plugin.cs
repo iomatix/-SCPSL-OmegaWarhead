@@ -2,8 +2,10 @@
 {
     using System;
     using Exiled.API.Features;
+    using Exiled.Events;
     using MEC;
-
+    using Server = Exiled.Events.Handlers.Server;
+    using Warhead = Exiled.Events.Handlers.Warhead;
     public class Plugin : Plugin<Config>
     {
         public static Plugin Singleton;
@@ -13,7 +15,7 @@
         public override Version Version { get; } = new Version(6, 0, 0);
         public override Version RequiredExiledVersion { get; } = new Version(9, 0, 0);
 
-        public Methods Methods { get; private set; }
+        internal Methods Methods { get; private set; }
         internal EventHandlers EventHandlers { get; private set; }
 
         public override void OnEnabled()
@@ -32,20 +34,23 @@
 
             Singleton = null;
             EventHandlers = null;
+            Methods = null;
 
             UnregisterEvents();
             base.OnDisabled();
         }
         public void RegisterEvents()
         {
-            Exiled.Events.Handlers.Server.WaitingForPlayers += EventHandlers.OnWaitingForPlayers;
-            Exiled.Events.Handlers.Warhead.Starting += EventHandlers.OnWarheadStart;
+            Server.WaitingForPlayers += EventHandlers.OnWaitingForPlayers;
+            Warhead.Starting += EventHandlers.OnWarheadStart;
+            Warhead.Stopping += EventHandlers.OnWarheadStop;
         }
 
         public void UnregisterEvents()
         {
-            Exiled.Events.Handlers.Server.WaitingForPlayers -= EventHandlers.OnWaitingForPlayers;
-            Exiled.Events.Handlers.Warhead.Starting -= EventHandlers.OnWarheadStart;
+            Server.WaitingForPlayers -= EventHandlers.OnWaitingForPlayers;
+            Warhead.Starting -= EventHandlers.OnWarheadStart;
+            Warhead.Stopping -= EventHandlers.OnWarheadStop;
         }
     }
 }
