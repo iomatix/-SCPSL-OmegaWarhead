@@ -177,14 +177,14 @@
         public IEnumerator<float> HandleHelicopterEscape()
         {
             yield return Timing.WaitForSeconds(12f);
-            Vector3 escapePrimaryPos = Door.Get(DoorType.EscapePrimary).WorldPosition(new Vector3(0,0,0));
+            Vector3 escapePrimaryPos = Door.Get(DoorType.EscapePrimary).WorldPosition(new Vector3(0f,0f,0f));
             Vector3 helicopterZone = new Vector3(escapePrimaryPos.x - 3.66f, escapePrimaryPos.y - 0.23f, escapePrimaryPos.z - 17.68f);
 
             RespawnEffectsController.ExecuteAllEffects(RespawnEffectsController.EffectType.Selection, SpawnableTeamType.NineTailedFox);
-            yield return Timing.WaitForSeconds(18f);
+            yield return Timing.WaitForSeconds(22f);
             foreach (Player player in Player.List)
             {
-                if (!player.IsScp && player.IsAlive && Vector3.Distance(player.Position, helicopterZone) <= 8)
+                if (!player.IsScp && player.IsAlive && Vector3.Distance(player.Position, helicopterZone) <= 8.33f)
                 {
                     player.Broadcast(4, _plugin.Config.HelicopterEscape);
                     player.Position = new Vector3(293, 978, -52);
