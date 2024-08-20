@@ -4,7 +4,11 @@
     using Exiled.API.Enums;
     using Exiled.API.Features;
     using Exiled.API.Features.Doors;
+    using Exiled.CustomModules.API.Extensions;
+    using MapGeneration.Distributors;
     using MEC;
+    using PlayerRoles;
+    using PluginAPI.Core.Zones.Heavy;
     using Respawning;
     using UnityEngine;
     using Server = Exiled.Events.Handlers.Server;
@@ -37,29 +41,29 @@
             return OmegaActivated;
         }
 
-        public void StopOmega()
+        public void ActivateOmegaWarhead()
         {
-            OmegaActivated = false;
-            Cassie.Clear();
-            heliSurvivors.Clear();
-            Cassie.Message(_plugin.Config.StopCassie, false, false);
-            foreach (var coroutine in _plugin.EventHandlers.Coroutines)
-                Timing.KillCoroutines(coroutine);
-            foreach (Room room in Room.List)
-                room.ResetColor();
-        }
 
-        public bool ActivateOmegaWarhead()
-        {
+            Warhead.Controller.CurScenario.TimeToDetonate = (int)_plugin.Config.TimeToDetonation;
             OmegaActivated = true;
+            Warhead.Start();
             ChangeRoomColors(new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB));
 
-            SendCassieMessage(_plugin.Config.Cassie);
+            SendImportantCassieMessage(_plugin.Config.StartingOmegaCassie);
             BroadcastOmegaActivation();
 
             StartOmegaWarheadSequence();
 
-            return true;
+        }
+
+        public void StopOmega()
+        {
+            OmegaActivated = false;
+            Warhead.Stop();
+            heliSurvivors.Clear();
+            SendImportantCassieMessage(_plugin.Config.StoppingOmegaCassie);
+            foreach (var coroutine in _plugin.EventHandlers.Coroutines) Timing.KillCoroutines(coroutine);
+            foreach (Room room in Room.List) room.ResetColor();
         }
 
         public void ChangeRoomColors(Color color)
@@ -72,28 +76,78 @@
 
         public void SendCassieMessage(string message)
         {
+            Cassie.Message(message, isNoisy: false, isSubtitles: false, isHeld: false);
+        }
+
+        public void SendImportantCassieMessage(string message)
+        {
+            Cassie.Clear();
             Cassie.Message(message, isSubtitles: false, isHeld: false);
         }
 
         public void BroadcastOmegaActivation()
         {
-            Map.Broadcast(10, _plugin.Config.ActivatedMessage);
+            Map.Broadcast(8, _plugin.Config.ActivatedMessage);
         }
 
         public void StartOmegaWarheadSequence()
         {
-            _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(150f, OpenAndLockCheckpointDoors));
-            _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(158f, BroadcastHelicopterCountdown));
-            _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(179f, HandleWarheadDetonation));
+            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceDetonation()));
+            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceHeli()));
+            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceCheckpointOpen()));
+        }
+
+
+        public IEnumerator<float> OmegaWarheadSequenceDetonation()
+        {
+            float timeToDetonation = _plugin.Config.TimeToDetonation;
+
+            int[] notificationTimes = { 180, 120, 60, 30, 20, 10 };
+
+            foreach (var notifyTime in notificationTimes)
+            {
+                if (timeToDetonation >= notifyTime)
+                {
+                    yield return Timing.WaitForSeconds(timeToDetonation - notifyTime);
+                    if (isOmegaActivated())  SendCassieMessage($"{notifyTime} Seconds until Omega Warhead Detonation");
+                    timeToDetonation = notifyTime;
+                }
+            }
+
+            yield return Timing.WaitForSeconds(1);
+            if (timeToDetonation <= 10)
+            {
+                for (int i = (int)timeToDetonation; i > 0; i--)
+                {
+                    Cassie.Clear();
+                    yield return Timing.WaitForSeconds(1);
+                    SendCassieMessage($"{i}");
+                }
+                if (isOmegaActivated()) HandleWarheadDetonation();
+            }
+        }
+
+        public IEnumerator<float> OmegaWarheadSequenceHeli()
+        {
+            yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
+            if (isOmegaActivated()) BroadcastHelicopterCountdown();
+        }
+
+        public IEnumerator<float> OmegaWarheadSequenceCheckpointOpen()
+        {
+            yield return Timing.WaitForSeconds(_plugin.Config.OpenAndLockCheckpointDoorsDelay);
+            if (isOmegaActivated()) OpenAndLockCheckpointDoors();
         }
 
         public void OpenAndLockCheckpointDoors()
         {
+            SendImportantCassieMessage(_plugin.Config.CheckpointUnlockCassie);
             foreach (Door door in Door.List)
             {
                 if (IsCheckpointDoor(door.Type))
                 {
                     door.IsOpen = true;
+                    door.PlaySound(DoorBeepType.InteractionAllowed);
                     door.Lock(69420, DoorLockType.Warhead);
                 }
             }
@@ -109,52 +163,68 @@
 
         public void BroadcastHelicopterCountdown()
         {
-            for (int i = 10; i > 0; i--)
-            {
-                Map.Broadcast(1, $"{_plugin.Config.HelicopterMessage} {i}");
-            }
-
-            _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(12f, HandleHelicopterEscape));
+            SendImportantCassieMessage(_plugin.Config.HeliIncomingCassie);
+            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandleHelicopterEscape()));
         }
 
-        public void HandleHelicopterEscape()
+        public IEnumerator<float> HandleHelicopterEscape()
         {
-            Vector3 helicopterZone = new Vector3(178, 993, -59);
+            yield return Timing.WaitForSeconds(12f);
+            Vector3 escapePrimaryPos = Door.Get(DoorType.EscapePrimary).WorldPosition(new Vector3(0,0,0));
+            Vector3 helicopterZone = new Vector3(escapePrimaryPos.x - 3.66f, escapePrimaryPos.y - 0.23f, escapePrimaryPos.z - 17.68f);
 
+            RespawnEffectsController.ExecuteAllEffects(RespawnEffectsController.EffectType.Selection, SpawnableTeamType.NineTailedFox);
+            yield return Timing.WaitForSeconds(18f);
             foreach (Player player in Player.List)
             {
-                if (Vector3.Distance(player.Position, helicopterZone) <= 10)
+                if (!player.IsScp && player.IsAlive && Vector3.Distance(player.Position, helicopterZone) <= 8)
                 {
                     player.Broadcast(4, _plugin.Config.HelicopterEscape);
                     player.Position = new Vector3(293, 978, -52);
                     player.Scale = Vector3.zero;
-                    player.EnableEffect(EffectType.Flashed, 12f);
-
+                    player.EnableEffect(EffectType.Flashed, 15f);
                     heliSurvivors.Add(player);
                     _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(0.5f, () => player.EnableEffect(EffectType.Ensnared)));
                 }
+
             }
 
-            RespawnEffectsController.ExecuteAllEffects(RespawnEffectsController.EffectType.Selection, SpawnableTeamType.NineTailedFox);
+            
         }
 
         public void HandleWarheadDetonation()
         {
-            DetonateWarhead();
+
+            Cassie.Clear();
+            SendCassieMessage(_plugin.Config.DetonatingOmegaCassie);
+            
 
             foreach (Player player in Player.List)
             {
-                if (IsInShelter(player))
+                
+                if (!heliSurvivors.Contains(player) || !IsInShelter(player))
                 {
-                    HandlePlayerInShelter(player);
+                    if(player.IsAlive) player.Kill("Omega Warhead");
                 }
-                else if (!heliSurvivors.Contains(player))
+                else
                 {
-                    player.Kill("Omega Warhead");
+                    if (player.IsAlive)  HandlePlayerInShelter(player);
                 }
-            }
 
-            ChangeRoomColors(Color.blue);
+                if(!player.IsAlive) player.RoleManager.ServerSetRole(RoleTypeId.Spectator, RoleChangeReason.Died);
+
+                if (player.IsAlive && heliSurvivors.Contains(player)) player.RoleManager.ServerSetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
+                
+
+            }
+            DetonateWarhead();
+
+
+            foreach (Room room in Room.List)
+            {
+                room.LockDown();
+                room.TurnOffLights(99999);
+            }
         }
 
         public void DetonateWarhead()
@@ -162,6 +232,8 @@
             Warhead.Detonate();
             Warhead.Shake();
         }
+
+
 
         public bool IsInShelter(Player player)
         {
@@ -171,8 +243,7 @@
         public void HandlePlayerInShelter(Player player)
         {
             player.IsGodModeEnabled = true;
-
-            _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(0.2f, () =>
+            _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(2.5f, () =>
             {
                 player.IsGodModeEnabled = false;
                 player.EnableEffect(EffectType.Flashed, 2f);

@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using Exiled.API.Features;
+    using Exiled.CustomModules.API.Enums;
     using Exiled.Events.EventArgs.Server;
     using Exiled.Events.EventArgs.Warhead;
     using Exiled.Loader;
@@ -43,6 +44,7 @@
             else if (!_plugin.Methods.isOmegaActivated() && (float)Loader.Random.NextDouble() * 100 < _plugin.Config.ReplaceAlphaChance)
             {
                 ev.IsAllowed = _plugin.Config.isStopAllowed;
+                Warhead.Controller.CurScenario.TimeToDetonate = (int)_plugin.Config.TimeToDetonation;
                 _plugin.Methods.ActivateOmegaWarhead();
             }
 
@@ -54,6 +56,10 @@
             {
                 _plugin.Methods.StopOmega();
             }
+
+        }
+        public void OnWarheadDetonate(StartingEventArgs ev)
+        {
 
         }
     }
