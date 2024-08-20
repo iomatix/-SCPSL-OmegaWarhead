@@ -12,13 +12,13 @@
         public int ReplaceAlphaChance { get; private set; } = 15;
 
         [Description("Time to the Omega Warhead detonation in seconds.")]
-        public float TimeToDetonation { get; private set; } = 300f;
+        public float TimeToDetonation { get; private set; } = 320f;
 
         [Description("Time to the open and lock checkpoint doors after Omega activation.")]
-        public float OpenAndLockCheckpointDoorsDelay { get; private set; } = 235f;
+        public float OpenAndLockCheckpointDoorsDelay { get; private set; } = 225f;
 
         [Description("Time to the helicopter after Omega activation.")]
-        public float HelicopterBroadcastDelay { get; private set; } = 255f;
+        public float HelicopterBroadcastDelay { get; private set; } = 250f;
 
         [Description("Indicates that the player can stop OmegaWarhead after activation.")]
         public bool isStopAllowed { get; private set; } = false;

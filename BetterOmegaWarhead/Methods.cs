@@ -108,7 +108,7 @@
         {
             float timeToDetonation = _plugin.Config.TimeToDetonation;
 
-            int[] notificationTimes = { 180, 120, 60, 30, 20 };
+            int[] notificationTimes = { 300, 240, 180, 120, 60, 30, 20 };
 
             
             foreach (var notifyTime in notificationTimes)
@@ -116,21 +116,24 @@
                 if (timeToDetonation >= notifyTime)
                 {
                     yield return Timing.WaitForSeconds(timeToDetonation - notifyTime);
-                    if (isOmegaActivated())  SendCassieMessage($"{notifyTime} Seconds until Omega Warhead Detonation");
+                    if (isOmegaActivated()) SendCassieMessage($"{notifyTime} Seconds until Omega Warhead Detonation");
                     timeToDetonation = notifyTime;
                 }
             }
 
-            yield return Timing.WaitForSeconds(12);
+            yield return Timing.WaitForSeconds(12f);
             for (int i = 10; i > 0; i--)
             {
                 if (isOmegaActivated())
                 {
-                    Map.TurnOffAllLights(0.75f);
-                    yield return Timing.WaitForSeconds(1.5f);
-                    SendCassieMessage(i.ToString());
+                    string msg = $"{i}";
+                    Cassie.Clear();
+                    SendCassieMessage(msg);
+                    Map.TurnOffAllLights(1f);
+                    yield return Timing.WaitForSeconds(2f);
                 }
             }
+
             if (isOmegaActivated()) HandleWarheadDetonation();
         }
 
@@ -181,15 +184,15 @@
             Vector3 helicopterZone = new Vector3(escapePrimaryPos.x - 3.66f, escapePrimaryPos.y - 0.23f, escapePrimaryPos.z - 17.68f);
 
             RespawnEffectsController.ExecuteAllEffects(RespawnEffectsController.EffectType.Selection, SpawnableTeamType.NineTailedFox);
-            yield return Timing.WaitForSeconds(22f);
+            yield return Timing.WaitForSeconds(19f);
             foreach (Player player in Player.List)
             {
                 if (!player.IsScp && player.IsAlive && Vector3.Distance(player.Position, helicopterZone) <= 8.33f)
                 {
                     player.Broadcast(4, _plugin.Config.HelicopterEscape);
-                    player.Position = new Vector3(293, 978, -52);
+                    player.Position = new Vector3(293f, 978f, -52f);
                     player.Scale = Vector3.zero;
-                    player.EnableEffect(EffectType.Flashed, 15f);
+                    player.EnableEffect(EffectType.Flashed, 10f);
                     heliSurvivors.Add(player);
                     _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(0.5f, () => player.EnableEffect(EffectType.Ensnared)));
                 }
@@ -209,13 +212,13 @@
             foreach (Player player in Player.List)
             {
                 
-                if (!heliSurvivors.Contains(player) && !IsInShelter(player))
+                if (heliSurvivors.Contains(player) || IsInShelter(player))
                 {
-                    if(player.IsAlive) player.Kill("Omega Warhead");
+                    HandleSafePlayer(player); 
                 }
                 else
                 {
-                    if (player.IsAlive) HandleSafePlayer(player);
+                    if (player.IsAlive) player.Kill("Omega Warhead");
                 }
 
                 if(!player.IsAlive) player.RoleManager.ServerSetRole(RoleTypeId.Spectator, RoleChangeReason.Died);
@@ -226,11 +229,10 @@
             }
             DetonateWarhead();
 
-
             foreach (Room room in Room.List)
             {
-                room.LockDown();
-                room.TurnOffLights(99999);
+                room.LockDown(DoorLockType.NoPower);
+                room.TurnOffLights(99999f);
             }
         }
 
