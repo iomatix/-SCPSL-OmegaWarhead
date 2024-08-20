@@ -126,9 +126,9 @@
             {
                 if (isOmegaActivated())
                 {
-                    Cassie.Clear();
-                    yield return Timing.WaitForSeconds(1);
-                    SendCassieMessage($"{i}");
+                    Map.TurnOffAllLights(0.75f);
+                    yield return Timing.WaitForSeconds(1.5f);
+                    SendCassieMessage(i.ToString());
                 }
             }
             if (isOmegaActivated()) HandleWarheadDetonation();
@@ -247,16 +247,15 @@
             return player.CurrentRoom.Type == RoomType.EzShelter;
         }
 
-        public void HandleSafePlayer(Player player)
+        public IEnumerable<float> HandleSafePlayer(Player player)
         {
             player.IsGodModeEnabled = true;
-            _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(1f, () =>
-            {
-                player.IsGodModeEnabled = false;
-                player.EnableEffect(EffectType.Flashed, 2f);
-                player.Position = new Vector3(-53, 988, -50);
-                player.EnableEffect(EffectType.Blinded, 5f);
-            }));
+            player.EnableEffect(EffectType.Flashed, 2.5f);
+            yield return Timing.WaitForSeconds(2f);
+            player.IsGodModeEnabled = false;
+            player.Position = new Vector3(-53, 988, -50);
+            player.EnableEffect(EffectType.Blinded, 5f);
+
         }
     }
 }
