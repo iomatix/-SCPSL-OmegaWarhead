@@ -28,10 +28,16 @@
 
         public void Disable()
         {
+            Clean();
             Server.RoundEnded -= _plugin.EventHandlers.OnRoundEnd;
             Server.RoundStarted -= _plugin.EventHandlers.OnRoundStart;
         }
 
+        public void Clean()
+        {
+            OmegaActivated = false;
+            heliSurvivors.Clear();
+        }
         public bool OmegaActivated { get; private set; }
 
 
@@ -102,8 +108,9 @@
         {
             float timeToDetonation = _plugin.Config.TimeToDetonation;
 
-            int[] notificationTimes = { 180, 120, 60, 30, 20, 10 };
+            int[] notificationTimes = { 180, 120, 60, 30, 20 };
 
+            
             foreach (var notifyTime in notificationTimes)
             {
                 if (timeToDetonation >= notifyTime)
@@ -114,17 +121,17 @@
                 }
             }
 
-            yield return Timing.WaitForSeconds(1);
-            if (timeToDetonation <= 10)
+            yield return Timing.WaitForSeconds(12);
+            for (int i = 10; i > 0; i--)
             {
-                for (int i = (int)timeToDetonation; i > 0; i--)
+                if (isOmegaActivated())
                 {
                     Cassie.Clear();
                     yield return Timing.WaitForSeconds(1);
                     SendCassieMessage($"{i}");
                 }
-                if (isOmegaActivated()) HandleWarheadDetonation();
             }
+            if (isOmegaActivated()) HandleWarheadDetonation();
         }
 
         public IEnumerator<float> OmegaWarheadSequenceHeli()
@@ -202,13 +209,13 @@
             foreach (Player player in Player.List)
             {
                 
-                if (!heliSurvivors.Contains(player) || !IsInShelter(player))
+                if (!heliSurvivors.Contains(player) && !IsInShelter(player))
                 {
                     if(player.IsAlive) player.Kill("Omega Warhead");
                 }
                 else
                 {
-                    if (player.IsAlive)  HandlePlayerInShelter(player);
+                    if (player.IsAlive) HandleSafePlayer(player);
                 }
 
                 if(!player.IsAlive) player.RoleManager.ServerSetRole(RoleTypeId.Spectator, RoleChangeReason.Died);
@@ -240,10 +247,10 @@
             return player.CurrentRoom.Type == RoomType.EzShelter;
         }
 
-        public void HandlePlayerInShelter(Player player)
+        public void HandleSafePlayer(Player player)
         {
             player.IsGodModeEnabled = true;
-            _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(2.5f, () =>
+            _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(1f, () =>
             {
                 player.IsGodModeEnabled = false;
                 player.EnableEffect(EffectType.Flashed, 2f);
