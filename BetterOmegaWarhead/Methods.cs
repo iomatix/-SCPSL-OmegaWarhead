@@ -64,9 +64,8 @@
 
         public void StopOmega()
         {
-            OmegaActivated = false;
             Warhead.Stop();
-            heliSurvivors.Clear();
+            Clean();
             SendImportantCassieMessage(_plugin.Config.StoppingOmegaCassie);
             foreach (var coroutine in _plugin.EventHandlers.Coroutines) Timing.KillCoroutines(coroutine);
             foreach (Room room in Room.List) room.ResetColor();
