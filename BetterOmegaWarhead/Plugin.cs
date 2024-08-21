@@ -12,7 +12,7 @@
         public override string Author { get; } = "ClaudioPanConQueso & iomatix";
         public override string Name { get; } = "BetterOmegaWarhead";
         public override string Prefix { get; } = "BetterOmegaWarhead";
-        public override Version Version { get; } = new Version(6, 2, 2);
+        public override Version Version { get; } = new Version(6, 2, 3);
         public override Version RequiredExiledVersion { get; } = new Version(9, 0, 0);
 
         internal Methods Methods { get; private set; }

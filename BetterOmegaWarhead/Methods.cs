@@ -81,11 +81,13 @@
 
         public void SendCassieMessage(string message)
         {
+            if (!(message.Length > 0)) return;
             Cassie.Message(message, isNoisy: false, isSubtitles: false, isHeld: false);
         }
 
         public void SendImportantCassieMessage(string message)
         {
+            if (!(message.Length > 0)) return;
             Cassie.Clear();
             Cassie.Message(message, isSubtitles: false, isHeld: false);
         }
@@ -120,7 +122,7 @@
                 }
             }
 
-            yield return Timing.WaitForSeconds(12f);
+            yield return Timing.WaitForSeconds(10f);
             for (int i = 10; i > 0; i--)
             {
                 if (isOmegaActivated())
@@ -128,8 +130,8 @@
                     string msg = $"{i}";
                     Cassie.Clear();
                     SendCassieMessage(msg);
-                    Map.TurnOffAllLights(1f);
-                    yield return Timing.WaitForSeconds(2f);
+                    Map.TurnOffAllLights(1.25f);
+                    yield return Timing.WaitForSeconds(2.5f);
                 }
             }
 
@@ -191,7 +193,7 @@
                     player.Broadcast(4, _plugin.Config.HelicopterEscape);
                     player.Position = new Vector3(293f, 978f, -52f);
                     player.Scale = Vector3.zero;
-                    player.EnableEffect(EffectType.Flashed, 10f);
+                    player.EnableEffect(EffectType.Flashed, 15f);
                     heliSurvivors.Add(player);
                     _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(0.5f, () => player.EnableEffect(EffectType.Ensnared)));
                 }
@@ -231,7 +233,7 @@
             foreach (Room room in Room.List)
             {
                 room.LockDown(DoorLockType.NoPower);
-                room.TurnOffLights(99999f);
+                room.TurnOffLights();
             }
         }
 
