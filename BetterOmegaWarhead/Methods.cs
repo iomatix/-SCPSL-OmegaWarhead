@@ -117,7 +117,7 @@
                 if (timeToDetonation >= notifyTime)
                 {
                     yield return Timing.WaitForSeconds(timeToDetonation - notifyTime);
-                    if (isOmegaActivated()) SendCassieMessage($"{notifyTime} Seconds until Omega Warhead Detonation");
+                    if (isOmegaActivated()) SendCassieMessage($".G3 {notifyTime} Seconds until Omega Warhead Detonation");
                     timeToDetonation = notifyTime;
                 }
             }
@@ -128,7 +128,7 @@
                 if (isOmegaActivated())
                 {
                     yield return Timing.WaitForSeconds(2.5f);
-                    string msg = $"{i}";
+                    string msg = $".G3 {i}";
                     Cassie.Clear();
                     SendCassieMessage(msg);
                     Map.TurnOffAllLights(1.25f);
