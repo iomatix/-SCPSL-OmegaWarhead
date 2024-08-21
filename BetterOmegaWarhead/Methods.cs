@@ -127,6 +127,7 @@
             {
                 if (isOmegaActivated())
                 {
+                    yield return Timing.WaitForSeconds(2.5f);
                     string msg = $"{i}";
                     Cassie.Clear();
                     SendCassieMessage(msg);
