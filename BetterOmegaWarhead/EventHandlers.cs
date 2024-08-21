@@ -18,7 +18,7 @@
 
         public void OnRoundStart()
         {
-
+            _plugin.Methods.Init();
         }
 
         public void OnRoundEnd(RoundEndedEventArgs ev)
