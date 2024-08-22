@@ -1,8 +1,9 @@
-﻿using CommandSystem;
-using Exiled.Permissions.Extensions;
-using System;
-namespace BetterOmegaWarhead.Commands
+﻿namespace BetterOmegaWarhead.Commands
 {
+    using System;
+    using CommandSystem;
+    using Exiled.Permissions.Extensions;
+
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     [CommandHandler(typeof(GameConsoleCommandHandler))]
     public class Stop : ICommand

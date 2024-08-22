@@ -1,9 +1,9 @@
-﻿using CommandSystem;
-using Exiled.Permissions.Extensions;
-using System;
-
-namespace BetterOmegaWarhead.Commands
+﻿namespace BetterOmegaWarhead.Commands
 {
+    using System;
+    using CommandSystem;
+    using Exiled.Permissions.Extensions;
+
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     [CommandHandler(typeof(GameConsoleCommandHandler))]
     public class Activate : ICommand
@@ -16,11 +16,29 @@ namespace BetterOmegaWarhead.Commands
 
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
+            float timeToDetonation = Plugin.Singleton.Config.TimeToDetonation;
+            if (!arguments.IsEmpty())
+            {
+                string arg = arguments.At(0).ToString();
+                if (float.TryParse(arg, out float floatResult))
+                {
+                    timeToDetonation = floatResult;
+                }
+                else if (double.TryParse(arg, out double doubleResult))
+                {
+                    timeToDetonation = (float)doubleResult;
+                }
+                else if (int.TryParse(arg, out int intResult))
+                {
+                    timeToDetonation = (float)intResult;
+                }
+            }
+
             if (sender.CheckPermission("omegawarhead"))
             {
                 if (!Plugin.Singleton.Methods.isOmegaActivated())
                 {
-                    Plugin.Singleton.Methods.ActivateOmegaWarhead();
+                    Plugin.Singleton.Methods.ActivateOmegaWarhead(timeToDetonation);
                     response = "Omega Warhead activated.";
                     return false;
                 }

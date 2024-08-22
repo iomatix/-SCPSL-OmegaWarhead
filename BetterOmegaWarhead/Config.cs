@@ -2,6 +2,7 @@
 {
     using System.ComponentModel;
     using Exiled.API.Interfaces;
+    using Exiled.API.Features;
 
     public sealed class Config : IConfig
     {
@@ -33,10 +34,10 @@
         public float LightsColorB { get; private set; } = 0.35f;
 
         [Description("Broadcast that will appear when the player escapes in the helicopter.")]
-        public string HelicopterEscape { get; set; } = "You escaped in the helicopter.";
+        public Broadcast HelicopterEscape { get; set; } = new Broadcast("You escaped in the helicopter.", 10);
 
         [Description("Broadcast that will appear when the Omega Warhead is activated.")]
-        public string ActivatedMessage { get; set; } = "<b><color=red>OMEGA WARHEAD ACTIVATED.</color></b>\nPLEASE EVACUATE IN BREACH SHELTER.";
+        public Broadcast ActivatedMessage { get; set; } = new Broadcast("<b><color=red>OMEGA WARHEAD ACTIVATED</color></b>\nPLEASE EVACUATE IMMEDIATELY", 10);
 
         [Description("Cassie message when Omega Warhead is stopped")]
         public string StoppingOmegaCassie { get; set; } = "pitch_0.9 Omega Warhead detonation has been stopped";
