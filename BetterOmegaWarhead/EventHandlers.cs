@@ -38,7 +38,7 @@
                 ev.IsAllowed = _plugin.Config.isStopAllowed;
             }
             else if (!_plugin.Methods.isOmegaActivated() && 
-                ((Generator.List.Count(generator => generator.State == GeneratorState.Engaged) >= _plugin.Config.generatorsNumGuaranteeOmega) || (float)Loader.Random.NextDouble() * 100 < _plugin.Config.ReplaceAlphaChance)
+                ((Generator.List.Count(generator => (generator.State & GeneratorState.Engaged) == GeneratorState.Engaged) >= _plugin.Config.generatorsNumGuaranteeOmega) || (float)Loader.Random.NextDouble() * 100 < _plugin.Config.ReplaceAlphaChance)
                 )
             {
                 float realTimeToDetonation = _plugin.Config.TimeToDetonation;
