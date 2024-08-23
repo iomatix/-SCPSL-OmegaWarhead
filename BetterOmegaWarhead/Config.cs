@@ -9,6 +9,11 @@
         [Description("Plugin enabled?")]
         public bool IsEnabled { get; set; } = true;
 
+
+        [Description("Amount of engaged generators guarantee 100% chance for the launch of the Omega Warhead.")]
+        public int generatorsNumGuaranteeOmega { get; private set; } = 2;
+
+
         [Description("Chance that the Alpha Warhead will be replaced with Omega Warhead")]
         public int ReplaceAlphaChance { get; private set; } = 15;
 

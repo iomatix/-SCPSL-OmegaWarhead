@@ -1,10 +1,9 @@
 ﻿namespace BetterOmegaWarhead
 {
     using System.Collections.Generic;
-    using Discord;
+    using System.Linq;
     using Exiled.API.Enums;
     using Exiled.API.Features;
-    using Exiled.CustomModules.API.Enums;
     using Exiled.Events.EventArgs.Server;
     using Exiled.Events.EventArgs.Warhead;
     using Exiled.Loader;
@@ -34,13 +33,15 @@
         }
         public void OnWarheadStart(StartingEventArgs ev)
         {
-            if(_plugin.Methods.isOmegaActivated())
+            if (_plugin.Methods.isOmegaActivated())
             {
                 ev.IsAllowed = _plugin.Config.isStopAllowed;
             }
-            else if (!_plugin.Methods.isOmegaActivated() && (float)Loader.Random.NextDouble() * 100 < _plugin.Config.ReplaceAlphaChance)
+            else if (!_plugin.Methods.isOmegaActivated() && 
+                ((Generator.List.Count(generator => generator.State == GeneratorState.Engaged) >= _plugin.Config.generatorsNumGuaranteeOmega) || (float)Loader.Random.NextDouble() * 100 < _plugin.Config.ReplaceAlphaChance)
+                )
             {
-                float realTimeToDetonation  = _plugin.Config.TimeToDetonation;
+                float realTimeToDetonation = _plugin.Config.TimeToDetonation;
                 float eventTimeToDetonation = realTimeToDetonation - 0.45f; //- (1.5f * 10.0f);
                 _plugin.Methods.ActivateOmegaWarhead(eventTimeToDetonation);
                 ev.IsAllowed = _plugin.Config.isStopAllowed;

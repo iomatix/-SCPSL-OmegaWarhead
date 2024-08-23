@@ -4,9 +4,13 @@
     using Exiled.API.Enums;
     using Exiled.API.Features;
     using Exiled.API.Features.Doors;
+    using Exiled.API.Features.Roles;
     using Exiled.CustomModules.API.Features;
+    using Exiled.CustomModules.API.Features.CustomRoles;
     using MEC;
     using PlayerRoles;
+    using PlayerRoles.RoleAssign;
+    using PluginAPI.Roles;
     using Respawning;
     using UnityEngine;
     using Server = Exiled.Events.Handlers.Server;
@@ -33,6 +37,7 @@
         public void Clean()
         {
             OmegaActivated = false;
+            foreach (Player player in heliSurvivors) player.IsGodModeEnabled = false;
             heliSurvivors.Clear();
             Warhead.Status = WarheadStatus.NotArmed;
             Map.ResetLightsColor();
@@ -116,7 +121,7 @@
                         SendCassieMessage($".G3 {notifyTime} Seconds until Omega Warhead Detonation");
 
                     }
-                        timeToDetonation = notifyTime;
+                    timeToDetonation = notifyTime;
                 }
             }
 
@@ -174,22 +179,28 @@
 
         public IEnumerator<float> HandleHelicopterEscape()
         {
-            yield return Timing.WaitForSeconds(12f);
+            yield return Timing.WaitForSeconds(12.0f);
             Vector3 escapePrimaryPos = Door.Get(DoorType.EscapePrimary).WorldPosition(new Vector3(0f, 0f, 0f));
             Vector3 helicopterZone = new Vector3(escapePrimaryPos.x - 3.66f, escapePrimaryPos.y - 0.23f, escapePrimaryPos.z - 17.68f);
-
+            yield return Timing.WaitForSeconds(1.5f);
             RespawnEffectsController.ExecuteAllEffects(RespawnEffectsController.EffectType.Selection, SpawnableTeamType.NineTailedFox);
-            yield return Timing.WaitForSeconds(19f);
+            yield return Timing.WaitForSeconds(19.0f);
             foreach (Player player in Player.List)
             {
-                if (!player.IsScp && player.IsAlive && Vector3.Distance(player.Position, helicopterZone) <= 8.33f)
+                if (!player.IsScp && player.IsAlive && player is Pawn pawn && Vector3.Distance(player.Position, helicopterZone) <= 8.33f)
                 {
-                    player.Broadcast(_plugin.Config.HelicopterEscape);
-                    player.Position = new Vector3(293f, 978f, -52f);
-                    player.Scale = Vector3.zero;
-                    player.EnableEffect(EffectType.Flashed, 15f);
                     heliSurvivors.Add(player);
-                    _plugin.EventHandlers.Coroutines.Add(Timing.CallDelayed(0.5f, () => player.EnableEffect(EffectType.Ensnared)));
+                    pawn.IsGodModeEnabled = true;
+                    pawn.Broadcast(_plugin.Config.HelicopterEscape);
+                    pawn.EnableEffect(EffectType.Flashed, 1.75f);
+                    pawn.Position = new Vector3(293f, 978f, -52f);
+                    pawn.ClearInventory();
+                    pawn.EnableEffect(EffectType.Ensnared);
+                    if (pawn.LeadingTeam == LeadingTeam.FacilityForces) Round.EscapedScientists++;
+                    else if (pawn.LeadingTeam == LeadingTeam.ChaosInsurgency) Round.EscapedDClasses++;
+                    yield return Timing.WaitForSeconds(0.75f);
+                    pawn.SetRole(RoleTypeId.Spectator, spawnReason: SpawnReason.Escaped, roleSpawnFlags: RoleSpawnFlags.None);
+
                 }
 
             }
@@ -207,37 +218,19 @@
             foreach (Player player in Player.List)
             {
 
-                if (heliSurvivors.Contains(player) || IsInShelter(player))
+                if (IsInShelter(player) || heliSurvivors.Contains(player))
                 {
-                    HandleSafePlayer(player);
+                    _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandlePlayerInShelter((Pawn)player)));
                 }
                 else
                 {
-                    if (player.IsAlive && !player.IsGodModeEnabled)
-                    {
                         player.Hurt(amount: 0.5f, damageType: DamageType.Bleeding);
                         player.Kill("Omega Warhead");
-
-                    }
                 }
-
-                if (!player.IsAlive) player.RoleManager.ServerSetRole(RoleTypeId.Spectator, RoleChangeReason.Died);
-
-
-
-             
-
 
             }
 
             DetonateWarhead();
-            bool isRoundEnd = Round.EndRound(); // try to finish the round
-
-            foreach (Player player in Player.List)
-            {
-                if (player.IsAlive && heliSurvivors.Contains(player)) player.RoleManager.ServerSetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
-            }
-
 
             foreach (Room room in Room.List)
             {
@@ -257,14 +250,11 @@
                 room.LockDown(DoorLockType.Warhead);
                 room.TurnOffLights();
             }
-            
-            yield return Timing.WaitForSeconds(5.0f);
-            ChangeRoomColors(new Color(0.2f, 0.1f, 0.15f));
 
-            while (!isRoundEnd)
+            while (true)
             {
-                yield return Timing.WaitForSeconds(0.175f);
                 Cassie.Clear();
+                yield return Timing.WaitForSeconds(0.175f);
             }
 
         }
@@ -279,13 +269,12 @@
             return player.CurrentRoom.Type == RoomType.EzShelter;
         }
 
-        public IEnumerable<float> HandleSafePlayer(Player player)
+        public IEnumerator<float> HandlePlayerInShelter(Pawn player)
         {
             player.IsGodModeEnabled = true;
-            player.EnableEffect(EffectType.Flashed, 2.5f);
-            yield return Timing.WaitForSeconds(2f);
+            player.EnableEffect(EffectType.Flashed, 0.75f);
+            yield return Timing.WaitForSeconds(0.75f);
             player.IsGodModeEnabled = false;
-            player.Position = new Vector3(-53, 988, -50);
             player.EnableEffect(EffectType.Blinded, 5f);
 
         }
