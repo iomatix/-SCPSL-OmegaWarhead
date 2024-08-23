@@ -1,4 +1,4 @@
-﻿namespace BetterOmegaWarhead
+namespace BetterOmegaWarhead
 {
     using System.Collections.Generic;
     using Exiled.API.Enums;
@@ -140,7 +140,10 @@
         public IEnumerator<float> OmegaWarheadSequenceHeli()
         {
             yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
-            if (isOmegaActivated()) BroadcastHelicopterCountdown();
+            if (isOmegaActivated()) {
+                BroadcastHelicopterCountdown();
+                _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandleHelicopterEscape()));
+            }
         }
 
         public IEnumerator<float> OmegaWarheadSequenceCheckpointOpen()
@@ -174,7 +177,6 @@
         public void BroadcastHelicopterCountdown()
         {
             SendImportantCassieMessage(_plugin.Config.HeliIncomingCassie);
-            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandleHelicopterEscape()));
         }
 
         public IEnumerator<float> HandleHelicopterEscape()
