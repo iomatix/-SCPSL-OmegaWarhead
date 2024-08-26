@@ -186,6 +186,9 @@ namespace BetterOmegaWarhead
             Vector3 helicopterZone = new Vector3(escapePrimaryPos.x - 3.66f, escapePrimaryPos.y - 0.23f, escapePrimaryPos.z - 17.68f);
             yield return Timing.WaitForSeconds(1.5f);
             RespawnEffectsController.ExecuteAllEffects(RespawnEffectsController.EffectType.Selection, SpawnableTeamType.NineTailedFox);
+            Respawn.ChaosTickets = 0;
+            Respawn.NtfTickets = 0;
+            Respawn.TimeUntilNextPhase = 9999;
             yield return Timing.WaitForSeconds(19.0f);
             foreach (Player player in Player.List)
             {
