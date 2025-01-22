@@ -21,7 +21,7 @@ namespace BetterOmegaWarhead
                 }
                 else
                 {
-                    player.Hurt(amount: 0.075f, damageType: DamageType.Warhead);
+                    player.Hurt(amount: 0.15f, damageType: DamageType.Explosion);
                     player.Kill("Omega Warhead");
                 }
 
