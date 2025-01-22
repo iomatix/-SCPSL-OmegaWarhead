@@ -154,8 +154,8 @@ namespace BetterOmegaWarhead
             Vector3 escapePrimaryPos = Door.Get(DoorType.EscapePrimary).GameObject.transform.position;
             Vector3 helicopterZone = new Vector3(escapePrimaryPos.x - 3.66f, escapePrimaryPos.y - 0.23f, escapePrimaryPos.z - 17.68f);
             yield return Timing.WaitForSeconds(1.5f);
-            Respawn.PauseWaves();
             Respawn.SummonNtfChopper();
+            Respawn.PauseWaves();
             yield return Timing.WaitForSeconds(19.0f);
             foreach (Player player in Player.List)
             {
