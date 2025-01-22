@@ -10,14 +10,14 @@ namespace BetterOmegaWarhead
     {
         private readonly Plugin _plugin;
         public PlayerMethods(Plugin plugin) => _plugin = plugin;
-        public void HandlePlayersOnNuke(HashSet<Player> inHeliSurvivors, EventHandlers handlers)
+        public void HandlePlayersOnNuke(HashSet<Player> inHeliSurvivors)
         {
             foreach (Player player in Player.List)
             {
 
                 if (IsInShelter(player) || inHeliSurvivors.Contains(player))
                 {
-                    handlers.Coroutines.Add(Timing.RunCoroutine(HandlePlayerInShelter(player)));
+                    _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandlePlayerInShelter(player)));
                 }
                 else
                 {
@@ -27,6 +27,7 @@ namespace BetterOmegaWarhead
 
             }
         }
+
         public bool IsInShelter(Player player)
         {
             return player.CurrentRoom.Type == RoomType.EzShelter;

@@ -181,7 +181,7 @@ namespace BetterOmegaWarhead
 
             Cassie.Clear();
             _plugin.NotificationMethods.SendCassieMessage(_plugin.Config.DetonatingOmegaCassie);
-            _plugin.PlayerMethods.HandlePlayersOnNuke(heliSurvivors, _plugin.EventHandlers);
+            _plugin.PlayerMethods.HandlePlayersOnNuke(heliSurvivors);
             DetonateWarhead();
 
 
