@@ -12,17 +12,22 @@
         public override string Author { get; } = "ClaudioPanConQueso & iomatix";
         public override string Name { get; } = "BetterOmegaWarhead";
         public override string Prefix { get; } = "BetterOmegaWarhead";
-        public override Version Version { get; } = new Version(6, 3, 3);
-        public override Version RequiredExiledVersion { get; } = new Version(9, 0, 0);
+        public override Version Version { get; } = new Version(6, 4, 0);
+        public override Version RequiredExiledVersion { get; } = new Version(9, 4, 0);
 
-        internal Methods Methods { get; private set; }
+        internal WarheadEventMethods EventMethods { get; private set; }
+        internal PlayerMethods PlayerMethods { get; private set; }
+
+        internal NotificationMethods NotificationMethods { get; private set; }
         internal EventHandlers EventHandlers { get; private set; }
 
         public override void OnEnabled()
         {
             Singleton = this;
             EventHandlers = new EventHandlers(this);
-            Methods = new Methods(this);
+            PlayerMethods = new PlayerMethods(this);
+            EventMethods = new WarheadEventMethods(this);
+            NotificationMethods = new NotificationMethods(this);
 
             RegisterEvents();
             base.OnEnabled();
@@ -34,7 +39,9 @@
 
             Singleton = null;
             EventHandlers = null;
-            Methods = null;
+            PlayerMethods = null;
+            EventMethods = null;
+            NotificationMethods = null;
 
             UnregisterEvents();
             base.OnDisabled();

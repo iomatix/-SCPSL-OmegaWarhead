@@ -17,9 +17,9 @@
         {
             if (sender.CheckPermission("omegawarhead"))
             {
-                if (Plugin.Singleton.Methods.isOmegaActivated())
+                if (Plugin.Singleton.EventMethods.isOmegaActive())
                 {
-                    Plugin.Singleton.Methods.StopOmega();
+                    Plugin.Singleton.EventMethods.StopOmega();
                     response = "Omega Warhead stopped.";
                     return false;
                 }

@@ -20,24 +20,24 @@
 
         public void OnRoundStart()
         {
-            _plugin.Methods.Init();
+            _plugin.EventMethods.Init();
         }
 
         public void OnRoundEnd(RoundEndedEventArgs ev)
         {
-            _plugin.Methods.Disable();
+            _plugin.EventMethods.Disable();
         }
         public void OnWaitingForPlayers()
         {
-            _plugin.Methods.Disable();
+            _plugin.EventMethods.Disable();
         }
         public void OnWarheadStart(StartingEventArgs ev)
         {
-            if (_plugin.Methods.isOmegaActivated())
+            if (_plugin.EventMethods.isOmegaActive())
             {
                 ev.IsAllowed = _plugin.Config.isStopAllowed;
             }
-            else if (!_plugin.Methods.isOmegaActivated())
+            else if (!_plugin.EventMethods.isOmegaActive())
             {
                 int engagedCount = Generator.List.Count(generator =>
                        (generator.State & GeneratorState.Engaged) == GeneratorState.Engaged);
@@ -46,7 +46,7 @@
                 {
                     float realTimeToDetonation = _plugin.Config.TimeToDetonation;
                     float eventTimeToDetonation = realTimeToDetonation - 0.45f; //- (1.5f * 10.0f);
-                    _plugin.Methods.ActivateOmegaWarhead(eventTimeToDetonation);
+                    _plugin.EventMethods.ActivateOmegaWarhead(eventTimeToDetonation);
                     ev.IsAllowed = _plugin.Config.isStopAllowed;
                     Warhead.Status = WarheadStatus.InProgress;
                     Warhead.DetonationTimer = realTimeToDetonation;
@@ -57,9 +57,9 @@
 
         public void OnWarheadStop(StartingEventArgs ev)
         {
-            if (_plugin.Methods.isOmegaActivated() && ev.IsAllowed)
+            if (_plugin.EventMethods.isOmegaActive() && ev.IsAllowed)
             {
-                _plugin.Methods.StopOmega();
+                _plugin.EventMethods.StopOmega();
             }
 
         }

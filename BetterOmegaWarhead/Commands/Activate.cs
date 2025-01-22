@@ -36,9 +36,9 @@
 
             if (sender.CheckPermission("omegawarhead"))
             {
-                if (!Plugin.Singleton.Methods.isOmegaActivated())
+                if (!Plugin.Singleton.EventMethods.isOmegaActive())
                 {
-                    Plugin.Singleton.Methods.ActivateOmegaWarhead(timeToDetonation);
+                    Plugin.Singleton.EventMethods.ActivateOmegaWarhead(timeToDetonation);
                     response = "Omega Warhead activated.";
                     return false;
                 }
