@@ -152,7 +152,7 @@ namespace BetterOmegaWarhead
         {
             yield return Timing.WaitForSeconds(12.0f);
             // Fixed Coords got by remote admin -> Request Data
-            Vector3 helicopterZone = new Vector3(128.681f, 995.456f, 40.202f);
+            Vector3 helicopterZone = new Vector3(128.681f, 995.456f, -42.202f);
             yield return Timing.WaitForSeconds(1.5f);
             Respawn.SummonNtfChopper();
             Respawn.PauseWaves();
