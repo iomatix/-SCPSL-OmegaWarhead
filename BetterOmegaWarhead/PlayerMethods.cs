@@ -17,7 +17,7 @@ namespace BetterOmegaWarhead
 
                 if (IsInShelter(player) || inHeliSurvivors.Contains(player))
                 {
-                    _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandlePlayerInShelter(player)));
+                    _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandleSavePlayer(player)));
                 }
                 else
                 {
@@ -33,7 +33,7 @@ namespace BetterOmegaWarhead
             return player.CurrentRoom.Type == RoomType.EzShelter;
         }
 
-        public IEnumerator<float> HandlePlayerInShelter(Player player)
+        public IEnumerator<float> HandleSavePlayer(Player player)
         {
             player.IsGodModeEnabled = true;
             player.EnableEffect(EffectType.Flashed, 0.75f);
