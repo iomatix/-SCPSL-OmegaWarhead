@@ -1,15 +1,52 @@
 namespace BetterOmegaWarhead
 {
+    using System;
     using System.Collections.Generic;
     using Exiled.API.Enums;
     using Exiled.API.Features;
     using MEC;
-
+    using PlayerRoles;
+    using UnityEngine;
 
     public class PlayerMethods
     {
         private readonly Plugin _plugin;
         public PlayerMethods(Plugin plugin) => _plugin = plugin;
+
+        public IEnumerator<float> HandleHelicopterEscape(HashSet<Player> hashSetHeliSurvivors)
+        {
+            yield return Timing.WaitForSeconds(12.0f);
+            // Fixed Coords got by remote admin -> Request Data
+            Vector3 helicopterZone = new Vector3(128.681f, 995.456f, -42.202f);
+            yield return Timing.WaitForSeconds(1.5f);
+            DisableFactionTokens();
+            Respawn.SummonNtfChopper();
+            yield return Timing.WaitForSeconds(19.0f);
+            foreach (Player player in Player.List)
+            {
+                if (!player.IsScp && player.IsAlive && Vector3.Distance(player.Position, helicopterZone) <= 8.33f)
+                {
+                    hashSetHeliSurvivors.Add(player);
+                    player.IsGodModeEnabled = true;
+                    player.Broadcast(_plugin.Config.HelicopterEscape);
+                    player.EnableEffect(EffectType.Flashed, 1.75f);
+                    player.Position = new Vector3(293f, 978f, -52f);
+                    player.ClearInventory();
+                    player.EnableEffect(EffectType.Ensnared);
+                    if (player.LeadingTeam == LeadingTeam.FacilityForces) Round.EscapedScientists++;
+                    else if (player.LeadingTeam == LeadingTeam.ChaosInsurgency) Round.EscapedDClasses++;
+                    yield return Timing.WaitForSeconds(0.75f);
+                    player.Role.Set(RoleTypeId.Spectator, reason: SpawnReason.Escaped);
+                }
+            }
+        }
+        public void DisableFactionTokens()
+        {
+            foreach (SpawnableFaction faction in Enum.GetValues(typeof(SpawnableFaction)))
+            {
+                Respawn.SetTokens(faction, 0);
+            }
+        }
         public void HandlePlayersOnNuke(HashSet<Player> inHeliSurvivors)
         {
             foreach (Player player in Player.List)
