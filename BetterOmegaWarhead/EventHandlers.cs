@@ -52,7 +52,6 @@
                     Warhead.DetonationTimer = realTimeToDetonation;
                 }
             }
-
         }
 
         public void OnWarheadStop(StartingEventArgs ev)

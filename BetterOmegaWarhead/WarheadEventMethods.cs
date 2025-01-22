@@ -36,10 +36,12 @@ namespace BetterOmegaWarhead
             OmegaActivated = false;
             foreach (Player player in heliSurvivors) player.IsGodModeEnabled = false;
             heliSurvivors.Clear();
+            Respawn.RestartWaves();
             Warhead.Status = WarheadStatus.NotArmed;
             Map.ResetLightsColor();
             foreach (var coroutine in _plugin.EventHandlers.Coroutines) Timing.KillCoroutines(coroutine);
             _plugin.EventHandlers.Coroutines.Clear();
+            
 
 
         }
@@ -47,7 +49,7 @@ namespace BetterOmegaWarhead
 
         public bool isOmegaActive()
         {
-            return OmegaActivated && Warhead.Controller.isActiveAndEnabled;
+            return OmegaActivated; //&& Warhead.Controller.isActiveAndEnabled;
         }
 
         public void ActivateOmegaWarhead(float timeToDetonation)
@@ -156,8 +158,8 @@ namespace BetterOmegaWarhead
             Vector3 escapePrimaryPos = Door.Get(DoorType.EscapePrimary).GameObject.transform.position;
             Vector3 helicopterZone = new Vector3(escapePrimaryPos.x - 3.66f, escapePrimaryPos.y - 0.23f, escapePrimaryPos.z - 17.68f);
             yield return Timing.WaitForSeconds(1.5f);
-            Respawn.SummonNtfChopper();
             Respawn.PauseWaves();
+            Respawn.SummonNtfChopper();
             yield return Timing.WaitForSeconds(19.0f);
             foreach (Player player in Player.List)
             {
