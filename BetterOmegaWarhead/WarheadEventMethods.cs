@@ -36,7 +36,6 @@ namespace BetterOmegaWarhead
             OmegaActivated = false;
             foreach (Player player in heliSurvivors) player.IsGodModeEnabled = false;
             heliSurvivors.Clear();
-            Respawn.RestartWaves();
             Warhead.Status = WarheadStatus.NotArmed;
             Map.ResetLightsColor();
             foreach (var coroutine in _plugin.EventHandlers.Coroutines) Timing.KillCoroutines(coroutine);
