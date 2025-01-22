@@ -39,11 +39,8 @@ namespace BetterOmegaWarhead
             Warhead.Status = WarheadStatus.NotArmed;
             Map.ResetLightsColor();
             foreach (var coroutine in _plugin.EventHandlers.Coroutines) Timing.KillCoroutines(coroutine);
-            _plugin.EventHandlers.Coroutines.Clear();
-            
-
-
         }
+
         public bool OmegaActivated { get; private set; }
 
         public bool isOmegaActive()
