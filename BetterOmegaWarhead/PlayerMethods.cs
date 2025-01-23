@@ -15,10 +15,11 @@ namespace BetterOmegaWarhead
 
         public IEnumerator<float> HandleHelicopterEscape(HashSet<Player> hashSetHeliSurvivors)
         {
-            yield return Timing.WaitForSeconds(12.0f);
-            // Fixed Coords got by remote admin -> Request Data
             Vector3 helicopterZone = new Vector3(128.681f, 995.456f, -42.202f);
+
             DisableFactionTokens();
+
+            yield return Timing.WaitForSeconds(12.0f);
             yield return Timing.WaitForSeconds(1.5f);
             Respawn.SummonNtfChopper();
             yield return Timing.WaitForSeconds(19.0f);
