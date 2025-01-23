@@ -23,8 +23,11 @@
         [Description("Time to the open and lock checkpoint doors after Omega activation.")]
         public float OpenAndLockCheckpointDoorsDelay { get; private set; } = 225f;
 
-        [Description("Time to the helicopter after Omega activation.")]
+        [Description("Time to the rescue helicopter after Omega activation.")]
         public float HelicopterBroadcastDelay { get; private set; } = 250f;
+
+        [Description("Size of the rescue zone.")]
+        public float HelicopterZoneSize { get; private set; } = 7.75f;
 
         [Description("Indicates that the player can stop OmegaWarhead after activation.")]
         public bool isStopAllowed { get; private set; } = false;

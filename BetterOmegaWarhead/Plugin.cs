@@ -12,7 +12,7 @@
         public override string Author { get; } = "ClaudioPanConQueso & iomatix";
         public override string Name { get; } = "BetterOmegaWarhead";
         public override string Prefix { get; } = "BetterOmegaWarhead";
-        public override Version Version { get; } = new Version(6, 4, 0);
+        public override Version Version { get; } = new Version(6, 4, 4);
         public override Version RequiredExiledVersion { get; } = new Version(9, 4, 0);
 
         internal WarheadEventMethods EventMethods { get; private set; }
@@ -50,18 +50,16 @@
         {
             Server.WaitingForPlayers += EventHandlers.OnWaitingForPlayers;
             Warhead.Starting += EventHandlers.OnWarheadStart;
-            //API error CS0019: Operator '+=' cannot be applied to operands of type 'Event
-            //Warhead.Stopping += EventHandlers.OnWarheadStop;
-            //Warhead.Detonating += EventHandlers.OnWarheadDetonate;
+            Warhead.Stopping += EventHandlers.OnWarheadStop;
+            Warhead.Detonating += EventHandlers.OnWarheadDetonate;
         }
 
         public void UnregisterEvents()
         {
             Server.WaitingForPlayers -= EventHandlers.OnWaitingForPlayers;
             Warhead.Starting -= EventHandlers.OnWarheadStart;
-            //API error CS0019: Operator '-=' cannot be applied to operands of type 'Event
-            //Warhead.Stopping -= EventHandlers.OnWarheadStop;
-            //Warhead.Detonating -= EventHandlers.OnWarheadDetonate;
+            Warhead.Stopping -= EventHandlers.OnWarheadStop;
+            Warhead.Detonating -= EventHandlers.OnWarheadDetonate;
         }
     }
 }

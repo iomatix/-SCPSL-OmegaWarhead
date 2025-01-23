@@ -45,11 +45,12 @@ namespace BetterOmegaWarhead
 
         public bool isOmegaActive()
         {
-            return OmegaActivated; //&& Warhead.Controller.isActiveAndEnabled;
+            return OmegaActivated && Warhead.Controller.isActiveAndEnabled;
         }
 
         public void ActivateOmegaWarhead(float timeToDetonation)
         {
+
             OmegaActivated = true;
             ChangeRoomColors(new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB));
 
@@ -63,7 +64,6 @@ namespace BetterOmegaWarhead
         public void StopOmega()
         {
             _plugin.NotificationMethods.SendImportantCassieMessage(_plugin.Config.StoppingOmegaCassie);
-            Warhead.Stop();
             Clean();
         }
 
@@ -97,6 +97,8 @@ namespace BetterOmegaWarhead
                     timeToDetonation = notifyTime;
                 }
             }
+
+            
 
             for (int i = 10; i > 0; i--)
             {
@@ -154,7 +156,6 @@ namespace BetterOmegaWarhead
 
             Cassie.Clear();
             _plugin.NotificationMethods.SendCassieMessage(_plugin.Config.DetonatingOmegaCassie);
-            _plugin.PlayerMethods.HandlePlayersOnNuke(heliSurvivors);
             DetonateWarhead();
 
 
@@ -168,7 +169,9 @@ namespace BetterOmegaWarhead
 
         void DetonateWarhead()
         {
-            Warhead.Status = WarheadStatus.Detonated;
+            _plugin.PlayerMethods.HandlePlayersOnNuke(heliSurvivors);
+
+            Warhead.Detonate();
             Warhead.Shake();
 
             foreach (Room room in Room.List)
@@ -187,6 +190,8 @@ namespace BetterOmegaWarhead
                 }
                 room.LockDown(69420, DoorLockType.Warhead);
                 room.TurnOffLights();
+
+
             }
         }
 

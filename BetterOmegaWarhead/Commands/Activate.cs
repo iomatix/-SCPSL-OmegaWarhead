@@ -2,6 +2,7 @@
 {
     using System;
     using CommandSystem;
+    using Exiled.API.Features;
     using Exiled.Permissions.Extensions;
 
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
@@ -38,7 +39,14 @@
             {
                 if (!Plugin.Singleton.EventMethods.isOmegaActive())
                 {
-                    Plugin.Singleton.EventMethods.ActivateOmegaWarhead(timeToDetonation);
+                    float realTimeToDetonation = Plugin.Singleton.Config.TimeToDetonation;
+                    float eventTimeToDetonation = realTimeToDetonation - 0.45f; //- (1.5f * 10.0f);
+                    
+
+                    Plugin.Singleton.EventMethods.ActivateOmegaWarhead(eventTimeToDetonation);
+
+                    Warhead.DetonationTimer = realTimeToDetonation;
+
                     response = "Omega Warhead activated.";
                     return false;
                 }

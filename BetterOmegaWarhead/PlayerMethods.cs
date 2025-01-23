@@ -25,7 +25,7 @@ namespace BetterOmegaWarhead
             yield return Timing.WaitForSeconds(19.0f);
             foreach (Player player in Player.List)
             {
-                if (!player.IsScp && player.IsAlive && Vector3.Distance(player.Position, helicopterZone) <= 8.33f)
+                if (!player.IsScp && player.IsAlive && Vector3.Distance(player.Position, helicopterZone) <= _plugin.Config.HelicopterZoneSize)
                 {
                     hashSetHeliSurvivors.Add(player);
                     player.IsGodModeEnabled = true;
@@ -38,6 +38,7 @@ namespace BetterOmegaWarhead
                     else if (player.LeadingTeam == LeadingTeam.ChaosInsurgency) Round.EscapedDClasses++;
                     yield return Timing.WaitForSeconds(0.75f);
                     player.Role.Set(RoleTypeId.Spectator, reason: SpawnReason.Escaped);
+
                 }
             }
         }
@@ -59,7 +60,10 @@ namespace BetterOmegaWarhead
                 }
                 else
                 {
+                  
+                    player.EnableEffect(EffectType.Flashed, 0.75f);
                     player.Hurt(amount: 0.15f, damageType: DamageType.Explosion);
+                    player.EnableEffect(EffectType.Blurred, 4.75f);
                     player.Kill("Omega Warhead");
                 }
 
@@ -77,8 +81,8 @@ namespace BetterOmegaWarhead
             player.EnableEffect(EffectType.Flashed, 0.75f);
             yield return Timing.WaitForSeconds(0.75f);
             player.IsGodModeEnabled = false;
-            player.EnableEffect(EffectType.Blinded, 5f);
-
+            player.EnableEffect(EffectType.Blinded, 2.5f);
+            player.EnableEffect(EffectType.Blurred, 4.75f);
         }
     }
 }

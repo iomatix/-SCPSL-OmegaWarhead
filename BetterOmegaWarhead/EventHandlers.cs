@@ -47,14 +47,16 @@
                     float realTimeToDetonation = _plugin.Config.TimeToDetonation;
                     float eventTimeToDetonation = realTimeToDetonation - 0.45f; //- (1.5f * 10.0f);
                     _plugin.EventMethods.ActivateOmegaWarhead(eventTimeToDetonation);
-                    ev.IsAllowed = _plugin.Config.isStopAllowed;
-                    Warhead.Status = WarheadStatus.InProgress;
+
                     Warhead.DetonationTimer = realTimeToDetonation;
+
+                    ev.IsAllowed = _plugin.Config.isStopAllowed;
+
                 }
             }
         }
 
-        public void OnWarheadStop(StartingEventArgs ev)
+        public void OnWarheadStop(StoppingEventArgs ev)
         {
             if (_plugin.EventMethods.isOmegaActive() && ev.IsAllowed)
             {
@@ -62,9 +64,11 @@
             }
 
         }
-        public void OnWarheadDetonate(StartingEventArgs ev)
+        public void OnWarheadDetonate(DetonatingEventArgs ev)
         {
+            if (_plugin.EventMethods.isOmegaActive()) {
 
+            }
         }
     }
 }
