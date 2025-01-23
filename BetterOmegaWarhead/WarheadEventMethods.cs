@@ -137,7 +137,7 @@ namespace BetterOmegaWarhead
                 {
                     door.IsOpen = true;
                     door.PlaySound(DoorBeepType.InteractionAllowed);
-                    door.Lock(69420, DoorLockType.Warhead);
+                    door.Lock(69420.0f, DoorLockType.Warhead);
                 }
             }
         }
@@ -188,8 +188,8 @@ namespace BetterOmegaWarhead
                         breakableDoor.Break();
                     }
                 }
-                room.LockDown(69420, DoorLockType.Warhead);
-                room.TurnOffLights();
+                room.LockDown(69420.0f, DoorLockType.Warhead);
+                room.TurnOffLights(69420.0f);
 
 
             }
