@@ -57,6 +57,7 @@
             yield return Timing.WaitForSeconds(delay);
             Warhead.Status = WarheadStatus.Armed;
             Warhead.DetonationTimer = timeToDetonation - delay;
+            Warhead.Controller.IsLocked = !Plugin.Singleton.Config.isStopAllowed;
         }
 
         public void OnWarheadStop(StoppingEventArgs ev)
