@@ -15,7 +15,6 @@
         public EventHandlers(Plugin plugin) => _plugin = plugin;
 
         public List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
-        public List<Player> heliSurvivors = new List<Player>();
 
 
         public void OnRoundStart()
@@ -45,14 +44,19 @@
                     (float)Loader.Random.NextDouble() * 100 < _plugin.Config.ReplaceAlphaChance)
                 {
 
+                    ev.IsAllowed = true;
                     _plugin.EventMethods.ActivateOmegaWarhead(eventTimeToDetonation);
-
-                    Warhead.Status = WarheadStatus.Armed;
-                    Warhead.DetonationTimer = realTimeToDetonation;
-                    Warhead.Controller.IsLocked = !Plugin.Singleton.Config.isStopAllowed;
-
+                    // The event is called before starting warhead, so we need to delay our activation to overwrite the main event
+                    _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(DelayedWarheadActivation(realTimeToDetonation, 0.75f)));
                 }
             }
+        }
+
+        public IEnumerator<float> DelayedWarheadActivation(float timeToDetonation, float delay)
+        {
+            yield return Timing.WaitForSeconds(delay);
+            Warhead.Status = WarheadStatus.Armed;
+            Warhead.DetonationTimer = timeToDetonation - delay;
         }
 
         public void OnWarheadStop(StoppingEventArgs ev)
