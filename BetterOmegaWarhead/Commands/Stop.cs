@@ -2,6 +2,8 @@
 {
     using System;
     using CommandSystem;
+    using Exiled.API.Enums;
+    using Exiled.API.Features;
     using Exiled.Permissions.Extensions;
 
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
@@ -20,6 +22,9 @@
                 if (Plugin.Singleton.EventMethods.isOmegaActive())
                 {
                     Plugin.Singleton.EventMethods.StopOmega();
+                    Warhead.IsLocked = false;
+                    Warhead.Status = WarheadStatus.NotArmed;
+
                     response = "Omega Warhead stopped.";
                     return false;
                 }

@@ -33,24 +33,23 @@
         }
         public void OnWarheadStart(StartingEventArgs ev)
         {
-            if (_plugin.EventMethods.isOmegaActive())
+
+            if (!_plugin.EventMethods.isOmegaActive())
             {
-                ev.IsAllowed = _plugin.Config.isStopAllowed;
-            }
-            else if (!_plugin.EventMethods.isOmegaActive())
-            {
+                float realTimeToDetonation = _plugin.Config.TimeToDetonation;
+                float eventTimeToDetonation = realTimeToDetonation - 0.45f; //- (1.5f * 10.0f);
+
                 int engagedCount = Generator.List.Count(generator =>
                        (generator.State & GeneratorState.Engaged) == GeneratorState.Engaged);
                 if (engagedCount >= _plugin.Config.generatorsNumGuaranteeOmega ||
                     (float)Loader.Random.NextDouble() * 100 < _plugin.Config.ReplaceAlphaChance)
                 {
-                    float realTimeToDetonation = _plugin.Config.TimeToDetonation;
-                    float eventTimeToDetonation = realTimeToDetonation - 0.45f; //- (1.5f * 10.0f);
+
                     _plugin.EventMethods.ActivateOmegaWarhead(eventTimeToDetonation);
 
+                    Warhead.Status = WarheadStatus.Armed;
                     Warhead.DetonationTimer = realTimeToDetonation;
-
-                    ev.IsAllowed = _plugin.Config.isStopAllowed;
+                    Warhead.Controller.IsLocked = !Plugin.Singleton.Config.isStopAllowed;
 
                 }
             }
@@ -58,15 +57,19 @@
 
         public void OnWarheadStop(StoppingEventArgs ev)
         {
-            if (_plugin.EventMethods.isOmegaActive() && ev.IsAllowed)
+            if (_plugin.EventMethods.isOmegaActive() && _plugin.Config.isStopAllowed)
             {
                 _plugin.EventMethods.StopOmega();
+
+                Warhead.Status = WarheadStatus.NotArmed;
+                Warhead.Controller.IsLocked = false;
             }
 
         }
         public void OnWarheadDetonate(DetonatingEventArgs ev)
         {
-            if (_plugin.EventMethods.isOmegaActive()) {
+            if (_plugin.EventMethods.isOmegaActive())
+            {
 
             }
         }
