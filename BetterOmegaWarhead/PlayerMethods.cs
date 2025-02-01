@@ -48,6 +48,7 @@ namespace BetterOmegaWarhead
             {
                 Respawn.SetTokens(faction, 0);
             }
+            Respawn.PauseWaves();
         }
         public void HandlePlayersOnNuke(HashSet<Player> inHeliSurvivors)
         {
