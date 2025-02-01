@@ -17,7 +17,7 @@ namespace BetterOmegaWarhead
         {
             Vector3 helicopterZone = new Vector3(128.681f, 995.456f, -42.202f);
 
-            DisableFactionTokens();
+            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(DisableFactionTokens()));
 
             yield return Timing.WaitForSeconds(12.0f);
             yield return Timing.WaitForSeconds(1.5f);
@@ -42,13 +42,16 @@ namespace BetterOmegaWarhead
                 }
             }
         }
-        public void DisableFactionTokens()
+        public IEnumerator<float> DisableFactionTokens()
         {
-            foreach (SpawnableFaction faction in Enum.GetValues(typeof(SpawnableFaction)))
+            while (true)
             {
-                Respawn.SetTokens(faction, 0);
+                foreach (SpawnableFaction faction in Enum.GetValues(typeof(SpawnableFaction)))
+                {
+                    Respawn.SetTokens(faction, 0);
+                }
+                yield return Timing.WaitForSeconds(0.45f);
             }
-            Respawn.PauseWaves();
         }
         public void HandlePlayersOnNuke(HashSet<Player> inHeliSurvivors)
         {
