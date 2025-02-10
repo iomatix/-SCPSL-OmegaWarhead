@@ -66,7 +66,7 @@ namespace BetterOmegaWarhead
                 }
                 else
                 {
-                  
+
                     player.EnableEffect(EffectType.Flashed, 0.75f);
                     player.Hurt(amount: 0.15f, damageType: DamageType.Explosion);
                     player.EnableEffect(EffectType.Blurred, 4.75f);
@@ -74,23 +74,6 @@ namespace BetterOmegaWarhead
                 }
 
             }
-        }
-
-        public HashSet<Vector3> GetShelterLocations()
-        {
-            // If we've already computed the shelter locations, return the cached version.
-            if (_cachedShelterLocations != null) return _cachedShelterLocations;
-
-            _cachedShelterLocations = new HashSet<Vector3>();
-            foreach (Room room in Room.List)
-            {
-                // Corrected: Check the room type using 'room.Type' rather than Equals.
-                if (room.Type == RoomType.EzShelter)
-                {
-                    _cachedShelterLocations.Add(room.Position);
-                }
-            }
-            return _cachedShelterLocations;
         }
 
         public bool IsInShelter(Player player)
