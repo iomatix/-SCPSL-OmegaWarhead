@@ -1,9 +1,12 @@
 ﻿namespace BetterOmegaWarhead
 {
     using System;
+    using System.Collections.Generic;
+    using Exiled.API.Enums;
     using Exiled.API.Features;
     using Exiled.Events;
     using MEC;
+    using UnityEngine;
     using Server = Exiled.Events.Handlers.Server;
     using Warhead = Exiled.Events.Handlers.Warhead;
     public class Plugin : Plugin<Config>
@@ -12,7 +15,7 @@
         public override string Author { get; } = "ClaudioPanConQueso & iomatix";
         public override string Name { get; } = "BetterOmegaWarhead";
         public override string Prefix { get; } = "BetterOmegaWarhead";
-        public override Version Version { get; } = new Version(6, 4, 5);
+        public override Version Version { get; } = new Version(6, 5, 0);
         public override Version RequiredExiledVersion { get; } = new Version(9, 5, 0);
 
         internal WarheadEventMethods EventMethods { get; private set; }
@@ -20,6 +23,9 @@
 
         internal NotificationMethods NotificationMethods { get; private set; }
         internal EventHandlers EventHandlers { get; private set; }
+
+       // Cached shelter locations computed once per round.
+        private HashSet<Vector3> _cachedShelterLocations = null;
 
         public override void OnEnabled()
         {
@@ -61,5 +67,33 @@
             Warhead.Stopping -= EventHandlers.OnWarheadStop;
             Warhead.Detonating -= EventHandlers.OnWarheadDetonate;
         }
+
+        public HashSet<Vector3> GetCachedShelterLocations()
+        {
+            if (_cachedShelterLocations == null)
+            {
+                CacheShelterLocations();
+            }
+            return _cachedShelterLocations;
+        }
+        public HashSet<Vector3> CacheShelterLocations()
+        {
+
+            _cachedShelterLocations = new HashSet<Vector3>();
+            foreach (Room room in Room.List)
+            {
+                if (room.Type == RoomType.EzShelter)
+                {
+                    _cachedShelterLocations.Add(room.Position);
+                }
+            }
+            return _cachedShelterLocations;
+        }
+
+        public void ResetCache()
+        {
+            _cachedShelterLocations = null;
+        }
+
     }
 }

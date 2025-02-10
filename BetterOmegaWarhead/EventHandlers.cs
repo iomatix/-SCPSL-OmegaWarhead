@@ -20,10 +20,12 @@
         public void OnRoundStart()
         {
             _plugin.EventMethods.Init();
+            _plugin.CacheShelterLocations();
         }
 
         public void OnRoundEnd(RoundEndedEventArgs ev)
         {
+            _plugin.ResetCache();
             _plugin.EventMethods.Disable();
         }
         public void OnWaitingForPlayers()

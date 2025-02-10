@@ -74,9 +74,9 @@ namespace BetterOmegaWarhead
 
         public void StartOmegaWarheadSequence(float timeToDetonation)
         {
-            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceDetonation(timeToDetonation)));
-            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceHeli()));
-            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceCheckpointOpen()));
+            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceDetonation(timeToDetonation),"OmegaWarheadSequenceDetonation"));
+            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceHeli(), "OmegaWarheadSequenceHelicopter"));
+            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceCheckpointOpen(), , "OmegaWarheadSequenceOpenCheckpoints"));
         }
         public IEnumerator<float> OmegaWarheadSequenceDetonation(float timeToDetonation)
         {
@@ -109,7 +109,7 @@ namespace BetterOmegaWarhead
                 }
             }
 
-            if (isOmegaActive()) _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandleWarheadDetonation()));
+            if (isOmegaActive()) _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandleWarheadDetonation(), "OmegaWarheadDetonationHandler"));
         }
 
         public IEnumerator<float> OmegaWarheadSequenceHeli()
@@ -118,7 +118,7 @@ namespace BetterOmegaWarhead
             if (isOmegaActive())
             {
                 _plugin.NotificationMethods.BroadcastHelicopterCountdown();
-                _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(heliSurvivors)));
+                _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(heliSurvivors), "OmegaWarheadHeliEvacuationHandler"));
             }
         }
 

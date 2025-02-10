@@ -9,13 +9,13 @@ namespace BetterOmegaWarhead
         public NotificationMethods(Plugin plugin) => _plugin = plugin;
         public void SendCassieMessage(string message)
         {
-            if (!(message.Length > 0)) return;
+            if (string.IsNullOrEmpty(message)) return;
             Cassie.Message(message, isNoisy: false, isSubtitles: false, isHeld: false);
         }
 
         public void SendImportantCassieMessage(string message)
         {
-            if (!(message.Length > 0)) return;
+            if (string.IsNullOrEmpty(message)) return;
             Cassie.Clear();
             Cassie.Message(message, isSubtitles: false, isHeld: false);
         }

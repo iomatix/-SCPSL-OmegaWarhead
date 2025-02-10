@@ -3,7 +3,9 @@ namespace BetterOmegaWarhead
     using System;
     using System.Collections.Generic;
     using Exiled.API.Enums;
+    using Exiled.API.Extensions;
     using Exiled.API.Features;
+
     using MEC;
     using PlayerRoles;
     using UnityEngine;
@@ -12,6 +14,7 @@ namespace BetterOmegaWarhead
     {
         private readonly Plugin _plugin;
         public PlayerMethods(Plugin plugin) => _plugin = plugin;
+        private HashSet<Vector3> _cachedShelterLocations = null;
 
         public IEnumerator<float> HandleHelicopterEscape(HashSet<Player> hashSetHeliSurvivors)
         {
@@ -74,10 +77,43 @@ namespace BetterOmegaWarhead
             }
         }
 
+        public HashSet<Vector3> GetShelterLocations()
+        {
+            // If we've already computed the shelter locations, return the cached version.
+            if (_cachedShelterLocations != null) return _cachedShelterLocations;
+
+            _cachedShelterLocations = new HashSet<Vector3>();
+            foreach (Room room in Room.List)
+            {
+                // Corrected: Check the room type using 'room.Type' rather than Equals.
+                if (room.Type == RoomType.EzShelter)
+                {
+                    _cachedShelterLocations.Add(room.Position);
+                }
+            }
+            return _cachedShelterLocations;
+        }
+
         public bool IsInShelter(Player player)
         {
-            return player.CurrentRoom.Type == RoomType.EzShelter;
+            // First, check if the player's current room is a shelter.
+            if (player.CurrentRoom != null && player.CurrentRoom.Type == RoomType.EzShelter)
+            {
+                return true;
+            }
+
+            // Retrieve the cached shelter locations from the plugin.
+            var shelters = _plugin.GetCachedShelterLocations();
+            foreach (Vector3 shelterPos in shelters)
+            {
+                if (Vector3.Distance(player.Position, shelterPos) <= _plugin.Config.ShelterZoneSize)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
+
 
         public IEnumerator<float> HandleSavePlayer(Player player)
         {

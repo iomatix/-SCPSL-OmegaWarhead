@@ -29,6 +29,9 @@
         [Description("Size of the rescue zone.")]
         public float HelicopterZoneSize { get; private set; } = 7.75f;
 
+        [Description("Size of the shelter zone.")]
+        public float ShelterZoneSize { get; private set; } = 7.75f;
+
         [Description("Indicates that the player can stop OmegaWarhead after activation.")]
         public bool isStopAllowed { get; private set; } = false;
 
