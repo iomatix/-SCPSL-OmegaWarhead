@@ -4,11 +4,7 @@ namespace BetterOmegaWarhead
     using Exiled.API.Enums;
     using Exiled.API.Features;
     using Exiled.API.Features.Doors;
-    using Exiled.Events.EventArgs.Map;
     using MEC;
-    using PlayerRoles;
-    using Respawning;
-    using Respawning.Waves;
     using UnityEngine;
     using Server = Exiled.Events.Handlers.Server;
 
