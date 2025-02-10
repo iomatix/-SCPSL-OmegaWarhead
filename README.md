@@ -5,7 +5,13 @@ This plugins adds a new Warhead to SCP:SL. It can be activated replacing Alpha W
 2. Escape in the rescue Helicopter at surface zone.
 
 
-Config:
+### Contributors
+
+<a href="https://github.com/iomatix/-SCPSL-BetterOmegaWarhead/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=iomatix/-SCPSL-BetterOmegaWarhead" />
+</a>
+
+#### Config:
 ```
 # Plugin enabled?
 is_enabled: true
