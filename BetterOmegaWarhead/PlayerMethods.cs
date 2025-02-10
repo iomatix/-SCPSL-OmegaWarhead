@@ -14,7 +14,6 @@ namespace BetterOmegaWarhead
     {
         private readonly Plugin _plugin;
         public PlayerMethods(Plugin plugin) => _plugin = plugin;
-        private HashSet<Vector3> _cachedShelterLocations = null;
 
         public IEnumerator<float> HandleHelicopterEscape(HashSet<Player> hashSetHeliSurvivors)
         {
