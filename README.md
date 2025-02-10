@@ -1,5 +1,7 @@
 # BetterOmegaWarhead
 
+![GitHub release (latest by date)](https://img.shields.io/github/downloads/iomatix/-SCPSL-BetterOmegaWarhead/6.5.0/total?style=for-the-badge)
+
 This plugins adds a new Warhead to SCP:SL. It can be activated replacing Alpha Warhead with the Omega Warhead (deactivated by default) or via commands (activateomegawarhead). The ways to survive the Omega Warhead are 2:
 1. Stay in the Breach/Evacuation Shelter
 2. Escape in the rescue Helicopter at surface zone.
