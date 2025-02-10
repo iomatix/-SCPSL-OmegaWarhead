@@ -24,13 +24,13 @@
         internal NotificationMethods NotificationMethods { get; private set; }
         internal EventHandlers EventHandlers { get; private set; }
 
-       // Cached shelter locations computed once per round.
-        private HashSet<Vector3> _cachedShelterLocations = null;
+        internal CacheHandlers CacheHandlers { get; private set; }
 
         public override void OnEnabled()
         {
             Singleton = this;
             EventHandlers = new EventHandlers(this);
+            CacheHandlers = new CacheHandlers(this);
             PlayerMethods = new PlayerMethods(this);
             EventMethods = new WarheadEventMethods(this);
             NotificationMethods = new NotificationMethods(this);
@@ -66,33 +66,6 @@
             Warhead.Starting -= EventHandlers.OnWarheadStart;
             Warhead.Stopping -= EventHandlers.OnWarheadStop;
             Warhead.Detonating -= EventHandlers.OnWarheadDetonate;
-        }
-
-        public HashSet<Vector3> GetCachedShelterLocations()
-        {
-            if (_cachedShelterLocations == null)
-            {
-                CacheShelterLocations();
-            }
-            return _cachedShelterLocations;
-        }
-        public HashSet<Vector3> CacheShelterLocations()
-        {
-
-            _cachedShelterLocations = new HashSet<Vector3>();
-            foreach (Room room in Room.List)
-            {
-                if (room.Type == RoomType.EzShelter)
-                {
-                    _cachedShelterLocations.Add(room.Position);
-                }
-            }
-            return _cachedShelterLocations;
-        }
-
-        public void ResetCache()
-        {
-            _cachedShelterLocations = null;
         }
 
     }

@@ -19,13 +19,12 @@
 
         public void OnRoundStart()
         {
+            _plugin.CacheHandlers.ResetCache();
             _plugin.EventMethods.Init();
-            _plugin.CacheShelterLocations();
         }
 
         public void OnRoundEnd(RoundEndedEventArgs ev)
         {
-            _plugin.ResetCache();
             _plugin.EventMethods.Disable();
         }
         public void OnWaitingForPlayers()

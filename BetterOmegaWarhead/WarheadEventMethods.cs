@@ -13,7 +13,7 @@ namespace BetterOmegaWarhead
         private readonly Plugin _plugin;
         public WarheadEventMethods(Plugin plugin) => _plugin = plugin;
 
-        private readonly HashSet<Player> heliSurvivors = new HashSet<Player>();
+  
         public void Init()
         {
             Server.RoundEnded += _plugin.EventHandlers.OnRoundEnd;
@@ -30,8 +30,6 @@ namespace BetterOmegaWarhead
         public void Clean()
         {
             OmegaActivated = false;
-            foreach (Player player in heliSurvivors) player.IsGodModeEnabled = false;
-            heliSurvivors.Clear();
             Warhead.Status = WarheadStatus.NotArmed;
             Map.ResetLightsColor();
             foreach (var coroutine in _plugin.EventHandlers.Coroutines) Timing.KillCoroutines(coroutine);
@@ -114,7 +112,7 @@ namespace BetterOmegaWarhead
             if (isOmegaActive())
             {
                 _plugin.NotificationMethods.BroadcastHelicopterCountdown();
-                _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(heliSurvivors), "OmegaWarheadHeliEvacuationHandler"));
+                _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(), "OmegaWarheadHeliEvacuationHandler"));
             }
         }
 
@@ -165,7 +163,7 @@ namespace BetterOmegaWarhead
 
         void DetonateWarhead()
         {
-            _plugin.PlayerMethods.HandlePlayersOnNuke(heliSurvivors);
+            _plugin.PlayerMethods.HandlePlayersOnNuke();
 
             Warhead.Detonate();
             Warhead.Shake();

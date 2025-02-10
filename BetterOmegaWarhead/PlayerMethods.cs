@@ -15,7 +15,7 @@ namespace BetterOmegaWarhead
         private readonly Plugin _plugin;
         public PlayerMethods(Plugin plugin) => _plugin = plugin;
 
-        public IEnumerator<float> HandleHelicopterEscape(HashSet<Player> hashSetHeliSurvivors)
+        public IEnumerator<float> HandleHelicopterEscape()
         {
             Vector3 helicopterZone = new Vector3(128.681f, 995.456f, -42.202f);
 
@@ -29,15 +29,24 @@ namespace BetterOmegaWarhead
             {
                 if (!player.IsScp && player.IsAlive && Vector3.Distance(player.Position, helicopterZone) <= _plugin.Config.HelicopterZoneSize)
                 {
-                    hashSetHeliSurvivors.Add(player);
+                    _plugin.CacheHandlers.CachePlayerEvacuatedByHelicopter(player);
                     player.IsGodModeEnabled = true;
                     player.Broadcast(_plugin.Config.HelicopterEscape);
                     player.EnableEffect(EffectType.Flashed, 1.75f);
+
+                    // TODO: Evade the hardcoded position of the helicopter destination when possible.
+                    // Request: https://github.com/ExMod-Team/EXILED/issues/434
                     player.Position = new Vector3(293f, 978f, -52f);
                     player.ClearInventory();
                     player.EnableEffect(EffectType.Ensnared);
-                    if (player.LeadingTeam == LeadingTeam.FacilityForces) Round.EscapedScientists++;
-                    else if (player.LeadingTeam == LeadingTeam.ChaosInsurgency) Round.EscapedDClasses++;
+                    if (player.LeadingTeam == LeadingTeam.FacilityForces)
+                    {
+                        Round.EscapedScientists++;
+                    }
+                    else if (player.LeadingTeam == LeadingTeam.ChaosInsurgency)
+                    {
+                        Round.EscapedDClasses++;
+                    }
                     yield return Timing.WaitForSeconds(0.75f);
                     player.Role.Set(RoleTypeId.Spectator, reason: SpawnReason.Escaped);
 
@@ -55,24 +64,21 @@ namespace BetterOmegaWarhead
                 yield return Timing.WaitForSeconds(0.45f);
             }
         }
-        public void HandlePlayersOnNuke(HashSet<Player> inHeliSurvivors)
+        public void HandlePlayersOnNuke()
         {
             foreach (Player player in Player.List)
             {
-
-                if (IsInShelter(player) || inHeliSurvivors.Contains(player))
+                if (IsInShelter(player) || _plugin.CacheHandlers.IsPlayerEvacuatedByHelicopters(player))
                 {
                     _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(HandleSavePlayer(player)));
                 }
                 else
                 {
-
                     player.EnableEffect(EffectType.Flashed, 0.75f);
                     player.Hurt(amount: 0.15f, damageType: DamageType.Explosion);
                     player.EnableEffect(EffectType.Blurred, 4.75f);
                     player.Kill("Omega Warhead");
                 }
-
             }
         }
 
@@ -85,7 +91,7 @@ namespace BetterOmegaWarhead
             }
 
             // Retrieve the cached shelter locations from the plugin.
-            var shelters = _plugin.GetCachedShelterLocations();
+            var shelters = _plugin.CacheHandlers.GetCachedShelterLocations();
             foreach (Vector3 shelterPos in shelters)
             {
                 if (Vector3.Distance(player.Position, shelterPos) <= _plugin.Config.ShelterZoneSize)
@@ -95,7 +101,6 @@ namespace BetterOmegaWarhead
             }
             return false;
         }
-
 
         public IEnumerator<float> HandleSavePlayer(Player player)
         {

@@ -104,6 +104,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CacheHandlers.cs" />
     <Compile Include="Commands\Activate.cs" />
     <Compile Include="Commands\Stop.cs" />
     <Compile Include="Config.cs" />
