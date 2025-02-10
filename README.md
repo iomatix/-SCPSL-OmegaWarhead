@@ -11,7 +11,7 @@ This plugins adds a new Warhead to SCP:SL. It can be activated replacing Alpha W
   <img src="https://contrib.rocks/image?repo=iomatix/-SCPSL-BetterOmegaWarhead" />
 </a>
 
-Config:
+#### Config:
 ```
 # Plugin enabled?
 is_enabled: true
