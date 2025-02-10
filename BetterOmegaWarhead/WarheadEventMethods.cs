@@ -76,7 +76,7 @@ namespace BetterOmegaWarhead
         {
             _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceDetonation(timeToDetonation),"OmegaWarheadSequenceDetonation"));
             _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceHeli(), "OmegaWarheadSequenceHelicopter"));
-            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceCheckpointOpen(), , "OmegaWarheadSequenceOpenCheckpoints"));
+            _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(OmegaWarheadSequenceCheckpointOpen(), "OmegaWarheadSequenceOpenCheckpoints"));
         }
         public IEnumerator<float> OmegaWarheadSequenceDetonation(float timeToDetonation)
         {
