@@ -17,7 +17,10 @@ namespace BetterOmegaWarhead
 
         public IEnumerator<float> HandleHelicopterEscape()
         {
-            Vector3 helicopterZone = new Vector3(128.681f, 995.456f, -42.202f);
+
+            // TODO: Evade the hardcoded position of the helicopter destination when possible.
+            // Request: https://github.com/ExMod-Team/EXILED/issues/434
+            Vector3 helicopterZone = new Vector3(127f, 995.5f, -43f);
 
             _plugin.EventHandlers.Coroutines.Add(Timing.RunCoroutine(DisableFactionTokens()));
 
@@ -33,10 +36,8 @@ namespace BetterOmegaWarhead
                     player.IsGodModeEnabled = true;
                     player.Broadcast(_plugin.Config.HelicopterEscape);
                     player.EnableEffect(EffectType.Flashed, 1.75f);
-
-                    // TODO: Evade the hardcoded position of the helicopter destination when possible.
-                    // Request: https://github.com/ExMod-Team/EXILED/issues/434
-                    player.Position = new Vector3(127f, 995.5f, -43f);
+                    // TODO: Evade the hardcoded position of the tutorial tower.
+                    player.Position = new Vector3(39f,1015f,32f);
                     player.ClearInventory();
                     player.EnableEffect(EffectType.Ensnared);
                     if (player.LeadingTeam == LeadingTeam.FacilityForces)
