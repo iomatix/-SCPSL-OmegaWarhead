@@ -10,55 +10,72 @@
         private readonly Plugin _plugin;
         public CacheHandlers(Plugin plugin) => _plugin = plugin;
 
-        // Cached shelter locations computed once per round.
-        private HashSet<Vector3> _cachedShelterLocations = null;
-        private HashSet<Player> _cachedHeliSurvivors = null;
-
-        public HashSet<Vector3> GetCachedShelterLocations()
+        private HashSet<Vector3> _cachedShelterLocations;
+        private HashSet<Player> _cachedHeliSurvivors;
+        // Lazy initialization of shelter locations using a property getter.
+        private HashSet<Vector3> CachedShelterLocations
         {
-            if (_cachedShelterLocations == null)
+            get
             {
-                CacheShelterLocations();
+                if (_cachedShelterLocations == null)
+                {
+                    _cachedShelterLocations = CacheShelterLocations();
+                }
+                return _cachedShelterLocations;
             }
-            return _cachedShelterLocations;
         }
+
+        // Lazy initialization of heli survivors using a property getter.
+        private HashSet<Player> CachedHeliSurvivors
+        {
+            get
+            {
+                if (_cachedHeliSurvivors == null)
+                {
+                    _cachedHeliSurvivors = new HashSet<Player>();
+                }
+                return _cachedHeliSurvivors;
+            }
+        }
+
+        public HashSet<Vector3> GetCachedShelterLocations() => CachedShelterLocations;
+
         public HashSet<Vector3> CacheShelterLocations()
         {
-            _cachedShelterLocations = new HashSet<Vector3>();
+            var shelterLocations = new HashSet<Vector3>();
             foreach (Room room in Room.List)
             {
                 if (room.Type == RoomType.EzShelter)
                 {
-                    _cachedShelterLocations.Add(room.Position);
+                    shelterLocations.Add(room.Position);
                 }
             }
-            return _cachedShelterLocations;
+            return shelterLocations;
         }
 
         public void CachePlayerEvacuatedByHelicopter(Player evacuatedPlayer)
         {
-            _cachedHeliSurvivors.Add(evacuatedPlayer);
+            CachedHeliSurvivors.Add(evacuatedPlayer);
         }
 
-        public HashSet<Player> GetCachedPlayersEvacuatedByHelicopters()
-        {
-            return _cachedHeliSurvivors;
-        }
+        public HashSet<Player> GetCachedPlayersEvacuatedByHelicopters() =>
+            CachedHeliSurvivors;
 
-        public bool IsPlayerEvacuatedByHelicopters(Player player)
-        {
-            return _cachedHeliSurvivors.Contains(player);
-        }
+        public bool IsPlayerEvacuatedByHelicopters(Player player) =>
+            CachedHeliSurvivors.Contains(player);
 
 
         public void ResetCache()
         {
             _cachedShelterLocations = null;
-            foreach(Player player in _cachedHeliSurvivors)
+            if (_cachedHeliSurvivors != null)
             {
-                player.IsGodModeEnabled = false;
+                foreach (Player player in _cachedHeliSurvivors)
+                {
+                    player.IsGodModeEnabled = false;
+                }
+                _cachedHeliSurvivors = null;
             }
-            _cachedHeliSurvivors = null;
         }
     }
 }
