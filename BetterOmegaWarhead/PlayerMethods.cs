@@ -36,7 +36,7 @@ namespace BetterOmegaWarhead
 
                     // TODO: Evade the hardcoded position of the helicopter destination when possible.
                     // Request: https://github.com/ExMod-Team/EXILED/issues/434
-                    player.Position = new Vector3(293f, 978f, -52f);
+                    player.Position = new Vector3(127f, 995.5f, -43f);
                     player.ClearInventory();
                     player.EnableEffect(EffectType.Ensnared);
                     if (player.LeadingTeam == LeadingTeam.FacilityForces)
