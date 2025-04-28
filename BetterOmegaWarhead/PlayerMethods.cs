@@ -76,6 +76,7 @@ namespace BetterOmegaWarhead
             Log.Debug("DisableFactionSpawn called.");
             foreach (SpawnableFaction spawnableFaction in Enum.GetValues(typeof(SpawnableFaction)))
             {
+                if(spawnableFaction == SpawnableFaction.None) continue;
                 Faction faction = RoleExtensions.GetFaction(spawnableFaction);
                 Log.Debug($"Disabling faction: {faction} (from SpawnableFaction: {spawnableFaction}).");
                 _plugin.CacheHandlers.CacheDisabledFaction(faction);
