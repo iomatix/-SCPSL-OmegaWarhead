@@ -6,6 +6,11 @@ This plugins adds a new Warhead to SCP:SL. It can be activated replacing Alpha W
 1. Stay in the Breach/Evacuation Shelter
 2. Escape in the rescue Helicopter at surface zone.
 
+### Supporting Development
+
+My mods are **always free to use**.
+
+If you appreciate my work, you can support me by [buying me a coffee](https://buymeacoffee.com/iomatix).
 
 ### Contributors
 
