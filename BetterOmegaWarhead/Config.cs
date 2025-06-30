@@ -60,7 +60,7 @@
         public string DetonatingOmegaCassie { get; set; } = "pitch_0.65 Detonating pitch_0.5 Warhead";
 
         [Description("Cassie message regarding the incoming Helicopter")]
-        public string HeliIncomingCassie { get; set; } = "pitch_0.25 .g3 .g3 .g3 pitch_0.9 attention . attention . the helicopter is in comeing . Please evacuate . Attention . the helicopter is in comeing . Please evacuate immediately";
+        public string HeliIncomingCassie { get; set; } = "pitch_0.25 .g3 .g3 .g3 pitch_0.9 attention . attention . the helicopter is in coming . Please evacuate . Attention . the helicopter is in coming . Please evacuate immediately";
         [Description("Cassie message regarding the checkpoints unlock")]
         public string CheckpointUnlockCassie { get; set; } = "pitch_0.25 .g3 .g3 .g3 pitch_0.9 attention . attention . the checkpoint doors are open . Attention . the checkpoint doors are open . Please evacuate immediately";
         [Description("Permissions of the plugin.")]
