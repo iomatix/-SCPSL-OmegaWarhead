@@ -17,7 +17,7 @@
         public override string Author { get; } = "ClaudioPanConQueso & iomatix";
         public override string Name { get; } = "BetterOmegaWarhead";
         public override string Prefix { get; } = "BetterOmegaWarhead";
-        public override Version Version { get; } = new Version(6, 5, 6);
+        public override Version Version { get; } = new Version(6, 6, 0);
         public override Version RequiredExiledVersion { get; } = new Version(9, 5, 0);
 
         internal WarheadEventMethods EventMethods { get; private set; }

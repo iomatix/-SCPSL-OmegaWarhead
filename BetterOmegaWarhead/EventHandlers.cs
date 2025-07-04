@@ -29,12 +29,14 @@
         public void OnRoundEnd(RoundEndedEventArgs ev)
         {
             Log.Debug($"OnRoundEnd triggered with leading team: {ev.LeadingTeam}. Disabling event methods.");
+            _plugin.CacheHandlers.ResetCache();
             _plugin.EventMethods.Disable();
         }
 
         public void OnWaitingForPlayers()
         {
             Log.Debug("OnWaitingForPlayers triggered, disabling event methods.");
+            _plugin.CacheHandlers.ResetCache();
             _plugin.EventMethods.Disable();
         }
 

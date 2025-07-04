@@ -19,7 +19,7 @@ namespace BetterOmegaWarhead
         public IEnumerator<float> HandleHelicopterEscape()
         {
             Log.Debug("HandleHelicopterEscape coroutine started.");
-            Vector3 helicopterZone = new Vector3(127f, 995.5f, -43f);
+            Vector3 helicopterZone = new Vector3(127f, 295.5f, -43f);
             Log.Debug($"Helicopter zone set to: {helicopterZone}");
 
             DisableFactionSpawn();
