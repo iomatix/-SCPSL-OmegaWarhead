@@ -63,6 +63,10 @@
         public string HeliIncomingCassie { get; set; } = "pitch_0.25 .g3 .g3 .g3 pitch_0.9 attention . attention . the helicopter is in coming . Please evacuate . Attention . the helicopter is in coming . Please evacuate immediately";
         [Description("Cassie message regarding the checkpoints unlock")]
         public string CheckpointUnlockCassie { get; set; } = "pitch_0.25 .g3 .g3 .g3 pitch_0.9 attention . attention . the checkpoint doors are open . Attention . the checkpoint doors are open . Please evacuate immediately";
+
+        [Description("Should cassie clear the messeage cue before important message to prevent spam, and match timers?")]
+        public bool CassieMessageClearBeforeImportant { get; set; } = true;
+
         [Description("Permissions of the plugin.")]
         public string Permissions { get; set; } = "omegawarhead";
 

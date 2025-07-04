@@ -16,7 +16,7 @@ namespace BetterOmegaWarhead
         public void SendImportantCassieMessage(string message)
         {
             if (string.IsNullOrEmpty(message)) return;
-            Cassie.Clear();
+            if(_plugin.Config.CassieMessageClearBeforeImportant) Cassie.Clear();
             Cassie.Message(message, isSubtitles: false, isHeld: false);
         }
 
