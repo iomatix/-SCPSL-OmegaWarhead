@@ -9,10 +9,8 @@
         [Description("Plugin enabled?")]
         public bool IsEnabled { get; set; } = true;
 
-
         [Description("Amount of engaged generators guarantee 100% chance for the launch of the Omega Warhead.")]
         public int generatorsNumGuaranteeOmega { get; private set; } = 2;
-
 
         [Description("Chance that the Alpha Warhead will be replaced with Omega Warhead")]
         public int ReplaceAlphaChance { get; private set; } = 15;
@@ -64,8 +62,10 @@
         [Description("Cassie message regarding the checkpoints unlock")]
         public string CheckpointUnlockCassie { get; set; } = "pitch_0.25 .g3 .g3 .g3 pitch_0.9 attention . attention . the checkpoint doors are open . Attention . the checkpoint doors are open . Please evacuate immediately";
 
-        [Description("Should cassie clear the messeage cue before important message to prevent spam, and match timers?")]
+        [Description("Should cassie clear the messeage cue before important message to prevent spam.")]
         public bool CassieMessageClearBeforeImportant { get; set; } = true;
+        [Description("Should cassie clear the messeage cue before warhead messages to call them instantly?")]
+        public bool CassieMessageClearBeforeWarheadMessage { get; set; } = true;        
 
         [Description("Permissions of the plugin.")]
         public string Permissions { get; set; } = "omegawarhead";

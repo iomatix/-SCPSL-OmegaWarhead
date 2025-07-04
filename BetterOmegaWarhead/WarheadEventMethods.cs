@@ -104,7 +104,7 @@ namespace BetterOmegaWarhead
                     if (isOmegaActive())
                     {
                         Log.Debug($"Sending Cassie notification for {notifyTime}s remaining.");
-                        Cassie.Clear();
+                        if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
                         _plugin.NotificationMethods.SendCassieMessage($".G3 {notifyTime} Seconds until Omega Warhead Detonation");
                     }
                     timeToDetonation = notifyTime;
@@ -197,7 +197,7 @@ namespace BetterOmegaWarhead
         public IEnumerator<float> HandleWarheadDetonation()
         {
             Log.Debug("HandleWarheadDetonation coroutine started.");
-            Cassie.Clear();
+            if(_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
             Log.Debug("Sending Omega detonation Cassie message.");
             _plugin.NotificationMethods.SendCassieMessage(_plugin.Config.DetonatingOmegaCassie);
             Log.Debug("Detonating warhead.");
@@ -205,7 +205,7 @@ namespace BetterOmegaWarhead
 
             while (true)
             {
-                Cassie.Clear();
+                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
                 yield return Timing.WaitForSeconds(0.175f);
             }
         }
