@@ -100,6 +100,11 @@
             {
                 if (!IsOmegaActive) yield break;
                 Map.TurnOffLights(0.75f);
+                if (i <= 5 && IsOmegaActive)
+                {
+                    Cassie.Clear();
+                    _plugin.NotificationMethods.SendCassieMessage($".G3 {i}");
+                }
                 yield return Timing.WaitForSeconds(1.0f);
             }
 
@@ -139,6 +144,7 @@
         {
             if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
             _plugin.NotificationMethods.SendCassieMessage(_plugin.Config.DetonatingOmegaCassie);
+            yield return Timing.WaitForSeconds(3f); // Wait for message to complete
 
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             Warhead.Detonate();
@@ -146,17 +152,12 @@
 
             foreach (Room room in Room.List)
             {
-                //foreach (Window window in room.windows)
-                //window.BreakWindow();
-
                 foreach (LabApi.Features.Wrappers.Door door in room.Doors)
                 {
                     door.IsOpened = true;
                     if (door is LabApi.Features.Wrappers.BreakableDoor breakable && !breakable.IsBroken) breakable.TryBreak();
-
                     door.Lock(Interactables.Interobjects.DoorUtils.DoorLockReason.Warhead, true);
                 }
-
 
                 foreach (var lightController in room.AllLightControllers)
                 {
@@ -182,7 +183,6 @@
             LogHelper.Debug("ResetOmegaState called.");
             Cleanup();
         }
-
 
         public void HandleWarheadStart(LabApi.Events.Arguments.WarheadEvents.WarheadStartingEventArgs ev)
         {
@@ -215,14 +215,14 @@
             LogHelper.Debug("HandleWarheadDetonate called.");
             if (!IsOmegaActive) return;
 
-            LogHelper.Debug("Omega is active during detonation, calling OnDetonation.");
-            OnDetonation();
+            LogHelper.Debug("Omega is active during detonation, blocking default warhead detonation.");
+            ev.IsAllowed = false; // Prevent default warhead detonation
+            // Note: Omega Warhead detonation is handled by HandleDetonation coroutine
         }
 
         public void OnDetonation()
         {
             LogHelper.Debug("OnDetonation called.");
-            // Optional: trigger post-detonation logic here, like logging, cleanup, visual effects, etc.
             _omegaActivated = false;
         }
 
@@ -230,14 +230,12 @@
         {
             LogHelper.Debug("OnRoundStartCleanup called.");
             Cleanup();
-
         }
+
         public void Dispose()
         {
             LogHelper.Debug("Dispose called.");
             Disable();
         }
-
-
     }
 }
