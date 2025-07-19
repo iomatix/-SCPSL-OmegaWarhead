@@ -21,7 +21,7 @@ namespace BetterOmegaWarhead
 
         public void BroadcastOmegaActivation()
         {
-            foreach (Player player in Player.List)
+            foreach (Player player in Player.ReadyList)
                 player.SendHint(_plugin.Config.ActivatedMessage, 5f);
         }
 

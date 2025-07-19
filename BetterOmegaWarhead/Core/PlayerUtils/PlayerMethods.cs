@@ -44,7 +44,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
 
             yield return Timing.WaitForSeconds(19.0f);
 
-            foreach (Player player in Player.List)
+            foreach (Player player in Player.ReadyList)
             {
                 if (!_playerUtility.IsEligibleForEscape(player, helicopterZone))
                     continue;
@@ -94,7 +94,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         {
             LogHelper.Debug("HandlePlayersOnNuke called.");
 
-            foreach (Player player in Player.List)
+            foreach (Player player in Player.ReadyList)
             {
                 bool isInShelter = _playerUtility.IsInShelter(player);
                 bool isEvacuated = _plugin.CacheHandler.IsPlayerEvacuatedByHelicopters(player);
