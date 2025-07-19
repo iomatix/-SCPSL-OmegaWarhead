@@ -2,30 +2,15 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
 {
     using BetterOmegaWarhead.Core.LoggingUtils;
     using CustomPlayerEffects;
-    using Exiled.API.Enums;
-    using Exiled.API.Extensions;
+    using LabApi.Features.Extensions;
     using LabApi.Features.Wrappers;
     using MEC;
     using PlayerRoles;
+    using Respawning;
     using System;
     using System.Collections.Generic;
     using UnityEngine;
-
-    /// <summary>  
-    /// Represents different escape scenarios and their configurations.  
-    /// </summary>  
-    public class EscapeScenario
-    {
-        public string Name { get; set; }
-        public Vector3 EscapeZone { get; set; }
-        public Vector3 TeleportPosition { get; set; }
-        public string InitialMessage { get; set; }
-        public string EscapeMessage { get; set; }
-        public float InitialDelay { get; set; }
-        public float ProcessingDelay { get; set; }
-        public float FinalDelay { get; set; }
-        public Action OnEscapeTriggered { get; set; }
-    }
+    using static BetterOmegaWarhead.Core.PlayerUtils.PlayerUtility;
 
     /// <summary>  
     /// Contains core player-related coroutine logic requiring plugin context.  
@@ -134,14 +119,42 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         {
             LogHelper.Debug("DisableFactionSpawn called.");
 
-            foreach (SpawnableFaction spawnableFaction in Enum.GetValues(typeof(SpawnableFaction)))
+            var spawnableRoles = new[]
             {
-                if (spawnableFaction == SpawnableFaction.None)
-                    continue;
+                RoleTypeId.NtfCaptain,
+                RoleTypeId.NtfSergeant,
+                RoleTypeId.NtfSpecialist,
+                RoleTypeId.NtfPrivate,
+                RoleTypeId.ChaosConscript,
+                RoleTypeId.ChaosMarauder,
+                RoleTypeId.ChaosRepressor,
+                RoleTypeId.ChaosRifleman
+            };
 
-                Faction faction = RoleExtensions.GetFaction(spawnableFaction);
-                _plugin.CacheHandler.CacheDisabledFaction(faction);
-                LogHelper.Debug($"Disabled faction: {faction}");
+            foreach (var role in spawnableRoles)
+            {
+                Team team = role.GetTeam();
+                Faction faction;
+
+                switch (team)
+                {
+                    case Team.FoundationForces:
+                        faction = Faction.FoundationStaff;
+                        break;
+                    case Team.ChaosInsurgency:
+                        faction = Faction.FoundationEnemy;
+                        break;
+                    default:
+                        faction = Faction.Unclassified;
+                        break;
+                }
+
+                if (faction != Faction.Unclassified)
+                {
+                    FactionInfluenceManager.Set(faction, 0f);
+                    _plugin.CacheHandler.CacheDisabledFaction(faction);
+                    LogHelper.Debug($"Disabled faction: {faction} for role: {role}");
+                }
             }
 
             LogHelper.Debug("DisableFactionSpawn completed.");
