@@ -11,9 +11,25 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
     using System.Collections.Generic;
     using UnityEngine;
 
-    /// <summary>
-    /// Contains core player-related coroutine logic requiring plugin context.
-    /// </summary>
+    /// <summary>  
+    /// Represents different escape scenarios and their configurations.  
+    /// </summary>  
+    public class EscapeScenario
+    {
+        public string Name { get; set; }
+        public Vector3 EscapeZone { get; set; }
+        public Vector3 TeleportPosition { get; set; }
+        public string InitialMessage { get; set; }
+        public string EscapeMessage { get; set; }
+        public float InitialDelay { get; set; }
+        public float ProcessingDelay { get; set; }
+        public float FinalDelay { get; set; }
+        public Action OnEscapeTriggered { get; set; }
+    }
+
+    /// <summary>  
+    /// Contains core player-related coroutine logic requiring plugin context.  
+    /// </summary>  
     public class PlayerMethods
     {
         private readonly Plugin _plugin;
@@ -25,51 +41,95 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
             _playerUtility = new PlayerUtility(_plugin);
         }
 
-        /// <summary>
-        /// Coroutine handling the helicopter escape sequence for eligible players.
-        /// </summary>
-        public IEnumerator<float> HandleHelicopterEscape()
+        /// <summary>  
+        /// Generic escape handler that can process different escape scenarios.  
+        /// </summary>  
+        public IEnumerator<float> HandleEscapeSequence(EscapeScenario scenario)
         {
-            LogHelper.Debug("HandleHelicopterEscape coroutine started.");
-
-            Vector3 helicopterZone = new Vector3(127f, 295.5f, -43f);
-            LogHelper.Debug($"Helicopter zone set to: {helicopterZone}");
+            LogHelper.Debug($"{scenario.Name} escape sequence started.");
+            LogHelper.Debug($"Escape zone set to: {scenario.EscapeZone}");
 
             DisableFactionSpawn();
 
-            yield return Timing.WaitForSeconds(13.5f);
-
-            LogHelper.Debug("Summoning NTF chopper.");
-            Exiled.API.Features.Respawn.SummonNtfChopper();
-
-            yield return Timing.WaitForSeconds(19.0f);
-
+            // Single loop to handle both hint sending and delayed escape processing  
             foreach (Player player in Player.ReadyList)
             {
-                if (!_playerUtility.IsEligibleForEscape(player, helicopterZone))
-                    continue;
+                player.SendHint(scenario.InitialMessage, 6.0f);
 
-                _plugin.CacheHandler.CachePlayerEvacuatedByHelicopter(player);
-
-                player.IsGodModeEnabled = true;
-                player.SendHint(_plugin.Config.HelicopterEscape);
-                player.EnableEffect<Flashed>(duration: 1.75f);
-                player.Position = new Vector3(39f, 1015f, 32f); // Tutorial tower
-                player.ClearInventory();
-                player.EnableEffect<Ensnared>(duration: 30f);
-
-                yield return Timing.WaitForSeconds(0.75f);
-                player.SetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
-
-                LogHelper.Debug($"Player {player.Nickname} has escaped by helicopter.");
+                float totalDelay = scenario.InitialDelay + scenario.ProcessingDelay;
+                Timing.CallDelayed(totalDelay, () => ProcessPlayerEscape(player, scenario));
             }
 
-            LogHelper.Debug("HandleHelicopterEscape coroutine completed.");
+            yield return Timing.WaitForSeconds(scenario.InitialDelay);
+
+            scenario.OnEscapeTriggered?.Invoke();
+
+            yield return Timing.WaitForSeconds(scenario.ProcessingDelay);
+            LogHelper.Debug($"{scenario.Name} escape sequence completed.");
         }
 
-        /// <summary>
-        /// Disables all spawnable factions except None.
-        /// </summary>
+        /// <summary>  
+        /// Helicopter escape using the generic escape system.  
+        /// </summary>  
+        public IEnumerator<float> HandleHelicopterEscape()
+        {
+            var helicopterScenario = new EscapeScenario
+            {
+                Name = "Helicopter",
+                EscapeZone = new Vector3(127f, 295.5f, -43f),
+                TeleportPosition = new Vector3(39f, 1015f, 32f),
+                InitialMessage = _plugin.Config.HelicopterIncomingMessage,
+                EscapeMessage = _plugin.Config.HelicopterEscape,
+                InitialDelay = 13.5f,
+                ProcessingDelay = 19.0f,
+                FinalDelay = 0.75f,
+                OnEscapeTriggered = () =>
+                {
+                    LogHelper.Debug("Summoning NTF chopper.");
+                    Exiled.API.Features.Respawn.SummonNtfChopper();
+                }
+            };
+
+            return HandleEscapeSequence(helicopterScenario);
+        }
+
+        /// <summary>  
+        /// Generic player escape processing.  
+        /// </summary>  
+        private void ProcessPlayerEscape(Player player, EscapeScenario scenario)
+        {
+            if (!_playerUtility.IsEligibleForEscape(player, scenario.EscapeZone))
+                return;
+
+            // Cache the evacuation based on scenario type  
+            if (scenario.Name == "Helicopter")
+                _plugin.CacheHandler.CachePlayerEvacuatedByHelicopter(player);
+
+            ApplyEscapeEffects(player, scenario);
+
+            Timing.CallDelayed(scenario.FinalDelay, () =>
+            {
+                player.SetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
+                LogHelper.Debug($"Player {player.Nickname} has escaped by {scenario.Name.ToLower()}.");
+            });
+        }
+
+        /// <summary>  
+        /// Applies standard escape effects to a player.  
+        /// </summary>  
+        private void ApplyEscapeEffects(Player player, EscapeScenario scenario)
+        {
+            player.IsGodModeEnabled = true;
+            player.SendHint(scenario.EscapeMessage);
+            player.EnableEffect<Flashed>(duration: 1.75f);
+            player.Position = scenario.TeleportPosition;
+            player.ClearInventory();
+            player.EnableEffect<Ensnared>(duration: 30f);
+        }
+
+        /// <summary>  
+        /// Disables all spawnable factions except None.  
+        /// </summary>  
         public void DisableFactionSpawn()
         {
             LogHelper.Debug("DisableFactionSpawn called.");
@@ -87,42 +147,69 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
             LogHelper.Debug("DisableFactionSpawn completed.");
         }
 
-        /// <summary>
-        /// Handles player fate on Omega Warhead detonation.
-        /// </summary>
+        /// <summary>  
+        /// Handles player fate on Omega Warhead detonation.  
+        /// </summary>  
         public void HandlePlayersOnNuke()
         {
             LogHelper.Debug("HandlePlayersOnNuke called.");
 
             foreach (Player player in Player.ReadyList)
             {
-                bool isInShelter = _playerUtility.IsInShelter(player);
-                bool isEvacuated = _plugin.CacheHandler.IsPlayerEvacuatedByHelicopters(player);
-
-                LogHelper.Debug($"Checking {player.Nickname}: In shelter: {isInShelter}, Evacuated: {isEvacuated}");
-
-                if (isInShelter || isEvacuated)
-                {
-                    LogHelper.Debug($"Saving {player.Nickname}.");
-                    _plugin.EventHandler.Coroutines.Add(Timing.RunCoroutine(HandleSavePlayer(player)));
-                }
-                else
-                {
-                    LogHelper.Debug($"Killing {player.Nickname} due to Omega Warhead exposure.");
-                    player.EnableEffect<Flashed>(duration: 0.75f);
-                    player.Damage(15f, "Omega Warhead");
-                    player.EnableEffect<Blurred>(duration: 4.75f);
-                    player.EnableEffect<Deafened>(duration: 4.75f);
-                    player.Kill("Omega Warhead");
-                }
+                PlayerFate fate = DeterminePlayerFate(player);
+                ProcessPlayerFate(player, fate);
             }
 
             LogHelper.Debug("HandlePlayersOnNuke completed.");
         }
 
-        /// <summary>
-        /// Coroutine that temporarily saves a player from death by applying effects and God Mode.
-        /// </summary>
+        /// <summary>  
+        /// Determines a player's fate during nuke detonation.  
+        /// </summary>  
+        private PlayerFate DeterminePlayerFate(Player player)
+        {
+            bool isInShelter = _playerUtility.IsInShelter(player);
+            bool isEvacuated = _plugin.CacheHandler.IsPlayerEvacuatedByHelicopters(player);
+
+            LogHelper.Debug($"Checking {player.Nickname}: In shelter: {isInShelter}, Evacuated: {isEvacuated}");
+
+            return (isInShelter || isEvacuated) ? PlayerFate.Saved : PlayerFate.Killed;
+        }
+
+        /// <summary>  
+        /// Processes the determined fate for a player.  
+        /// </summary>  
+        private void ProcessPlayerFate(Player player, PlayerFate fate)
+        {
+            switch (fate)
+            {
+                case PlayerFate.Saved:
+                    LogHelper.Debug($"Saving {player.Nickname}.");
+                    _plugin.EventHandler.Coroutines.Add(Timing.RunCoroutine(HandleSavePlayer(player)));
+                    break;
+
+                case PlayerFate.Killed:
+                    LogHelper.Debug($"Killing {player.Nickname} due to Omega Warhead exposure.");
+                    ApplyNukeEffects(player);
+                    break;
+            }
+        }
+
+        /// <summary>  
+        /// Applies nuke exposure effects and kills the player.  
+        /// </summary>  
+        private void ApplyNukeEffects(Player player)
+        {
+            player.EnableEffect<Flashed>(duration: 0.75f);
+            player.Damage(15f, "Omega Warhead");
+            player.EnableEffect<Blurred>(duration: 4.75f);
+            player.EnableEffect<Deafened>(duration: 4.75f);
+            player.Kill("Omega Warhead");
+        }
+
+        /// <summary>  
+        /// Coroutine that temporarily saves a player from death by applying effects and God Mode.  
+        /// </summary>  
         private IEnumerator<float> HandleSavePlayer(Player player)
         {
             LogHelper.Debug($"HandleSavePlayer coroutine started for {player.Nickname}.");
@@ -139,5 +226,14 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
 
             LogHelper.Debug($"HandleSavePlayer coroutine completed for {player.Nickname}.");
         }
+    }
+
+    /// <summary>  
+    /// Represents possible player fates during events.  
+    /// </summary>  
+    public enum PlayerFate
+    {
+        Saved,
+        Killed
     }
 }

@@ -68,6 +68,8 @@
         #endregion
 
         #region Messages
+        [Description("Hint message displayed when the evacuation helicopter is inbound to the landing zone.")]
+        public string HelicopterIncomingMessage { get; set; } = "Incoming evacuation helicopter!";
 
         [Description("Hint message shown when helicopter escape is successful.")]
         public string HelicopterEscape { get; set; } = "You escaped in the helicopter.";
