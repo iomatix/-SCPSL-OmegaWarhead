@@ -51,7 +51,6 @@
             foreach (var coroutine in _coroutines)
             {
                 Timing.KillCoroutines(coroutine);
-                LogHelper.Debug($"Killed coroutine: {coroutine}");
             }
             _coroutines.Clear();
         }
@@ -81,7 +80,7 @@
 
         private IEnumerator<float> HandleCountdown(float timeToDetonation)
         {
-            int[] notifyTimes = { 300, 240, 180, 120, 60, 25, 10 };
+            int[] notifyTimes = { 300, 240, 180, 120, 60, 25, 15, 5, 4, 3, 2, 1};
             foreach (var notifyTime in notifyTimes)
             {
                 if (timeToDetonation >= notifyTime)
@@ -89,27 +88,30 @@
                     yield return Timing.WaitForSeconds(timeToDetonation - notifyTime);
                     if (IsOmegaActive)
                     {
+
                         if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
-                        _plugin.NotificationMethods.SendCassieMessage($".G3 {notifyTime} Seconds until Omega Warhead Detonation");
+                        switch (notifyTime)
+                        {
+                            case 5:
+                            case 4:
+                            case 3:
+                            case 2:
+                            case 1:
+                                Map.TurnOffLights(0.75f);
+                                Cassie.Clear();
+                                _plugin.NotificationMethods.SendCassieMessage($".G3 {notifyTime}");
+                                break;
+
+                            default:
+                                _plugin.NotificationMethods.SendCassieMessage($".G3 {notifyTime} Seconds until Omega Warhead Detonation");
+                                break;
+                        }
                     }
                     timeToDetonation = notifyTime;
                 }
             }
 
-            for (int i = 10; i > 0; i--)
-            {
-                if (!IsOmegaActive) yield break;
-                Map.TurnOffLights(0.75f);
-                if (i <= 5 && IsOmegaActive)
-                {
-                    Cassie.Clear();
-                    _plugin.NotificationMethods.SendCassieMessage($".G3 {i}");
-                }
-                yield return Timing.WaitForSeconds(1.0f);
-            }
-
-            if (IsOmegaActive)
-                _coroutines.Add(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
+            if (IsOmegaActive) _coroutines.Add(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
         }
 
         private IEnumerator<float> HandleHelicopter()
@@ -144,7 +146,7 @@
         {
             if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
             _plugin.NotificationMethods.SendCassieMessage(_plugin.Config.DetonatingOmegaCassie);
-            yield return Timing.WaitForSeconds(3f); // Wait for message to complete
+            yield return Timing.WaitForSeconds(10f);
 
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             Warhead.Detonate();
