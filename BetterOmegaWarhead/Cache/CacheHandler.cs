@@ -8,10 +8,10 @@
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class CacheHandlers
+    public class CacheHandler
     {
         private readonly Plugin _plugin;
-        public CacheHandlers(Plugin plugin) => _plugin = plugin;
+        public CacheHandler(Plugin plugin) => _plugin = plugin;
 
         private HashSet<Vector3> _cachedShelterLocations;
         private HashSet<Player> _cachedHeliSurvivors;

@@ -1,8 +1,7 @@
 namespace BetterOmegaWarhead
 {
-    using Exiled.API.Features;
 
-
+    using LabApi.Features.Wrappers;
     public class NotificationMethods
     {
         private readonly Plugin _plugin;
@@ -16,13 +15,14 @@ namespace BetterOmegaWarhead
         public void SendImportantCassieMessage(string message)
         {
             if (string.IsNullOrEmpty(message)) return;
-            if(_plugin.Config.CassieMessageClearBeforeImportant) Cassie.Clear();
+            if (_plugin.Config.CassieMessageClearBeforeImportant) Cassie.Clear();
             Cassie.Message(message, isSubtitles: false, isHeld: false);
         }
 
         public void BroadcastOmegaActivation()
         {
-            Map.Broadcast(_plugin.Config.ActivatedMessage);
+            foreach (Player player in Player.List)
+                player.SendHint(_plugin.Config.ActivatedMessage, 5f);
         }
 
         public void BroadcastHelicopterCountdown()
