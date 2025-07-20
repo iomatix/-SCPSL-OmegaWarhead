@@ -219,8 +219,11 @@
                 // Compute when to *start* this announcement
                 double targetStart = warheadStartTime - notifyTime - msgDuration - buffer;
                 double now = Timing.LocalTime;
-                double wait = targetStart - now;
 
+                // Skip if we can't start the message on time
+                if (now > targetStart) continue;
+
+                double wait = targetStart - now;
                 if (wait > 0)
                     yield return Timing.WaitForSeconds((float)wait);
 
@@ -237,7 +240,6 @@
                 // Let it finish (with buffer)
                 yield return Timing.WaitForSeconds(msgDuration + buffer);
             }
-
 
             if (_plugin.OmegaManager.IsOmegaActive)
             {
