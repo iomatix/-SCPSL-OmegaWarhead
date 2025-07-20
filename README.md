@@ -19,7 +19,7 @@ If you appreciate my work, you can support me by [buying me a coffee](https://bu
   <img src="https://contrib.rocks/image?repo=iomatix/-SCPSL-BetterOmegaWarhead" />
 </a>
 
-####Example Config:
+### Example Config:
 ```
 # Plugin enabled?
 is_enabled: true
