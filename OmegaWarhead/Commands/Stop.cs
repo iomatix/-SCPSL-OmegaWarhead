@@ -1,4 +1,4 @@
-﻿namespace BetterOmegaWarhead.Commands
+﻿namespace OmegaWarhead.Commands
 {
     using System;
     using CommandSystem;

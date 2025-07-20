@@ -1,7 +1,7 @@
-namespace BetterOmegaWarhead
+namespace OmegaWarhead
 {
-    using BetterOmegaWarhead.Core.LoggingUtils;
-    using BetterOmegaWarhead.NotificationUtils;
+    using OmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.NotificationUtils;
     using CustomPlayerEffects;
     using Exiled.API.Enums;
     using LabApi.Features.Wrappers;

@@ -1,4 +1,4 @@
-﻿namespace BetterOmegaWarhead.Core.DoorUtils
+﻿namespace OmegaWarhead.Core.DoorUtils
 {
     using LabApi.Features.Enums;
     using LabApi.Features.Wrappers;

@@ -1,11 +1,11 @@
-﻿namespace BetterOmegaWarhead
+﻿namespace OmegaWarhead
 {
     using System.ComponentModel;
-    using BetterOmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.LoggingUtils;
     using Exiled.API.Interfaces;
 
     /// <summary>
-    /// Configuration settings for BetterOmegaWarhead.
+    /// Configuration settings for OmegaWarhead.
     /// </summary>
     #region Config Class
     public sealed class Config : IConfig

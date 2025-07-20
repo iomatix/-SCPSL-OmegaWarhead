@@ -1,8 +1,8 @@
-namespace BetterOmegaWarhead.Core.PlayerUtils
+namespace OmegaWarhead.Core.PlayerUtils
 {
     #region Usings
-    using BetterOmegaWarhead.Core.EscapeScenarioUtils;
-    using BetterOmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.EscapeScenarioUtils;
+    using OmegaWarhead.Core.LoggingUtils;
     using CustomPlayerEffects;
     using LabApi.Features.Extensions;
     using LabApi.Features.Wrappers;
@@ -12,7 +12,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
     using System;
     using System.Collections.Generic;
     using UnityEngine;
-    using static BetterOmegaWarhead.Core.PlayerUtils.PlayerUtility;
+    using static OmegaWarhead.Core.PlayerUtils.PlayerUtility;
     #endregion
 
     /// <summary>  

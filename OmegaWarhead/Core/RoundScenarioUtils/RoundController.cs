@@ -1,6 +1,6 @@
-﻿namespace BetterOmegaWarhead.Core.RoundScenarioUtils
+﻿namespace OmegaWarhead.Core.RoundScenarioUtils
 {
-    using BetterOmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.LoggingUtils;
     using LabApi.Features.Wrappers;
     using MEC;
     using System;

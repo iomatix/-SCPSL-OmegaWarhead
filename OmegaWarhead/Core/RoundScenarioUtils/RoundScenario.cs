@@ -1,6 +1,6 @@
-﻿namespace BetterOmegaWarhead.Core.RoundScenarioUtils
+﻿namespace OmegaWarhead.Core.RoundScenarioUtils
 {
-    using BetterOmegaWarhead.Core.RoundScenarioUtils;
+    using OmegaWarhead.Core.RoundScenarioUtils;
     public abstract class RoundScenario
     {
 

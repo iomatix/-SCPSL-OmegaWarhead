@@ -1,8 +1,8 @@
-﻿namespace BetterOmegaWarhead
+﻿namespace OmegaWarhead
 {
-    using BetterOmegaWarhead.Core.LoggingUtils;
-    using BetterOmegaWarhead.Core.RoundScenarioUtils;
-    using BetterOmegaWarhead.NotificationUtils;
+    using OmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.RoundScenarioUtils;
+    using OmegaWarhead.NotificationUtils;
     using LabApi.Events.Arguments.WarheadEvents;
     using LabApi.Features.Enums;
     using LabApi.Features.Wrappers;

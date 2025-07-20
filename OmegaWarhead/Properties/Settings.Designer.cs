@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace BetterOmegaWarhead.Properties {
+namespace OmegaWarhead.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

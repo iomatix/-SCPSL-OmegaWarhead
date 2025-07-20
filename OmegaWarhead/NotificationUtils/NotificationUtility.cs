@@ -1,4 +1,4 @@
-namespace BetterOmegaWarhead.NotificationUtils
+namespace OmegaWarhead.NotificationUtils
 {
     using LabApi.Features.Wrappers;
     using System.Collections.Generic;

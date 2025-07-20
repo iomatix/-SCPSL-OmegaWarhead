@@ -1,17 +1,17 @@
-﻿namespace BetterOmegaWarhead
+﻿namespace OmegaWarhead
 {
-    using BetterOmegaWarhead.Core.LoggingUtils;
-    using BetterOmegaWarhead.Core.PlayerUtils;
+    using OmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.PlayerUtils;
     using LabApi.Features.Wrappers;
     using MapGeneration;
     using PlayerRoles;
     using System;
     using System.Collections.Generic;
     using UnityEngine;
-    using static BetterOmegaWarhead.Core.PlayerUtils.PlayerMethods;
+    using static OmegaWarhead.Core.PlayerUtils.PlayerMethods;
 
     /// <summary>
-    /// Handles caching of runtime data for the BetterOmegaWarhead plugin,
+    /// Handles caching of runtime data for the OmegaWarhead plugin,
     /// including shelter locations, players evacuated by helicopter, and disabled factions.
     /// </summary>
     public class CacheHandler

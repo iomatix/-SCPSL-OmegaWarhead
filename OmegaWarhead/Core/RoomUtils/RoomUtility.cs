@@ -1,4 +1,4 @@
-﻿namespace BetterOmegaWarhead.Core.RoomUtils
+﻿namespace OmegaWarhead.Core.RoomUtils
 {
     using LabApi.Features.Wrappers;
     using MapGeneration;

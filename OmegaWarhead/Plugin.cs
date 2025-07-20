@@ -1,21 +1,21 @@
-﻿namespace BetterOmegaWarhead
+﻿namespace OmegaWarhead
 {
     using Exiled.API.Features;
     using MEC;
     using System;
-    using BetterOmegaWarhead.Core.RoundScenarioUtils;
-    using BetterOmegaWarhead.Core.PlayerUtils;
-    using BetterOmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.RoundScenarioUtils;
+    using OmegaWarhead.Core.PlayerUtils;
+    using OmegaWarhead.Core.LoggingUtils;
 
-    using RoundUtility = BetterOmegaWarhead.Core.RoundScenarioUtils;
-    using DoorUtility = BetterOmegaWarhead.Core.DoorUtils;
-    using EscapeUtility = BetterOmegaWarhead.Core.PlayerUtils;
-    using PlayerUtility = BetterOmegaWarhead.Core.PlayerUtils;
-    using RoomUtility = BetterOmegaWarhead.Core.RoomUtils;
+    using RoundUtility = OmegaWarhead.Core.RoundScenarioUtils;
+    using DoorUtility = OmegaWarhead.Core.DoorUtils;
+    using EscapeUtility = OmegaWarhead.Core.PlayerUtils;
+    using PlayerUtility = OmegaWarhead.Core.PlayerUtils;
+    using RoomUtility = OmegaWarhead.Core.RoomUtils;
 
 
     /// <summary>
-    /// The main plugin class for the BetterOmegaWarhead system, managing initialization, handlers, and lifecycle events.
+    /// The main plugin class for the OmegaWarhead system, managing initialization, handlers, and lifecycle events.
     /// </summary>
     #region Plugin Class
     public class Plugin : Plugin<Config>
@@ -43,12 +43,12 @@
         /// <summary>
         /// Gets the name of the plugin.
         /// </summary>
-        public override string Name { get; } = "BetterOmegaWarhead";
+        public override string Name { get; } = "OmegaWarhead";
 
         /// <summary>
         /// Gets the prefix used for the plugin's configuration and logging.
         /// </summary>
-        public override string Prefix { get; } = "BetterOmegaWarhead";
+        public override string Prefix { get; } = "OmegaWarhead";
 
         /// <summary>
         /// Gets the version of the plugin.
@@ -101,7 +101,7 @@
         {
             Singleton = this;
 
-            LogHelper.Debug("Enabling BetterOmegaWarhead plugin.");
+            LogHelper.Debug("Enabling OmegaWarhead plugin.");
             try
             {
                 Config.Validate();
@@ -129,7 +129,7 @@
             #endregion
 
             base.OnEnabled();
-            LogHelper.Debug("BetterOmegaWarhead plugin enabled.");
+            LogHelper.Debug("OmegaWarhead plugin enabled.");
         }
 
         /// <summary>
@@ -137,7 +137,7 @@
         /// </summary>
         public override void OnDisabled()
         {
-            LogHelper.Debug("Disabling BetterOmegaWarhead plugin.");
+            LogHelper.Debug("Disabling OmegaWarhead plugin.");
 
             #region Disable Omega Manager
             LogHelper.Debug("Disabling OmegaWarheadManager.");
@@ -170,7 +170,7 @@
             OmegaManager = null;
             #endregion
 
-            LogHelper.Debug("BetterOmegaWarhead plugin disabled.");
+            LogHelper.Debug("OmegaWarhead plugin disabled.");
             base.OnDisabled();
         }
         #endregion

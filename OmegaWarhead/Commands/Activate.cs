@@ -1,6 +1,6 @@
-﻿namespace BetterOmegaWarhead.Commands
+﻿namespace OmegaWarhead.Commands
 {
-    using BetterOmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.LoggingUtils;
     using CommandSystem;
     using Exiled.API.Enums;
     using Exiled.API.Features;

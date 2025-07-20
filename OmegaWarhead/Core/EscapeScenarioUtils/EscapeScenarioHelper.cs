@@ -1,6 +1,6 @@
-﻿namespace BetterOmegaWarhead.Core.EscapeUtils
+﻿namespace OmegaWarhead.Core.EscapeUtils
 {
-    using BetterOmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.LoggingUtils;
     using MEC;
     using System;
     using System.Collections.Generic;

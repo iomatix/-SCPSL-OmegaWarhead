@@ -1,7 +1,7 @@
-﻿namespace BetterOmegaWarhead
+﻿namespace OmegaWarhead
 {
     using MEC;
-    using BetterOmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.LoggingUtils;
     using InventorySystem.Items.Usables;
     using PlayerRoles;
     using System.Collections.Generic;

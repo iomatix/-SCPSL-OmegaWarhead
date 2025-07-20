@@ -1,4 +1,4 @@
-﻿namespace BetterOmegaWarhead.Core.EscapeScenarioUtils
+﻿namespace OmegaWarhead.Core.EscapeScenarioUtils
 {
     using System;
     using UnityEngine;

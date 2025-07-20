@@ -1,4 +1,4 @@
-﻿namespace BetterOmegaWarhead.Core.PlayerUtils
+﻿namespace OmegaWarhead.Core.PlayerUtils
 {
     using LabApi.Features.Wrappers;
     using MapGeneration;
