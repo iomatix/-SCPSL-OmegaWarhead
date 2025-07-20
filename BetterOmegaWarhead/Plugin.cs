@@ -92,10 +92,19 @@
         public override void OnEnabled()
         {
             Singleton = this;
-            LogHelper.Debug("Enabling BetterOmegaWarhead plugin.");
-            Config.Validate();
 
-            #region Initialize Handlers
+            LogHelper.Debug("Enabling BetterOmegaWarhead plugin.");
+            try
+            {
+                Config.Validate();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error($"Failed to validate config: {ex.Message}\nStackTrace: {ex.StackTrace}");
+            }
+
+
+            #region Initialize Components
             LogHelper.Debug("Initializing handlers.");
             EventHandler = new EventHandler(this);
             CacheHandler = new CacheHandler(this);
@@ -110,8 +119,8 @@
             OmegaManager.Init();
             #endregion
 
-            LogHelper.Debug("BetterOmegaWarhead plugin enabled.");
             base.OnEnabled();
+            LogHelper.Debug("BetterOmegaWarhead plugin enabled.");
         }
 
         /// <summary>
