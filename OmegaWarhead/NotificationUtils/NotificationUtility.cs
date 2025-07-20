@@ -138,8 +138,8 @@ namespace OmegaWarhead.NotificationUtils
         /// <returns>A formatted Cassie message for the countdown.</returns>
         public static string GetCassieCounterNotifyMessage(int notifyTime)
         {
-            if (notifyTime <= 5) return $"{notifyTime.ToString()} .G5";
-            if (notifyTime == 10 || notifyTime == 15) return $".G3 {notifyTime.ToString()} Seconds .G5";
+            if (notifyTime < 5) return $".G5";
+            if (notifyTime >= 5 && notifyTime <= 20) return $".G3 {notifyTime.ToString()} Seconds .G5";
             return $".G3 {notifyTime.ToString()} Seconds until Omega Warhead Detonation .G5";
         }
         #endregion
