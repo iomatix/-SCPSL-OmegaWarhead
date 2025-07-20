@@ -61,7 +61,8 @@
             _omegaActivated = true;
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
             LogHelper.Debug($"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
-            Map.SetColorOfLights(lightColor);
+            Timing.CallDelayed(3.5f, () => { Map.SetColorOfLights(lightColor); });
+
 
             _plugin.NotificationMethods.SendImportantCassieMessage(_plugin.Config.StartingOmegaCassie);
             _plugin.NotificationMethods.BroadcastOmegaActivation();
@@ -215,7 +216,6 @@
         {
             LogHelper.Debug("HandleWarheadDetonate called.");
             if (!IsOmegaActive) return;
-
             LogHelper.Debug("Omega is active during detonation, blocking default warhead detonation.");
             ev.IsAllowed = false; // Prevent default warhead detonation
             // Note: Omega Warhead detonation is handled by HandleDetonation coroutine
