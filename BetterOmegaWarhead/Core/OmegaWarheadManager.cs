@@ -47,6 +47,7 @@
             LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}, Coroutines: {_coroutines.Count}.");
             _omegaActivated = false;
             Warhead.LeverStatus = false;
+            Warhead.Stop(); // Ensure Alpha Warhead is stopped
             Map.ResetColorOfLights();
             foreach (var coroutine in _coroutines)
             {
@@ -59,11 +60,11 @@
         {
             LogHelper.Debug($"Activating Omega Warhead with detonation time: {timeToDetonation}s.");
             _omegaActivated = true;
+            Warhead.Stop(); // Stop any existing Alpha Warhead countdown
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
             LogHelper.Debug($"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
-            Timing.CallDelayed(3.5f, () => { Map.SetColorOfLights(lightColor); });
-
-
+            Timing.CallDelayed(5.75f, () => Map.SetColorOfLights(lightColor));
+             
             _plugin.NotificationMethods.SendImportantCassieMessage(_plugin.Config.StartingOmegaCassie);
             _plugin.NotificationMethods.BroadcastOmegaActivation();
 
@@ -81,7 +82,7 @@
 
         private IEnumerator<float> HandleCountdown(float timeToDetonation)
         {
-            int[] notifyTimes = { 300, 240, 180, 120, 60, 25, 15, 5, 4, 3, 2, 1};
+            int[] notifyTimes = { 300, 240, 180, 120, 60, 25, 15, 5, 4, 3, 2, 1 };
             foreach (var notifyTime in notifyTimes)
             {
                 if (timeToDetonation >= notifyTime)
@@ -89,29 +90,33 @@
                     yield return Timing.WaitForSeconds(timeToDetonation - notifyTime);
                     if (IsOmegaActive)
                     {
-                        switch (notifyTime)
-                        {
-                            case 5:
-                            case 4:
-                            case 3:
-                            case 2:
-                            case 1:
-                                Cassie.Clear();
-                                _plugin.NotificationMethods.SendCassieMessage($"{notifyTime} .G5");
-                                Map.TurnOffLights(0.75f);
-                                break;
+                        string message = notifyTime <= 5
+                            ? $"{notifyTime} .G5"
+                            : $".G3 {notifyTime} Seconds until Omega Warhead Detonation .G5";
+                        if (_plugin.Config.CassieMessageClearBeforeWarheadMessage || notifyTime <= 5)
+                            Cassie.Clear();
+                        float messageDuration = Cassie.CalculateDuration(message);
+                        LogHelper.Debug($"Cassie message '{message}' duration: {messageDuration}s");
+                        _plugin.NotificationMethods.SendCassieMessage(message);
+                        if (notifyTime <= 5)
+                            Map.TurnOffLights(0.75f);
 
-                            default:
-                                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
-                                _plugin.NotificationMethods.SendCassieMessage($".G3 {notifyTime} Seconds until Omega Warhead Detonation .G5");
-                                break;
-                        }
+                        // Wait for the message to complete, ensuring sync
+                        yield return Timing.WaitForSeconds(messageDuration);
+                        timeToDetonation = notifyTime;
                     }
-                    timeToDetonation = notifyTime;
+                    else
+                    {
+                        timeToDetonation = notifyTime;
+                    }
                 }
             }
 
-            if (IsOmegaActive) _coroutines.Add(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
+            if (IsOmegaActive)
+            {
+                // No additional pause needed, as message durations are accounted for
+                _coroutines.Add(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
+            }
         }
 
         private IEnumerator<float> HandleHelicopter()
@@ -144,10 +149,16 @@
 
         private IEnumerator<float> HandleDetonation()
         {
-            if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
-            _plugin.NotificationMethods.SendCassieMessage(_plugin.Config.DetonatingOmegaCassie);
-            yield return Timing.WaitForSeconds(3f);
+            if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
+                Cassie.Clear();
+            string detonationMessage = _plugin.Config.DetonatingOmegaCassie;
+            float detonationMessageDuration = Cassie.CalculateDuration(detonationMessage);
+            LogHelper.Debug($"Detonation Cassie message '{detonationMessage}' duration: {detonationMessageDuration}s");
+            _plugin.NotificationMethods.SendCassieMessage(detonationMessage);
 
+            yield return Timing.WaitForSeconds(detonationMessageDuration);
+
+            Warhead.Stop(); // Ensure Alpha Warhead is stopped
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             Warhead.Detonate();
             Warhead.Shake();
@@ -157,7 +168,8 @@
                 foreach (LabApi.Features.Wrappers.Door door in room.Doors)
                 {
                     door.IsOpened = true;
-                    if (door is LabApi.Features.Wrappers.BreakableDoor breakable && !breakable.IsBroken) breakable.TryBreak();
+                    if (door is LabApi.Features.Wrappers.BreakableDoor breakable && !breakable.IsBroken)
+                        breakable.TryBreak();
                     door.Lock(Interactables.Interobjects.DoorUtils.DoorLockReason.Warhead, true);
                 }
 
@@ -169,7 +181,8 @@
 
             while (true)
             {
-                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
+                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
+                    Cassie.Clear();
                 yield return Timing.WaitForSeconds(0.175f);
             }
         }
@@ -216,9 +229,10 @@
         {
             LogHelper.Debug("HandleWarheadDetonate called.");
             if (!IsOmegaActive) return;
-            LogHelper.Debug("Omega is active during detonation, blocking default warhead detonation.");
-            ev.IsAllowed = false; // Prevent default warhead detonation
-            // Note: Omega Warhead detonation is handled by HandleDetonation coroutine
+
+            LogHelper.Debug("Omega is active during detonation, attempting to block default warhead detonation.");
+            ev.IsAllowed = false; // Attempt to block, though it may not work
+            Warhead.Stop(); // Fallback to ensure Alpha Warhead is stopped
         }
 
         public void OnDetonation()
