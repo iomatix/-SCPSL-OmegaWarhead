@@ -36,14 +36,10 @@ namespace BetterOmegaWarhead
         public void StartSequence(float timeToDetonation)
         {
 
-            Plugin.Singleton.OmegaManager.IsOmegaActive = true;
-
-            Timing.CallDelayed(Plugin.Singleton.Config.DelayBeforeOmegaSequence, () =>
-            {
-
+                Plugin.Singleton.OmegaManager.IsOmegaActive = true;
                 LogHelper.Debug("Starting Omega Warhead sequence chain...");
                 Activate(timeToDetonation);
-            });
+
         }
 
         /// <summary>
@@ -62,13 +58,19 @@ namespace BetterOmegaWarhead
             #region Light Configuration
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
             LogHelper.Debug($"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
-            Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () => Map.SetColorOfLights(lightColor) );
+            Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () => { if (_plugin.OmegaManager.IsOmegaActive) Map.SetColorOfLights(lightColor); });
 
             #endregion
 
             #region Notifications
-            NotificationUtility.SendImportantCassieMessage(_plugin.Config.StartingOmegaCassie);
-            NotificationUtility.BroadcastOmegaActivation();
+            Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
+            {
+                if (_plugin.OmegaManager.IsOmegaActive)
+                {
+                    NotificationUtility.SendImportantCassieMessage(_plugin.Config.StartingOmegaCassie);
+                    NotificationUtility.BroadcastOmegaActivation();
+                }
+            });
             #endregion
 
             #region Coroutine Setup
@@ -90,6 +92,7 @@ namespace BetterOmegaWarhead
         /// </summary>
         public void StopSequence()
         {
+            Plugin.Singleton.OmegaManager.IsOmegaActive = false;
             LogHelper.Debug("Stopping Omega Warhead sequence.");
 
             NotificationUtility.SendImportantCassieMessage(Plugin.Singleton.Config.StoppingOmegaCassie);

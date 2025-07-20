@@ -237,7 +237,7 @@
 
             if (_plugin.OmegaManager.IsOmegaActive)
             {
-                _plugin.OmegaManager.AddCoroutines(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
+                AddCoroutines(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
             }
         }
 

@@ -217,9 +217,8 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
 
             if (isInShelter) return PlayerFate.SurvivedShelter;
             if (isEvacuated) return PlayerFate.EvacuatedByHelicopter;
-            if (!player.IsAlive) return PlayerFate.KilledByWarhead;
 
-            return PlayerFate.Unknown;
+            return PlayerFate.KilledByWarhead;
         }
 
         /// <summary>
