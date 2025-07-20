@@ -1,5 +1,6 @@
 namespace BetterOmegaWarhead.Core.PlayerUtils
 {
+    using BetterOmegaWarhead.Core.EscapeScenarioUtils;
     using BetterOmegaWarhead.Core.LoggingUtils;
     using CustomPlayerEffects;
     using LabApi.Features.Extensions;
@@ -18,12 +19,10 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
     public class PlayerMethods
     {
         private readonly Plugin _plugin;
-        private readonly PlayerUtility _playerUtility;
 
         public PlayerMethods(Plugin plugin)
         {
             _plugin = plugin;
-            _playerUtility = new PlayerUtility(_plugin);
         }
 
         /// <summary>  
@@ -83,7 +82,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         /// </summary>  
         private void ProcessPlayerEscape(Player player, EscapeScenario scenario)
         {
-            if (!_playerUtility.IsEligibleForEscape(player, scenario.EscapeZone))
+            if (!PlayerUtility.IsEligibleForEscape(player, scenario.EscapeZone, _plugin.Config.EscapeZoneSize))
                 return;
 
             // Cache the evacuation based on scenario type  
@@ -181,7 +180,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         /// </summary>  
         private PlayerFate DeterminePlayerFate(Player player)
         {
-            bool isInShelter = _playerUtility.IsInShelter(player);
+            bool isInShelter = PlayerUtility.IsInShelter(player, _plugin.Config.ShelterZoneSize);
             bool isEvacuated = _plugin.CacheHandler.IsPlayerEvacuatedByHelicopters(player);
 
             LogHelper.Debug($"Checking {player.Nickname}: In shelter: {isInShelter}, Evacuated: {isEvacuated}");

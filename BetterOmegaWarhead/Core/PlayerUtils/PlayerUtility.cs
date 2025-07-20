@@ -10,55 +10,40 @@
     /// <summary>
     /// Static helper methods related to Player checks and conditions.
     /// </summary>
-    public class PlayerUtility
+    public static class PlayerUtility
     {
-        private readonly Plugin _plugin;
-
-        public PlayerUtility(Plugin plugin)
-        {
-            _plugin = plugin;
-        }
-
-        /// <summary>  
-        /// Represents different escape scenarios and their configurations.  
-        /// </summary>  
-        public class EscapeScenario
-        {
-            public string Name { get; set; }
-            public Vector3 EscapeZone { get; set; }
-            public Vector3 TeleportPosition { get; set; }
-            public string InitialMessage { get; set; }
-            public string EscapeMessage { get; set; }
-            public float InitialDelay { get; set; }
-            public float ProcessingDelay { get; set; }
-            public float FinalDelay { get; set; }
-            public Action OnEscapeTriggered { get; set; }
-        }
-
         /// <summary>
         /// Checks if the player is eligible for escape scenario.
         /// </summary>
-        public bool IsEligibleForEscape(Player player, Vector3 escapeZone)
+        public static bool IsEligibleForEscape(Player player, Vector3 escapeZone, float escapeZoneSize)
         {
             if (player.IsSCP || !player.IsAlive)
                 return false;
 
             float distance = Vector3.Distance(player.Position, escapeZone);
-            return distance <= _plugin.Config.EscapeZoneSize;
+            return distance <= escapeZoneSize;
         }
 
         /// <summary>
         /// Determines if a player is inside a shelter.
         /// </summary>
-        public bool IsInShelter(Player player)
+        public static bool IsInShelter(Player player, float shelterZoneSize, params RoomName[] roomNames)
         {
-            if (player.Room != null && player.Room.Name == RoomName.EzEvacShelter)
+            // Default to EzEvacShelter if no rooms specified  
+            if (roomNames == null || roomNames.Length == 0)
+            {
+                roomNames = new[] { RoomName.EzEvacShelter };
+            }
+
+            // Check if player is in any of the specified shelter rooms  
+            if (player.Room != null && roomNames.Contains(player.Room.Name))
                 return true;
 
-            var shelters = _plugin.CacheHandler.GetCachedShelterLocations();
+            // Check distance-based shelters  
+            HashSet<Vector3> shelters = Plugin.Singleton.CacheHandler.GetCachedShelterLocations();
             foreach (Vector3 shelterPos in shelters)
             {
-                if (Vector3.Distance(player.Position, shelterPos) <= _plugin.Config.ShelterZoneSize)
+                if (Vector3.Distance(player.Position, shelterPos) <= shelterZoneSize)
                     return true;
             }
 

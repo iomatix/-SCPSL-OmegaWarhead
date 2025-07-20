@@ -17,7 +17,7 @@
             if (!HasPermission(sender, out response))
                 return true;
 
-            if (Plugin.Singleton.EventMethods.isOmegaActive)
+            if (Plugin.Singleton.OmegaManager.IsOmegaActive)
             {
                 response = "Omega Warhead is already active.";
                 return false;
@@ -28,7 +28,7 @@
             if (arguments.Count >= 1 && float.TryParse(arguments.At(0), out float parsed))
                 detonationTime = parsed;
 
-            Plugin.Singleton.EventMethods.ActivateOmegaWarhead(detonationTime);
+            Plugin.Singleton.WarheadMethods.StartSequence(detonationTime);
 
             Warhead.Status = WarheadStatus.Armed;
             Warhead.DetonationTimer = detonationTime;

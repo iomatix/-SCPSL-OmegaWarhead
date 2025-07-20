@@ -1,11 +1,14 @@
 ﻿namespace BetterOmegaWarhead.Core.DoorUtils
 {
+    using LabApi.Features.Enums;
     using LabApi.Features.Wrappers;
+    using MEC;
+    using System.Collections.Generic;
 
     /// <summary>
-    /// Helper methods related to Door logic.
+    /// Static helper methods related to Door logic.
     /// </summary>
-    public static class DoorUtility
+    public class DoorUtility
     {
         /// <summary>
         /// Checks if a door is open.

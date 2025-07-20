@@ -18,7 +18,10 @@
         public int ReplaceAlphaChance { get; set; } = 15;
 
         [Description("Number of engaged generatorgenerators that guarantees Omega Warhead launch.")]
-        public int GeneratorsNumGuaranteeOmega { get; set; } = 2;
+        public int GeneratorsNumGuaranteeOmega { get; set; } = 3;
+
+        [Description("How much the chance is increased per each activated generator.")]
+        public float GeneratorsIncreaseChanceBy { get; set; } = 15;
 
         [Description("Whether players can stop the Omega Warhead.")]
         public bool IsStopAllowed { get; set; } = false;

@@ -1,17 +1,16 @@
 ﻿namespace BetterOmegaWarhead
 {
-    using System;
-    using Exiled.API.Features;
+    using BetterOmegaWarhead.Core.LoggingUtils;
     using BetterOmegaWarhead.Core.PlayerUtils;
     using MEC;
+    using System;
+    using DoorUtility = BetterOmegaWarhead.Core.DoorUtils;
+    using EscapeUtility = BetterOmegaWarhead.Core.PlayerUtils;
+    using PlayerUtility = BetterOmegaWarhead.Core.PlayerUtils;
+    using RoomUtility = BetterOmegaWarhead.Core.RoomUtils;
 
-    using ServerHandler = LabApi.Events.Handlers.ServerEvents;
-    using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
-    using WarheadHandler = LabApi.Events.Handlers.WarheadEvents;
-    using OmegaPlayer = BetterOmegaWarhead.Core.PlayerUtils;
 
-
-    public class Plugin : Plugin<Config>
+    public class Plugin : Exiled.API.Features.Plugin<Config>
     {
         public static Plugin Singleton;
         public override string Author { get; } = "iomatix";
@@ -20,84 +19,60 @@
         public override Version Version { get; } = new Version(7, 0, 0);
         public override Version RequiredExiledVersion { get; } = new Version(9, 6, 0);
 
-        internal WarheadEventMethods EventMethods { get; private set; }
+        internal WarheadMethods WarheadMethods { get; private set; }
         internal PlayerMethods PlayerMethods { get; private set; }
-        internal NotificationMethods NotificationMethods { get; private set; }
         internal EventHandler EventHandler { get; private set; }
         internal CacheHandler CacheHandler { get; private set; }
         internal OmegaWarheadManager OmegaManager { get; private set; }
 
         public override void OnEnabled()
         {
-            Log.Debug("Enabling BetterOmegaWarhead plugin.");
+            LogHelper.Debug("Enabling BetterOmegaWarhead plugin.");
             Config.Validate();
             Singleton = this;
-            Log.Debug("Initializing handlers.");
+            LogHelper.Debug("Initializing handlers.");
             EventHandler = new EventHandler(this);
             CacheHandler = new CacheHandler(this);
             PlayerMethods = new PlayerMethods(this);
-            EventMethods = new WarheadEventMethods(this);
-            NotificationMethods = new NotificationMethods(this);
+            WarheadMethods = new WarheadMethods(this);
             OmegaManager = new OmegaWarheadManager(this);
 
-            Log.Debug("Registering events.");
-            RegisterEvents();
+            LogHelper.Debug("Registering events.");
+            EventHandler.RegisterEvents();
             OmegaManager.Init();
-            Log.Debug("BetterOmegaWarhead plugin enabled.");
+            LogHelper.Debug("BetterOmegaWarhead plugin enabled.");
             base.OnEnabled();
         }
 
         public override void OnDisabled()
         {
-            Log.Debug("Disabling BetterOmegaWarhead plugin.");
-            Log.Debug("Disabling OmegaWarheadManager.");
+            LogHelper.Debug("Disabling BetterOmegaWarhead plugin.");
+            LogHelper.Debug("Disabling OmegaWarheadManager.");
             OmegaManager?.Disable();
 
-            Log.Debug("Killing coroutines.");
+            LogHelper.Debug("Killing coroutines.");
             foreach (CoroutineHandle handle in EventHandler.Coroutines)
             {
                 Timing.KillCoroutines(handle);
-                Log.Debug($"Killed coroutine: {handle}");
+                LogHelper.Debug($"Killed coroutine: {handle}");
             }
             EventHandler.Coroutines.Clear();
-            Log.Debug("Cleared coroutine list.");
+            LogHelper.Debug("Cleared coroutine list.");
 
-            Log.Debug("Nullifying handlers and singleton.");
+            LogHelper.Debug("Unregistering events.");
+            EventHandler.UnregisterEvents();
+
+            LogHelper.Debug("Nullifying handlers and singleton.");
             Singleton = null;
             EventHandler = null;
             PlayerMethods = null;
-            EventMethods = null;
-            NotificationMethods = null;
+            WarheadMethods = null;
             OmegaManager = null;
 
-            Log.Debug("Unregistering events.");
-            UnregisterEvents();
-            Log.Debug("BetterOmegaWarhead plugin disabled.");
+            LogHelper.Debug("BetterOmegaWarhead plugin disabled.");
             base.OnDisabled();
         }
 
-        public void RegisterEvents()
-        {
-            Log.Debug("Registering event handlers.");
-            ServerHandler.WaitingForPlayers += EventHandler.OnWaitingForPlayers;
-            WarheadHandler.Starting += EventHandler.OnWarheadStart;
-            WarheadHandler.Stopping += EventHandler.OnWarheadStop;
-            WarheadHandler.Detonating += EventHandler.OnWarheadDetonate;
-            ServerHandler.WaveRespawning += EventHandler.OnWaveRespawning;
-            PlayerHandler.ChangingRole += EventHandler.OnChangingRole;
-            Log.Debug("Event handlers registered.");
-        }
 
-        public void UnregisterEvents()
-        {
-            Log.Debug("Unregistering event handlers.");
-            ServerHandler.WaitingForPlayers -= EventHandler.OnWaitingForPlayers;
-            WarheadHandler.Starting -= EventHandler.OnWarheadStart;
-            WarheadHandler.Stopping -= EventHandler.OnWarheadStop;
-            WarheadHandler.Detonating -= EventHandler.OnWarheadDetonate;
-            ServerHandler.WaveRespawning -= EventHandler.OnWaveRespawning;
-            PlayerHandler.ChangingRole -= EventHandler.OnChangingRole;
-            Log.Debug("Event handlers unregistered.");
-        }
     }
 }

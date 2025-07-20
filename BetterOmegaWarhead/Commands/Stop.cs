@@ -24,7 +24,7 @@
                 return false;
             }
 
-            Plugin.Singleton.OmegaManager.Stop();
+            Plugin.Singleton.WarheadMethods.StopSequence();
             Warhead.Status = WarheadStatus.NotArmed;
             Warhead.IsLocked = false;
 

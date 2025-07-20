@@ -6,10 +6,12 @@ namespace BetterOmegaWarhead.Core.RoomUtils
     using UnityEngine;
 
     /// <summary>
-    /// Helper methods related to Room logic.
+    /// Static helper methods related to Room logic.
     /// </summary>
-    public static class RoomUtility
+    public class RoomUtility
     {
+
+
         /// <summary>
         /// Checks if player is inside any room of a specific type.
         /// </summary>
