@@ -71,9 +71,9 @@ namespace OmegaWarhead.NotificationUtils
         /// Calculates the duration of a Cassie message based on its content and speed.
         /// </summary>
         /// <param name="message">The message to calculate duration for.</param>
-        /// <param name="speed">The speed at which the message is played (default is 1).</param>
+        /// <param name="speed">The speed at which the message is played (default is 0.95).</param>
         /// <returns>The duration of the message in seconds.</returns>
-        public static float CalculateCassieMessageDuration(string message, float speed = 1)
+        public static float CalculateCassieMessageDuration(string message, float speed = 0.95f)
         {
             return Cassie.CalculateDuration(message, speed: speed);
         }

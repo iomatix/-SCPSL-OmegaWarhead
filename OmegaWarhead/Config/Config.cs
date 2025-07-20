@@ -1,8 +1,9 @@
 ﻿namespace OmegaWarhead
 {
-    using System.ComponentModel;
-    using OmegaWarhead.Core.LoggingUtils;
     using Exiled.API.Interfaces;
+    using OmegaWarhead.Core.LoggingUtils;
+    using System.Collections.Generic;
+    using System.ComponentModel;
 
     /// <summary>
     /// Configuration settings for OmegaWarhead.
@@ -56,6 +57,41 @@
         public float TimeToDetonation { get; set; } = 320f;
 
         /// <summary>
+        /// Notification times (in seconds) at which Cassie announcements are triggered.
+        /// Must be sorted in descending order.
+        /// </summary>
+        [Description("Notification times (in seconds), descending order (e.g. 300,240,...,1).")]
+        public List<int> NotifyTimes { get; set; } = new List<int>()
+        {
+            300, 240, 180, 120, 60, 25, 15, 10, 5, 4, 3, 2, 1
+        };
+
+        /// <summary>
+        /// Estimation multiplier used to calculate how long Cassie countdown notifications play.
+        /// This does not change the actual Cassie voice speed. It helps synchronize message scheduling.
+        /// Tune this value to match how Cassie behaves on your server.
+        /// Recommended range: 0.65 to 0.75.
+        /// </summary>
+        [Description("Multiplier for calculating estimated Cassie duration during countdown notifications (does not control actual speech speed).")]
+        public float CassieNotifySpeed { get; set; } = 0.69f;
+
+        /// <summary>
+        /// Estimation multiplier for the final Omega Warhead detonation Cassie message.
+        /// Used to calculate when the message finishes. Tune this to match Cassie's real delivery.
+        /// Recommended range: 0.4 to 0.6.
+        /// </summary>
+        [Description("Multiplier for estimating Cassie duration of final detonation message (does not affect actual voice speed).")]
+        public float CassieDetonationSpeed { get; set; } = 0.47f;
+
+        /// <summary>
+        /// Extra buffer time (in seconds) added to each Cassie announcement to prevent overlapping or skipped messages.
+        /// This ensures smoother playback—especially during fast countdown intervals (e.g. 5s, 4s, 3s...).
+        /// Recommended value: 0.5 to 1.5 seconds.
+        /// </summary>
+        [Description("Buffer time (in seconds) added to each Cassie message to avoid skips during countdown.")]
+        public float CassieTimingBuffer { get; set; } = 1.25f;
+
+        /// <summary>
         /// Gets or sets the delay (in seconds) before checkpoint doors open and lock.
         /// </summary>
         [Description("Delay before checkpoint doors open and lock (in seconds).")]
@@ -71,7 +107,7 @@
         /// Gets or sets the delay (in seconds) before the Omega sequence starts.
         /// </summary>
         [Description("Delay before Omega sequence starts (in seconds).")]
-        public float DelayBeforeOmegaSequence { get; set; } = 5f;
+        public float DelayBeforeOmegaSequence { get; set; } = 0.15f;
         #endregion
 
         #region Zones
@@ -288,6 +324,20 @@
             // Timing
             if (TimeToDetonation < 10)
                 LogHelper.Warning($"[Config] TimeToDetonation should be at least 10 seconds to allow evacuation. Current: {TimeToDetonation}s");
+
+            if (CassieNotifySpeed < 0.3f || CassieNotifySpeed > 1.5f)
+                LogHelper.Warning($"[Config] CassieNotifySpeed ({CassieNotifySpeed}) is outside safe estimation range. This affects timing calculations — not voice speed. Recommended: 0.65 to 0.75.");
+
+            if (CassieDetonationSpeed < 0.3f || CassieDetonationSpeed > 1.5f)
+                LogHelper.Warning($"[Config] CassieDetonationSpeed ({CassieDetonationSpeed}) may lead to incorrect detonation timing. This is for estimating playback duration only. Recommended: 0.4 to 0.6.");
+
+            if (CassieTimingBuffer < 0f || CassieTimingBuffer > 3f)
+                LogHelper.Warning($"[Config] CassieTimingBuffer ({CassieTimingBuffer}s) is outside recommended range. A value between 0.5 and 1.5 seconds typically ensures smooth playback. Avoid excessive buffering.");
+            else if (CassieTimingBuffer < 0.5f || CassieTimingBuffer > 1.5f)
+                LogHelper.Warning($"[Config] CassieTimingBuffer ({CassieTimingBuffer}s) is valid but outside optimal range. Recommended: 0.5 to 1.5 seconds.");
+
+            if (CassieTimingBuffer < 0f || CassieTimingBuffer > 5f)
+                LogHelper.Warning($"[Config] CassieTimingBuffer is recommended to be between 0.0 and 5.0 seconds. Current: {CassieTimingBuffer}");
 
             if (OpenAndLockCheckpointDoorsDelay < 0 || OpenAndLockCheckpointDoorsDelay >= TimeToDetonation)
                 LogHelper.Warning($"[Config] OpenAndLockCheckpointDoorsDelay should be non-negative and less than TimeToDetonation ({TimeToDetonation}s). Current: {OpenAndLockCheckpointDoorsDelay}s");
