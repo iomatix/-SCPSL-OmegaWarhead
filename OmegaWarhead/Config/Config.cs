@@ -70,26 +70,26 @@
         /// Estimation multiplier used to calculate how long Cassie countdown notifications play.
         /// This does not change the actual Cassie voice speed. It helps synchronize message scheduling.
         /// Tune this value to match how Cassie behaves on your server.
-        /// Recommended range: 0.65 to 0.75.
+        /// Recommended range: 0.65 to 1.25.
         /// </summary>
         [Description("Multiplier for calculating estimated Cassie duration during countdown notifications (does not control actual speech speed).")]
-        public float CassieNotifySpeed { get; set; } = 0.69f;
+        public float CassieNotifySpeed { get; set; } = 0.85f;
 
         /// <summary>
         /// Estimation multiplier for the final Omega Warhead detonation Cassie message.
         /// Used to calculate when the message finishes. Tune this to match Cassie's real delivery.
-        /// Recommended range: 0.4 to 0.6.
+        /// Recommended range: 0.35 to 0.65.
         /// </summary>
         [Description("Multiplier for estimating Cassie duration of final detonation message (does not affect actual voice speed).")]
-        public float CassieDetonationSpeed { get; set; } = 0.47f;
+        public float CassieDetonationSpeed { get; set; } = 0.45f;
 
         /// <summary>
         /// Extra buffer time (in seconds) added to each Cassie announcement to prevent overlapping or skipped messages.
         /// This ensures smoother playback—especially during fast countdown intervals (e.g. 5s, 4s, 3s...).
-        /// Recommended value: 0.5 to 1.5 seconds.
+        /// Recommended value: 0.45 to 1.5 seconds.
         /// </summary>
         [Description("Buffer time (in seconds) added to each Cassie message to avoid skips during countdown.")]
-        public float CassieTimingBuffer { get; set; } = 1.25f;
+        public float CassieTimingBuffer { get; set; } = 0.65f;
 
         /// <summary>
         /// Gets or sets the delay (in seconds) before checkpoint doors open and lock.
