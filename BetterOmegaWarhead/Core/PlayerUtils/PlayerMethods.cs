@@ -322,12 +322,12 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
             {
                 foreach (Player player in Player.ReadyList)
                 {
-                    player.SendBroadcast(Plugin.Singleton.Config.EndingBroadcast
+                    player.SendHint(Plugin.Singleton.Config.EndingBroadcast
                         .Replace("{survived}", survived.ToString())
                         .Replace("{escaped}", escaped.ToString())
                         .Replace("{dead}", dead.ToString())
-                        .Replace("{code}", UnityEngine.Random.Range(1000, 9999).ToString())
-                        , duration: 15, shouldClearPrevious: true, type: Broadcast.BroadcastFlags.Normal);
+                        .Replace("{code}", UnityEngine.Random.Range(1000, 99999).ToString())
+                        , duration: 15);
                 }
             });
         }
