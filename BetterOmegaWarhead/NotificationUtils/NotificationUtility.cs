@@ -158,7 +158,7 @@ namespace BetterOmegaWarhead.NotificationUtils
         /// </summary>
         public static void BroadcastHelicopterCountdown()
         {
-            SendImportantCassieMessage(Plugin.Singleton.Config.HeliIncomingCassie);
+            SendImportantCassieMessage(Plugin.Singleton.Config.HeliIncomingCassie, Plugin.Singleton.Config.HelicopterIncomingMessage);
         }
 
         /// <summary>

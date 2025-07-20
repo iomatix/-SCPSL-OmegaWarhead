@@ -67,7 +67,7 @@ namespace BetterOmegaWarhead
             {
                 if (_plugin.OmegaManager.IsOmegaActive)
                 {
-                    NotificationUtility.SendImportantCassieMessage(_plugin.Config.StartingOmegaCassie);
+                    NotificationUtility.SendImportantCassieMessage(_plugin.Config.StartingOmegaCassie, _plugin.Config.StartingOmegaMessage);
                     NotificationUtility.BroadcastOmegaActivation();
                 }
             });
@@ -95,7 +95,7 @@ namespace BetterOmegaWarhead
             Plugin.Singleton.OmegaManager.IsOmegaActive = false;
             LogHelper.Debug("Stopping Omega Warhead sequence.");
 
-            NotificationUtility.SendImportantCassieMessage(Plugin.Singleton.Config.StoppingOmegaCassie);
+            NotificationUtility.SendImportantCassieMessage(Plugin.Singleton.Config.StoppingOmegaCassie, _plugin.Config.StoppingOmegaMessage);
             Plugin.Singleton.OmegaManager.Cleanup();
         }
 

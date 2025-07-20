@@ -204,6 +204,37 @@
         public string CheckpointUnlockCassie { get; set; } = "pitch_0.25 .g3 .g3 .g3 pitch_0.9 attention . attention . the checkpoint doors are open . Attention . the checkpoint doors are open . Please evacuate immediately";
 
         /// <summary>
+        /// Gets or sets the message when Omega Warhead is stopped.
+        /// </summary>
+        [Description("Message when Omega is stopped.")]
+        public string StoppingOmegaMessage { get; set; } = "Omega Warhead detonation has been successfully aborted";
+
+        /// <summary>
+        /// Gets or sets the message when Omega Warhead is activated.
+        /// </summary>
+        [Description("Message when Omega is activated.")]
+        public string StartingOmegaMessage { get; set; } = "Attention: Omega Warhead activation sequence initiated. All personnel must evacuate through secure shelters or extraction zones";
+
+        /// <summary>
+        /// Gets or sets the message during Omega Warhead detonation.
+        /// </summary>
+        [Description("Message during detonation.")]
+        public string DetonatingOmegaMessage { get; set; } = "Omega Warhead detonation in progress. Evacuation is no longer possible";
+
+        /// <summary>
+        /// Gets or sets the message announcing the incoming helicopter.
+        /// </summary>
+        [Description("Message announcing incoming helicopter.")]
+        public string HeliIncomingMessage { get; set; } = "Alert: Extraction helicopter approaching the facility. Proceed to the surface zone immediately";
+
+        /// <summary>
+        /// Gets or sets the message announcing checkpoint unlock.
+        /// </summary>
+        [Description("Message announcing checkpoint unlock.")]
+        public string CheckpointUnlockMessage { get; set; } = "Facility update: Checkpoint doors are now accessible. Proceed with caution";
+
+
+        /// <summary>
         /// Gets or sets a value indicating whether to clear the Cassie queue before important messages.
         /// </summary>
         [Description("Clear Cassie queue before important messages?")]
@@ -278,7 +309,7 @@
                 LogHelper.Warning("[Config] HelicopterIncomingMessage is empty.");
 
             if (string.IsNullOrEmpty(HelicopterEscapeMessage))
-                LogHelper.Warning("[Config] HelicopterEscape is empty.");
+                LogHelper.Warning("[Config] HelicopterEscapeMessage is empty.");
 
             if (string.IsNullOrEmpty(ActivatedMessage))
                 LogHelper.Warning("[Config] ActivatedMessage is empty.");
@@ -298,11 +329,39 @@
             if (string.IsNullOrEmpty(CheckpointUnlockCassie))
                 LogHelper.Warning("[Config] CheckpointUnlockCassie is empty.");
 
+            if (string.IsNullOrEmpty(StoppingOmegaMessage))
+                LogHelper.Warning("[Config] StoppingOmegaMessage is empty.");
+
+            if (string.IsNullOrEmpty(StartingOmegaMessage))
+                LogHelper.Warning("[Config] StartingOmegaMessage is empty.");
+
+            if (string.IsNullOrEmpty(DetonatingOmegaMessage))
+                LogHelper.Warning("[Config] DetonatingOmegaMessage is empty.");
+
+            if (string.IsNullOrEmpty(HeliIncomingMessage))
+                LogHelper.Warning("[Config] HeliIncomingMessage is empty.");
+
+            if (string.IsNullOrEmpty(CheckpointUnlockMessage))
+                LogHelper.Warning("[Config] CheckpointUnlockMessage is empty.");
+
+            if (string.IsNullOrEmpty(SurvivorMessage))
+                LogHelper.Warning("[Config] SurvivorMessage is empty.");
+
+            if (string.IsNullOrEmpty(EvacuatedMessage))
+                LogHelper.Warning("[Config] EvacuatedMessage is empty.");
+
+            if (string.IsNullOrEmpty(KilledMessage))
+                LogHelper.Warning("[Config] KilledMessage is empty.");
+
+            if (string.IsNullOrEmpty(EndingBroadcast))
+                LogHelper.Warning("[Config] EndingBroadcast is empty.");
+
             // Permissions
             if (string.IsNullOrEmpty(Permissions))
                 LogHelper.Warning("[Config] Permissions cannot be null or empty.");
         }
         #endregion
+
     }
     #endregion
 }

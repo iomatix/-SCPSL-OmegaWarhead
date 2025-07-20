@@ -221,7 +221,7 @@
                             Exiled.API.Features.Cassie.Clear();
                         float messageDuration = NotificationUtility.CalculateCassieMessageDuration(message);
                         LogHelper.Debug($"Cassie message '{message}' duration: {messageDuration}s");
-                        NotificationUtility.SendCassieMessage(message);
+                        NotificationUtility.SendCassieMessage(message, "Warhead -> " + notifyTime.ToString() + "...");
 
                         if (notifyTime <= 5) Map.TurnOffLights(0.75f);
                         yield return Timing.WaitForSeconds(messageDuration + 0.75f);
@@ -264,7 +264,7 @@
             yield return Timing.WaitForSeconds(_plugin.Config.OpenAndLockCheckpointDoorsDelay);
             if (_plugin.OmegaManager.IsOmegaActive)
             {
-                NotificationUtility.SendImportantCassieMessage(_plugin.Config.CheckpointUnlockCassie);
+                NotificationUtility.SendImportantCassieMessage(_plugin.Config.CheckpointUnlockCassie, _plugin.Config.CheckpointUnlockMessage);
                 foreach (Door door in Door.List)
                 {
                     if (door.DoorName is DoorName.LczCheckpointA || door.DoorName is DoorName.LczCheckpointB || door.DoorName is DoorName.HczCheckpoint)
@@ -288,7 +288,7 @@
             string detonationMessage = _plugin.Config.DetonatingOmegaCassie;
             float detonationMessageDuration = Exiled.API.Features.Cassie.CalculateDuration(detonationMessage);
             LogHelper.Debug($"Detonation Cassie message '{detonationMessage}' duration: {detonationMessageDuration}s");
-            NotificationUtility.SendCassieMessage(detonationMessage);
+            NotificationUtility.SendCassieMessage(detonationMessage, _plugin.Config.DetonatingOmegaMessage);
 
             yield return Timing.WaitForSeconds(detonationMessageDuration);
 

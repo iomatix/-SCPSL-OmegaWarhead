@@ -75,7 +75,6 @@
 
         private void ScheduleRoundEnd()
         {
-            NotificationUtility.SendImportantCassieMessage("Round ends in next . 30 . seconds");
             Timing.CallDelayed(30f, () =>
             {
                 Map.TurnOnLights();
