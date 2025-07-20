@@ -7,8 +7,8 @@
     <ProjectGuid>{E29E30DA-09A6-462F-A192-E2897FBEBB72}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BetterOmegaWarhead</RootNamespace>
-    <AssemblyName>BetterOmegaWarhead</AssemblyName>
+    <RootNamespace>OmegaWarhead</RootNamespace>
+    <AssemblyName>OmegaWarhead</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>

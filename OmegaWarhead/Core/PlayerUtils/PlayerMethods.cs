@@ -256,9 +256,10 @@ namespace OmegaWarhead.Core.PlayerUtils
         private void ApplyNukeEffects(Player player)
         {
             player.EnableEffect<Flashed>(duration: 0.75f);
+            player.EnableEffect<Blindness>(duration: 1.25f);
             player.Damage(15f, "Omega Warhead");
-            player.EnableEffect<Blurred>(duration: 4.75f);
-            player.EnableEffect<Deafened>(duration: 4.75f);
+            player.EnableEffect<Blurred>(duration: 15.75f);
+            player.EnableEffect<Deafened>(duration: 15.75f);
             player.Kill("Omega Warhead");
         }
 
@@ -277,9 +278,9 @@ namespace OmegaWarhead.Core.PlayerUtils
             yield return Timing.WaitForSeconds(0.75f);
 
             player.IsGodModeEnabled = false;
-            player.EnableEffect<Blindness>(duration: 2.5f);
-            player.EnableEffect<Blurred>(duration: 4.75f);
-            player.EnableEffect<Deafened>(duration: 4.75f);
+            player.EnableEffect<Blindness>(duration: 2.75f);
+            player.EnableEffect<Blurred>(duration: 5.75f);
+            player.EnableEffect<Deafened>(duration: 15.75f);
 
             LogHelper.Debug($"HandleSavePlayer coroutine completed for {player.Nickname}.");
         }
@@ -297,9 +298,9 @@ namespace OmegaWarhead.Core.PlayerUtils
                 Player player = entry.Key;
                 PlayerFate fate = entry.Value;
 
-                player.EnableEffect<Flashed>(duration: 0.75f);
-                player.EnableEffect<Blurred>(duration: 4.75f);
-                player.EnableEffect<Deafened>(duration: 4.75f);
+                player.EnableEffect<Flashed>(duration: 1.75f);
+                player.EnableEffect<Blurred>(duration: 15.75f);
+                player.EnableEffect<Deafened>(duration: 15.75f);
 
                 switch (fate)
                 {
