@@ -83,6 +83,7 @@
             WarheadHandler.Starting += EventHandler.OnWarheadStart;
             WarheadHandler.Stopping += EventHandler.OnWarheadStop;
             WarheadHandler.Detonating += EventHandler.OnWarheadDetonate;
+            ServerHandler.WaveRespawning += EventHandler.OnWaveRespawning;
             PlayerHandler.ChangingRole += EventHandler.OnChangingRole;
             Log.Debug("Event handlers registered.");
         }
@@ -94,6 +95,7 @@
             WarheadHandler.Starting -= EventHandler.OnWarheadStart;
             WarheadHandler.Stopping -= EventHandler.OnWarheadStop;
             WarheadHandler.Detonating -= EventHandler.OnWarheadDetonate;
+            ServerHandler.WaveRespawning -= EventHandler.OnWaveRespawning;
             PlayerHandler.ChangingRole -= EventHandler.OnChangingRole;
             Log.Debug("Event handlers unregistered.");
         }

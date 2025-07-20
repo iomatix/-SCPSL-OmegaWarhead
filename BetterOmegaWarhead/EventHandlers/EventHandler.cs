@@ -51,14 +51,26 @@
 
         public void OnWarheadDetonate(LabApi.Events.Arguments.WarheadEvents.WarheadDetonatingEventArgs ev)
         {
-            
+
             LogHelper.Debug("OnWarheadDetonate triggered.");
             _plugin.OmegaManager.HandleWarheadDetonate(ev);
         }
 
-        public void OnChangingRole(LabApi.Events.Arguments.PlayerEvents.PlayerChangingRoleEventArgs ev)
+        public void OnWaveRespawning(LabApi.Events.Arguments.ServerEvents.WaveRespawningEventArgs ev)
         {
 
+            Faction faction = ev.Wave.Faction;
+            LogHelper.Debug($"OnWaveRespawning triggered. Faction: {faction}");
+
+            if (_plugin.CacheHandler.IsFactionDisabled(faction))
+            {
+                LogHelper.Debug($"Blocked wave. Faction {faction} is disabled.");
+                ev.IsAllowed = false;
+            }
+        }
+
+        public void OnChangingRole(LabApi.Events.Arguments.PlayerEvents.PlayerChangingRoleEventArgs ev)
+        {
             Faction faction = ev.NewRole.GetFaction();
             LogHelper.Debug($"OnChangingRole triggered. Player: {ev.Player.Nickname}, NewRole: {ev.NewRole}, Faction: {faction}");
 
