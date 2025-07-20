@@ -44,8 +44,7 @@ namespace BetterOmegaWarhead.NotificationUtils
 
             bool hasSubtitles = !string.IsNullOrEmpty(customSubtitles);
             string fullMessage = "pitch_0.95 " + message;
-
-            Cassie.Message(fullMessage, isSubtitles: hasSubtitles, isHeld: false, customSubtitles: customSubtitles);
+            Cassie.Message(fullMessage, isSubtitles: hasSubtitles, isNoisy: false, isHeld: false, customSubtitles: customSubtitles);
         }
 
         /// <summary>
@@ -61,7 +60,7 @@ namespace BetterOmegaWarhead.NotificationUtils
             bool hasSubtitles = !string.IsNullOrEmpty(customSubtitles);
             string fullMessage = "pitch_1.05 " + message;
 
-            Cassie.Message(fullMessage, isSubtitles: hasSubtitles, isHeld: false, customSubtitles: customSubtitles);
+            Cassie.Message(fullMessage, isSubtitles: hasSubtitles, isNoisy: false, isHeld: false, customSubtitles: customSubtitles);
         }
         #endregion
 
