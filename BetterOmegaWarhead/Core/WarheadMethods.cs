@@ -69,16 +69,6 @@ namespace BetterOmegaWarhead
             float messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations(1f, countdownMessages);
             LogHelper.Debug($"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.");
             float adjustedTime = timeToDetonation + messageDurationAdjustment;
-            
-            // Alpha Warhead Sync Attempt
-            if (Warhead.Exists)
-            {
-                Warhead.DetonationTime = adjustedTime; // activate synced Alpha  
-            }
-            else
-            {
-                LogHelper.Warning("Warhead components not yet initialized, cannot set detonation time");
-            }
 
 
             Plugin.Singleton.OmegaManager.AddCoroutines(
@@ -137,6 +127,11 @@ namespace BetterOmegaWarhead
                 foreach (var lightController in room.AllLightControllers)
                 {
                     lightController.LightsEnabled = false;
+                }
+
+                foreach (Player p in Player.ReadyList.Where(p => Plugin.Singleton.CacheHandler.IsPlayerEvacuatedByHelicopters(p)))
+                {
+                    p.SendHint(Plugin.Singleton.Config.SurvivorMessage);
                 }
             }
             #endregion

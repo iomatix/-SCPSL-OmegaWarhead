@@ -223,7 +223,7 @@
                         NotificationUtility.SendCassieMessage(message);
 
                         if (notifyTime <= 5) Map.TurnOffLights(0.75f);
-                        yield return Timing.WaitForSeconds(messageDuration);
+                        yield return Timing.WaitForSeconds(messageDuration + 0.75f);
 
                         timeToDetonation = notifyTime;
                     }

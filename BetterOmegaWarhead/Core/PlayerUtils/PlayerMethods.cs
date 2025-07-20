@@ -78,7 +78,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
                 EscapeZone = new Vector3(127f, 295.5f, -43f),
                 TeleportPosition = new Vector3(39f, 1015f, 32f),
                 InitialMessage = _plugin.Config.HelicopterIncomingMessage,
-                EscapeMessage = _plugin.Config.HelicopterEscape,
+                EscapeMessage = _plugin.Config.HelicopterEscapeMessage,
                 InitialDelay = 13.5f,
                 ProcessingDelay = 19.0f,
                 FinalDelay = 0.75f,

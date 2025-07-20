@@ -119,13 +119,19 @@
         /// Gets or sets the hint message shown when helicopter escape is successful.
         /// </summary>
         [Description("Hint message shown when helicopter escape is successful.")]
-        public string HelicopterEscape { get; set; } = "You escaped in the helicopter.";
+        public string HelicopterEscapeMessage { get; set; } = "You escaped in the helicopter.";
+
+        /// <summary>  
+        /// Gets or sets the message displayed to players who survive the Omega Warhead detonation.  
+        /// </summary>  
+        [Description("Message shown to players who successfully evacuate during Omega Warhead detonation.")]
+        public string SurvivorMessage { get; set; } = "The facility may be gone, but hope lives on through survivors like you. A new dawn awaits.\n <b><color=#00FA9A>Your story of survival will inspire generations.</color></b>";
 
         /// <summary>
         /// Gets or sets the hint message displayed when Omega Warhead is activated.
         /// </summary>
         [Description("Hint message when Omega Warhead is activated.")]
-        public string ActivatedMessage { get; set; } = "<b><color=red>OMEGA WARHEAD ACTIVATED</color></b>\nPLEASE EVACUATE IMMEDIATELY";
+        public string ActivatedMessage { get; set; } = "<b><color=#ff0040>OMEGA WARHEAD ACTIVATED</color></b>\nPLEASE EVACUATE IMMEDIATELY";
 
         /// <summary>
         /// Gets or sets the Cassie message when Omega Warhead is stopped.
@@ -231,7 +237,7 @@
             if (string.IsNullOrEmpty(HelicopterIncomingMessage))
                 LogHelper.Warning("[Config] HelicopterIncomingMessage is empty.");
 
-            if (string.IsNullOrEmpty(HelicopterEscape))
+            if (string.IsNullOrEmpty(HelicopterEscapeMessage))
                 LogHelper.Warning("[Config] HelicopterEscape is empty.");
 
             if (string.IsNullOrEmpty(ActivatedMessage))
