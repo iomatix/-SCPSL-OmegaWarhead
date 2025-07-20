@@ -22,12 +22,18 @@ namespace BetterOmegaWarhead
         public void BroadcastOmegaActivation()
         {
             foreach (Player player in Player.ReadyList)
-                player.SendHint(_plugin.Config.ActivatedMessage, 5f);
+                player.SendHint(_plugin.Config.ActivatedMessage, 6f);
         }
 
         public void BroadcastHelicopterCountdown()
         {
             SendImportantCassieMessage(_plugin.Config.HeliIncomingCassie);
+        }
+
+        public void BroadcastHelicopterIncoming()
+        {
+            foreach (Player player in Player.ReadyList)
+                player.SendHint(_plugin.Config.HelicopterIncomingMessage, 5f);
         }
 
     }

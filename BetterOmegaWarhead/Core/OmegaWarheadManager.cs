@@ -88,8 +88,6 @@
                     yield return Timing.WaitForSeconds(timeToDetonation - notifyTime);
                     if (IsOmegaActive)
                     {
-
-                        if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
                         switch (notifyTime)
                         {
                             case 5:
@@ -97,13 +95,14 @@
                             case 3:
                             case 2:
                             case 1:
-                                Map.TurnOffLights(0.75f);
                                 Cassie.Clear();
-                                _plugin.NotificationMethods.SendCassieMessage($".G3 {notifyTime}");
+                                _plugin.NotificationMethods.SendCassieMessage($"{notifyTime} .G5");
+                                Map.TurnOffLights(0.75f);
                                 break;
 
                             default:
-                                _plugin.NotificationMethods.SendCassieMessage($".G3 {notifyTime} Seconds until Omega Warhead Detonation");
+                                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
+                                _plugin.NotificationMethods.SendCassieMessage($".G3 {notifyTime} Seconds until Omega Warhead Detonation .G5");
                                 break;
                         }
                     }
@@ -146,7 +145,7 @@
         {
             if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Cassie.Clear();
             _plugin.NotificationMethods.SendCassieMessage(_plugin.Config.DetonatingOmegaCassie);
-            yield return Timing.WaitForSeconds(10f);
+            yield return Timing.WaitForSeconds(3f);
 
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             Warhead.Detonate();
