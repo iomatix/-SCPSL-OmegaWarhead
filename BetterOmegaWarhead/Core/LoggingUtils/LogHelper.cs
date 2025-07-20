@@ -14,7 +14,7 @@
         public static void Debug(string message)
         {
             if (Plugin.Singleton.Config.Debug)
-                Log.Debug($"[BetterOmegaWarhead] {message}");
+                Log.Debug($"{message}");
         }
 
         /// <summary>
@@ -23,7 +23,7 @@
         /// <param name="message">The message to log as informational output.</param>
         public static void Info(string message)
         {
-            Log.Info($"[BetterOmegaWarhead] {message}");
+            Log.Info($"{message}");
         }
 
         /// <summary>
@@ -32,7 +32,7 @@
         /// <param name="message">The message to log as a warning.</param>
         public static void Warning(string message)
         {
-            Log.Warn($"[BetterOmegaWarhead] {message}");
+            Log.Warn($"{message}");
         }
 
         /// <summary>
@@ -41,7 +41,7 @@
         /// <param name="message">The message to log as an error.</param>
         public static void Error(string message)
         {
-            Log.Error($"[BetterOmegaWarhead] {message}");
+            Log.Error($"{message}");
         }
     }
 }
