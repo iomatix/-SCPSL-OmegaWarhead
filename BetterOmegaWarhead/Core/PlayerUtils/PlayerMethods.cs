@@ -1,5 +1,6 @@
 namespace BetterOmegaWarhead.Core.PlayerUtils
 {
+    #region Usings
     using BetterOmegaWarhead.Core.EscapeScenarioUtils;
     using BetterOmegaWarhead.Core.LoggingUtils;
     using CustomPlayerEffects;
@@ -12,12 +13,15 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
     using System.Collections.Generic;
     using UnityEngine;
     using static BetterOmegaWarhead.Core.PlayerUtils.PlayerUtility;
+    #endregion
 
     /// <summary>  
     /// Contains core player-related coroutine logic requiring plugin context.  
     /// </summary>  
+    #region PlayerMethods Class
     public class PlayerMethods
     {
+        #region Fields & Constructor
         private readonly Plugin _plugin;
 
         /// <summary>
@@ -28,7 +32,9 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         {
             _plugin = plugin;
         }
+        #endregion
 
+        #region Escape Handling
         /// <summary>
         /// Handles a generic escape sequence defined by an <see cref="EscapeScenario"/>.
         /// </summary>
@@ -41,6 +47,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
 
             DisableFactionSpawn();
 
+            #region Player Processing
             // Single loop to handle both hint sending and delayed escape processing  
             foreach (Player player in Player.ReadyList)
             {
@@ -49,13 +56,16 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
                 float totalDelay = scenario.InitialDelay + scenario.ProcessingDelay;
                 Timing.CallDelayed(totalDelay, () => ProcessPlayerEscape(player, scenario));
             }
+            #endregion
 
+            #region Scenario Timing
             yield return Timing.WaitForSeconds(scenario.InitialDelay);
 
             scenario.OnEscapeTriggered?.Invoke();
 
             yield return Timing.WaitForSeconds(scenario.ProcessingDelay);
             LogHelper.Debug($"{scenario.Name} escape sequence completed.");
+            #endregion
         }
 
         /// <summary>
@@ -64,6 +74,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleHelicopterEscape()
         {
+            #region Helicopter Scenario Setup
             var helicopterScenario = new EscapeScenario
             {
                 Name = "Helicopter",
@@ -80,6 +91,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
                     Exiled.API.Features.Respawn.SummonNtfChopper();
                 }
             };
+            #endregion
 
             return HandleEscapeSequence(helicopterScenario);
         }
@@ -94,6 +106,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
             if (!PlayerUtility.IsEligibleForEscape(player, scenario.EscapeZone, _plugin.Config.EscapeZoneSize))
                 return;
 
+            #region Escape Processing
             // Cache the evacuation based on scenario type  
             if (scenario.Name == "Helicopter")
                 _plugin.CacheHandler.CachePlayerEvacuatedByHelicopter(player);
@@ -105,6 +118,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
                 player.SetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
                 LogHelper.Debug($"Player {player.Nickname} has escaped by {scenario.Name.ToLower()}.");
             });
+            #endregion
         }
 
         /// <summary>
@@ -121,7 +135,9 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
             player.ClearInventory();
             player.EnableEffect<Ensnared>(duration: 30f);
         }
+        #endregion
 
+        #region Faction Management
         /// <summary>
         /// Disables all enemy faction spawns (e.g., NTF, Chaos) to prevent reinforcement after an escape event.
         /// </summary>
@@ -129,6 +145,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         {
             LogHelper.Debug("DisableFactionSpawn called.");
 
+            #region Faction Role Processing
             var spawnableRoles = new[]
             {
                 RoleTypeId.NtfCaptain,
@@ -166,10 +183,13 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
                     LogHelper.Debug($"Disabled faction: {faction} for role: {role}");
                 }
             }
+            #endregion
 
             LogHelper.Debug("DisableFactionSpawn completed.");
         }
+        #endregion
 
+        #region Nuke Handling
         /// <summary>
         /// Evaluates and applies consequences to all players when the Omega Warhead detonates.
         /// </summary>
@@ -256,8 +276,11 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
 
             LogHelper.Debug($"HandleSavePlayer coroutine completed for {player.Nickname}.");
         }
+        #endregion
     }
+    #endregion
 
+    #region PlayerFate Enum
     /// <summary>
     /// Represents the outcome of a player during a critical event.
     /// </summary>
@@ -266,4 +289,5 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         Saved,
         Killed
     }
+    #endregion
 }

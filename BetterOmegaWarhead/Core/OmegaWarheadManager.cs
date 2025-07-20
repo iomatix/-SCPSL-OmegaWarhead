@@ -14,44 +14,61 @@
     using ServerHandler = LabApi.Events.Handlers.ServerEvents;
     using WarheadHandler = LabApi.Events.Handlers.WarheadEvents;
 
+    /// <summary>
+    /// Manages the Omega Warhead functionality, including activation, countdown, and detonation sequences.
+    /// </summary>
+    #region OmegaWarheadManager Class
     public class OmegaWarheadManager
     {
+        #region Fields
         private readonly Plugin _plugin;
         private readonly List<CoroutineHandle> _coroutines = new List<CoroutineHandle>();
         private bool _omegaActivated, _omegaDetonated;
         private static readonly int[] NotifyTimes = { 300, 240, 180, 120, 60, 25, 15, 10, 5, 4, 3, 2, 1 };
+        #endregion
 
+        #region Constructor
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OmegaWarheadManager"/> class.
+        /// </summary>
+        /// <param name="plugin">Reference to the core plugin instance.</param>
         public OmegaWarheadManager(Plugin plugin) => _plugin = plugin;
+        #endregion
 
+        #region Properties
+        /// <summary>
+        /// Gets a value indicating whether the Omega Warhead is currently active.
+        /// </summary>
+        /// <value><c>true</c> if the Omega Warhead is active; otherwise, <c>false</c>.</value>
         public bool IsOmegaActive => _omegaActivated;
-        public void AddCoroutines(params CoroutineHandle[] handles)
-        {
-            foreach (CoroutineHandle handle in handles)
-            {
-                _coroutines.Add(handle);
-            }
-        }
+        #endregion
 
-
+        #region Initialization and Cleanup
+        /// <summary>
+        /// Initializes the Omega Warhead manager and logs the initialization process.
+        /// </summary>
         public void Init()
         {
             LogHelper.Debug("Initializing OmegaWarheadManager.");
         }
 
+        /// <summary>
+        /// Disables the Omega Warhead manager and performs cleanup operations.
+        /// </summary>
         public void Disable()
         {
             LogHelper.Debug("Disabling OmegaWarheadManager. Cleaning up...");
             Cleanup();
         }
 
+        /// <summary>
+        /// Cleans up all active coroutines and resets the Omega Warhead state.
+        /// </summary>
         public void Cleanup()
         {
             LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}, Coroutines: {_coroutines.Count}.");
             _omegaActivated = false;
             _omegaDetonated = false;
-            //Warhead.LeverStatus = false;
-            //Warhead.IsLocked = false;
-            //Warhead.Stop();
             Warhead.Scenario = default; // Should trigger the reset logic that automatically resets the warhead to its initial scenario 
             Map.ResetColorOfLights();
             foreach (CoroutineHandle coroutine in _coroutines)
@@ -60,8 +77,28 @@
             }
             _coroutines.Clear();
         }
+        #endregion
 
-        public void HandleWarheadStart(LabApi.Events.Arguments.WarheadEvents.WarheadStartingEventArgs ev)
+        #region Coroutine Management
+        /// <summary>
+        /// Adds one or more coroutine handles to the manager's coroutine list.
+        /// </summary>
+        /// <param name="handles">The coroutine handles to add.</param>
+        public void AddCoroutines(params CoroutineHandle[] handles)
+        {
+            foreach (CoroutineHandle handle in handles)
+            {
+                _coroutines.Add(handle);
+            }
+        }
+        #endregion
+
+        #region Warhead Event Handlers
+        /// <summary>
+        /// Handles the warhead start event, initiating the Omega Warhead sequence if conditions are met.
+        /// </summary>
+        /// <param name="ev">The warhead starting event arguments.</param>
+        public void HandleWarheadStart(WarheadStartingEventArgs ev)
         {
             if (!ev.IsAllowed) return;
 
@@ -71,6 +108,7 @@
                 return;
             }
 
+            #region Generator Check
             int activeGenerators = Generator.List.Count(g => g.Engaged);
             LogHelper.Debug($"Active Generators: {activeGenerators} (Required: {_plugin.Config.GeneratorsNumGuaranteeOmega})");
 
@@ -91,7 +129,9 @@
             {
                 LogHelper.Debug("Omega forced by generator threshold.");
             }
+            #endregion
 
+            #region Omega Activation
             LogHelper.Debug("WarheadStart triggered. Initiating Omega sequence...");
 
             Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
@@ -104,7 +144,58 @@
 
             LogHelper.Debug("Omega is being activated during warhead start, blocking default warhead.");
             ev.IsAllowed = false; // Prevent default warhead from triggering
+            #endregion
         }
+
+        /// <summary>
+        /// Handles the warhead stop event, stopping the Omega Warhead sequence if allowed by configuration.
+        /// </summary>
+        /// <param name="ev">The warhead stopping event arguments.</param>
+        public void HandleWarheadStop(WarheadStoppingEventArgs ev)
+        {
+            if (!ev.IsAllowed) return;
+
+            LogHelper.Debug("HandleWarheadStop called.");
+            if (!IsOmegaActive) return;
+
+            if (!_plugin.Config.IsStopAllowed)
+            {
+                LogHelper.Debug("Omega stop not allowed by config.");
+                ev.IsAllowed = false;
+                return;
+            }
+
+            if (_plugin.Config.ResetOmegaOnWarheadStop && Warhead.IsDetonated)
+            {
+                LogHelper.Debug("WarheadStop triggered. Resetting Omega sequence...");
+                _plugin.WarheadMethods.ResetSequence();
+            }
+
+            LogHelper.Debug("Omega is active during warhead stop, stopping Omega...");
+            _plugin.WarheadMethods.StopSequence();
+            ev.IsAllowed = false;
+        }
+
+        /// <summary>
+        /// Handles the warhead detonation event, blocking default detonation if Omega Warhead is active.
+        /// </summary>
+        /// <param name="ev">The warhead detonating event arguments.</param>
+        public void HandleWarheadDetonate(WarheadDetonatingEventArgs ev)
+        {
+            LogHelper.Debug("HandleWarheadDetonate called.");
+            if (!IsOmegaActive) return;
+
+            LogHelper.Debug("Omega is active during detonation, attempting to block default warhead detonation.");
+            ev.IsAllowed = false;
+        }
+        #endregion
+
+        #region Coroutine Handlers
+        /// <summary>
+        /// Manages the countdown sequence for the Omega Warhead, including notifications and light effects.
+        /// </summary>
+        /// <param name="timeToDetonation">The total time in seconds until detonation.</param>
+        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleCountdown(float timeToDetonation)
         {
             foreach (int notifyTime in NotifyTimes)
@@ -114,7 +205,6 @@
                     yield return Timing.WaitForSeconds(timeToDetonation - notifyTime);
                     if (IsOmegaActive)
                     {
-
                         string message = NotificationUtility.GetCassieCounterNotifyMessage(notifyTime);
                         bool shouldClearCassie = _plugin.Config.CassieMessageClearBeforeWarheadMessage || notifyTime <= 5;
 
@@ -141,6 +231,10 @@
             }
         }
 
+        /// <summary>
+        /// Manages the helicopter evacuation sequence, including broadcast and coroutine initiation.
+        /// </summary>
+        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleHelicopter()
         {
             yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
@@ -151,6 +245,10 @@
             }
         }
 
+        /// <summary>
+        /// Manages the unlocking and locking of checkpoint doors during the Omega Warhead sequence.
+        /// </summary>
+        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleCheckpointDoors()
         {
             yield return Timing.WaitForSeconds(_plugin.Config.OpenAndLockCheckpointDoorsDelay);
@@ -169,7 +267,10 @@
             }
         }
 
-
+        /// <summary>
+        /// Manages the detonation sequence for the Omega Warhead, including final notifications and player effects.
+        /// </summary>
+        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleDetonation()
         {
             if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
@@ -193,47 +294,7 @@
                 yield return Timing.WaitForSeconds(0.175f);
             }
         }
-
-
-
-        public void HandleWarheadStop(WarheadStoppingEventArgs ev)
-        {
-            if (!ev.IsAllowed) return;
-
-            LogHelper.Debug("HandleWarheadStop called.");
-            if (!IsOmegaActive) return;
-
-            if (!_plugin.Config.IsStopAllowed)
-            {
-                LogHelper.Debug("Omega stop not allowed by config.");
-                ev.IsAllowed = false;
-                return;
-            }
-
-            if (_plugin.Config.ResetOmegaOnWarheadStop && Warhead.IsDetonated)
-            {
-                LogHelper.Debug("WarheadStop triggered. Resetting Omega sequence...");
-                _plugin.WarheadMethods.ResetSequence();
-            }
-
-            LogHelper.Debug("Omega is active during warhead stop, stopping Omega...");
-            _plugin.WarheadMethods.StopSequence();
-            ev.IsAllowed = false;
-        }
-
-        public void HandleWarheadDetonate(LabApi.Events.Arguments.WarheadEvents.WarheadDetonatingEventArgs ev)
-        {
-            LogHelper.Debug("HandleWarheadDetonate called.");
-            if (!IsOmegaActive) return;
-
-            LogHelper.Debug("Omega is active during detonation, attempting to block default warhead detonation.");
-            ev.IsAllowed = false;
-        }
-
-
-
-
-
-
+        #endregion
     }
+    #endregion
 }

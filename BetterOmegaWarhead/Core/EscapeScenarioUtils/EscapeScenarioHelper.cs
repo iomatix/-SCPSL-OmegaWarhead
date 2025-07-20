@@ -6,15 +6,8 @@
     using System.Collections.Generic;
     using UnityEngine;
 
-    public class EscapeScenarioHelper
+    public static class EscapeScenarioHelper
     {
-        private readonly Plugin _plugin;
-
-        public EscapeScenarioHelper(Plugin plugin)
-        {
-            _plugin = plugin;
-        }
-
 
     }
 

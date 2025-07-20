@@ -6,30 +6,34 @@
     using System.Collections.Generic;
 
     /// <summary>
-    /// Static helper methods related to Door logic.
+    /// Provides static utility methods for interacting with doors in the game world.
     /// </summary>
-    public class DoorUtility
+    #region DoorUtility Class
+    public static class DoorUtility
     {
+        #region Door State Methods
         /// <summary>
-        /// Checks if a door is open.
+        /// Determines whether a given door is currently open.
         /// </summary>
+        /// <param name="door">The door to check.</param>
+        /// <returns><c>true</c> if the door is open; otherwise, <c>false</c>.</returns>
         public static bool IsDoorOpen(Door door)
         {
             return door != null && door.IsOpened;
         }
 
         /// <summary>
-        /// Toggles door state.
+        /// Toggles the state of the specified door between open and closed.
         /// </summary>
+        /// <param name="door">The door to toggle. If <c>null</c>, the method does nothing.</param>
         public static void ToggleDoor(Door door)
         {
             if (door == null)
                 return;
 
-            if (door.IsOpened)
-                door.IsOpened = false;
-            else
-                door.IsOpened = true;
+            door.IsOpened = !door.IsOpened;
         }
+        #endregion
     }
+    #endregion
 }
