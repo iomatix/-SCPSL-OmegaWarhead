@@ -3,14 +3,16 @@
     using Exiled.API.Features;
     using MEC;
     using System;
-
-    using BetterOmegaWarhead.Core.LoggingUtils;
+    using BetterOmegaWarhead.Core.RoundScenarioUtils;
     using BetterOmegaWarhead.Core.PlayerUtils;
+    using BetterOmegaWarhead.Core.LoggingUtils;
 
+    using RoundUtility = BetterOmegaWarhead.Core.RoundScenarioUtils;
     using DoorUtility = BetterOmegaWarhead.Core.DoorUtils;
     using EscapeUtility = BetterOmegaWarhead.Core.PlayerUtils;
     using PlayerUtility = BetterOmegaWarhead.Core.PlayerUtils;
     using RoomUtility = BetterOmegaWarhead.Core.RoomUtils;
+
 
     /// <summary>
     /// The main plugin class for the BetterOmegaWarhead system, managing initialization, handlers, and lifecycle events.
@@ -24,6 +26,7 @@
         /// </summary>
         public static Plugin Singleton;
 
+        private RoundController _roundController;
         private WarheadMethods _warheadMethods;
         private PlayerMethods _playerMethods;
         private EventHandler _eventHandler;
@@ -50,7 +53,7 @@
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version { get; } = new Version(7, 0, 0);
+        public override Version Version { get; } = new Version(7, 1, 0);
 
         /// <summary>
         /// Gets the minimum required version of Exiled for the plugin.
@@ -59,6 +62,11 @@
         #endregion
 
         #region Handler Properties
+        /// <summary>
+        /// Gets the round controller methods for managing round ending.
+        /// </summary>
+        internal RoundController RoundController { get => _roundController; private set => _roundController = value; }
+
         /// <summary>
         /// Gets the warhead methods handler for managing Omega Warhead sequences.
         /// </summary>
@@ -106,6 +114,7 @@
 
             #region Initialize Components
             LogHelper.Debug("Initializing handlers.");
+            RoundController = new RoundController(this);
             EventHandler = new EventHandler(this);
             CacheHandler = new CacheHandler(this);
             PlayerMethods = new PlayerMethods(this);
@@ -153,6 +162,7 @@
 
             #region Nullify Handlers
             LogHelper.Debug("Nullifying handlers and singleton.");
+            RoundController = null;
             Singleton = null;
             EventHandler = null;
             PlayerMethods = null;

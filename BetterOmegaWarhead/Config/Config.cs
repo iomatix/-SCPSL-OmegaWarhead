@@ -124,8 +124,48 @@
         /// <summary>  
         /// Gets or sets the message displayed to players who survive the Omega Warhead detonation.  
         /// </summary>  
+        [Description("Message shown to players who successfully survive Omega Warhead detonation.")]
+        public string SurvivorMessage { get; set; } = "The facility may be gone, but hope lives on through survivors like you. A new dawn awaits.\n<b><color=#00FA9A>Your story of survival will inspire generations.</color></b>";
+
+        /// <summary>  
+        /// Gets or sets the message displayed to players who evacuated the Omega Warhead detonation.  
+        /// </summary>  
         [Description("Message shown to players who successfully evacuate during Omega Warhead detonation.")]
-        public string SurvivorMessage { get; set; } = "The facility may be gone, but hope lives on through survivors like you. A new dawn awaits.\n <b><color=#00FA9A>Your story of survival will inspire generations.</color></b>";
+        public string EvacuatedMessage { get; set; } = "Your escape was swift, but the scars will linger.\n<b><color=#00FA9A>You didn’t just run — you made it through hell to tell the tale.</color></b>";
+
+
+        /// <summary>  
+        /// Gets or sets the message displayed to players who been killed by the Omega Warhead detonation.  
+        /// </summary>  
+        [Description("Message shown to players who die during Omega Warhead detonation.")]
+        public string KilledMessage { get; set; } = "You became part of the blast that erased a legacy.\n<b><color=#6C1133>The facility consumed you... but whispers of your courage echo in the ruins.</color></b>";
+
+        /// <summary>
+        /// Global ending broadcast message displaying survival statistics after the nuclear event,
+        /// wrapped in a post-apocalyptic hopeful theme.
+        /// </summary>
+        /// <remarks>
+        /// This string supports these placeholders, which will be replaced at runtime:
+        /// <list type="bullet">
+        ///   <item><description><c>{survived}</c> — Number of souls who survived and sheltered safely.</description></item>
+        ///   <item><description><c>{escaped}</c> — Number of heroes evacuated and airlifted to safety.</description></item>
+        ///   <item><description><c>{dead}</c> — Number of casualties absorbed by the blast.</description></item>
+        ///   <item><description><c>{code}</c> — Automated system log code identifier.</description></item>
+        /// </list>
+        /// The message includes stylized colors and sizes for emphasis, suited for in-game UI rendering.
+        /// </remarks>
+        [Description("Global ending broadcast showing survival statistics with post-nuclear hope theme.")]
+        public string EndingBroadcast { get; set; } = "<size=26><color=#FFA500>--- OMEGA WARHEAD AFTERMATH ---</color></size>\n<b>CASUALTY REPORT</b>\n" +
+            "\n<color=green> ✔ Survived: {survived}</color> souls preserved in shelters." +
+            "\n<color=cyan> 🚁 Evacuated: {escaped}</color> heroes airlifted to safety." +
+            "\n<color=red> ✘ Lost: {dead}</color> absorbed by the nuclear blast\n" +
+            "\n<b><color=#DAA520>FINAL TRANSMISSION FROM SITE-██</color></b>" +
+            "\nDespite catastrophic losses, <color=#FFD700><b>humanity endures</b></color>." +
+            "\nThe Foundation's work continues at <i>Secondary Locations</i>." +
+            "\n<size=20>Those who remain will rebuild...</size>\n" +
+            "\n< size=18><color=#A9A9A9>// Automated System Log #{code} from SITE-██</color></size>;"
+
+
 
         /// <summary>
         /// Gets or sets the hint message displayed when Omega Warhead is activated.

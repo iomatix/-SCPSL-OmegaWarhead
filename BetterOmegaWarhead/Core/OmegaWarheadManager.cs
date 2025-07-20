@@ -1,6 +1,7 @@
 ﻿namespace BetterOmegaWarhead
 {
     using BetterOmegaWarhead.Core.LoggingUtils;
+    using BetterOmegaWarhead.Core.RoundScenarioUtils;
     using BetterOmegaWarhead.NotificationUtils;
     using LabApi.Events.Arguments.WarheadEvents;
     using LabApi.Features.Enums;
@@ -294,12 +295,11 @@
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             _omegaActivated = false;
             _omegaDetonated = true;
-            WarheadMethods.DetonateSequence();
+            _plugin.RoundController.ExecuteScenario(_plugin.RoundController.GetScenario<DetonationEndingScenario>());
 
             while (true)
             {
-                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
-                    Exiled.API.Features.Cassie.Clear();
+                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
                 yield return Timing.WaitForSeconds(0.175f);
             }
         }

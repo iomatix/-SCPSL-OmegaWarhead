@@ -112,6 +112,9 @@
     <Compile Include="Core\EscapeScenarioUtils\EscapeScenario.cs" />
     <Compile Include="Core\EscapeScenarioUtils\EscapeScenarioHelper.cs" />
     <Compile Include="Core\OmegaWarheadManager.cs" />
+    <Compile Include="Core\RoundScenarioUtils\DetonationEndingScenario.cs" />
+    <Compile Include="Core\RoundScenarioUtils\RoundController.cs" />
+    <Compile Include="Core\RoundScenarioUtils\RoundScenario.cs" />
     <Compile Include="EventHandlers\EventHandler.cs" />
     <Compile Include="NotificationUtils\NotificationUtility.cs" />
     <Compile Include="Core\DoorUtils\DoorUtility.cs" />

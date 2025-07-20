@@ -2,6 +2,7 @@ namespace BetterOmegaWarhead
 {
     using BetterOmegaWarhead.Core.LoggingUtils;
     using BetterOmegaWarhead.NotificationUtils;
+    using CustomPlayerEffects;
     using Exiled.API.Enums;
     using LabApi.Features.Wrappers;
     using MEC;
@@ -39,6 +40,7 @@ namespace BetterOmegaWarhead
 
             Timing.CallDelayed(Plugin.Singleton.Config.DelayBeforeOmegaSequence, () =>
             {
+
                 LogHelper.Debug("Starting Omega Warhead sequence chain...");
                 Activate(timeToDetonation);
             });
@@ -51,6 +53,11 @@ namespace BetterOmegaWarhead
         public void Activate(float timeToDetonation)
         {
             LogHelper.Debug($"Activating Omega Warhead with detonation time: {timeToDetonation}s.");
+
+            #region Round Configuration
+            // Lock round immediately to prevent automatic ending  
+            _plugin.RoundController.SetAutoRoundEndLock(true);
+            #endregion
 
             #region Light Configuration
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
@@ -96,45 +103,7 @@ namespace BetterOmegaWarhead
         {
             LogHelper.Debug("Resetting Omega Warhead state.");
             Plugin.Singleton.OmegaManager.Cleanup();
-        }
-        #endregion
-
-        #region Detonation Logic
-        /// <summary>
-        /// Executes the detonation sequence for the Omega Warhead, affecting doors and lights.
-        /// </summary>
-        public static void DetonateSequence()
-        {
-            #region Warhead Detonation
-            // Alpha warhead detonation  
-            Warhead.DetonationTime = 0f;
-            Warhead.Shake();
-            #endregion
-
-            #region Facility Effects
-            // Facility-wide door effects  
-            foreach (Room room in Room.List)
-            {
-                foreach (LabApi.Features.Wrappers.Door door in room.Doors)
-                {
-                    door.IsOpened = true;
-                    if (door is LabApi.Features.Wrappers.BreakableDoor breakable && !breakable.IsBroken)
-                        breakable.TryBreak();
-                    door.Lock(Interactables.Interobjects.DoorUtils.DoorLockReason.Warhead, true);
-                }
-
-                // Turn off all lights  
-                foreach (var lightController in room.AllLightControllers)
-                {
-                    lightController.LightsEnabled = false;
-                }
-
-                foreach (Player p in Player.ReadyList.Where(p => Plugin.Singleton.CacheHandler.IsPlayerEvacuatedByHelicopters(p)))
-                {
-                    p.SendHint(Plugin.Singleton.Config.SurvivorMessage);
-                }
-            }
-            #endregion
+            Plugin.Singleton.OmegaManager.Init();
         }
         #endregion
     }

@@ -215,7 +215,11 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
 
             LogHelper.Debug($"Checking {player.Nickname}: In shelter: {isInShelter}, Evacuated: {isEvacuated}");
 
-            return (isInShelter || isEvacuated) ? PlayerFate.Saved : PlayerFate.Killed;
+            if (isInShelter) return PlayerFate.SurvivedShelter;
+            if (isEvacuated) return PlayerFate.EvacuatedByHelicopter;
+            if (!player.IsAlive) return PlayerFate.KilledByWarhead;
+
+            return PlayerFate.Unknown;
         }
 
         /// <summary>
@@ -225,16 +229,23 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         /// <param name="fate">The fate of the player (Saved/Killed).</param>
         private void ProcessPlayerFate(Player player, PlayerFate fate)
         {
+            _plugin.CacheHandler.CachePlayerFate(player, fate);
             switch (fate)
             {
-                case PlayerFate.Saved:
-                    LogHelper.Debug($"Saving {player.Nickname}.");
+                case PlayerFate.SurvivedShelter:
+                case PlayerFate.EvacuatedByHelicopter:
+                    LogHelper.Debug($"Saving {player.Nickname}. Fate: {fate}");
                     _plugin.EventHandler.Coroutines.Add(Timing.RunCoroutine(HandleSavePlayer(player)));
                     break;
 
-                case PlayerFate.Killed:
-                    LogHelper.Debug($"Killing {player.Nickname} due to Omega Warhead exposure.");
+                case PlayerFate.KilledByWarhead:
+                    LogHelper.Debug($"Killing {player.Nickname} due to Omega Warhead exposure. Fate: {fate}");
                     ApplyNukeEffects(player);
+                    break;
+
+                // Optional: default handler for unexpected fate values
+                default:
+                    LogHelper.Warning($"Unhandled fate for {player.Nickname}: {fate}");
                     break;
             }
         }
@@ -274,17 +285,67 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
             LogHelper.Debug($"HandleSavePlayer coroutine completed for {player.Nickname}.");
         }
         #endregion
-    }
-    #endregion
 
-    #region PlayerFate Enum
-    /// <summary>
-    /// Represents the outcome of a player during a critical event.
-    /// </summary>
-    public enum PlayerFate
-    {
-        Saved,
-        Killed
+        #region Player Fate Ending
+        /// <summary>
+        /// Applies ending effects and messages to players based on their cached fate after a critical event.
+        /// </summary>
+        public void HandleEndingByFate()
+        {
+            ushort survived = 0, escaped = 0, dead = 0;
+            foreach (var entry in _plugin.CacheHandler.GetCachedPlayerFates())
+            {
+                Player player = entry.Key;
+                PlayerFate fate = entry.Value;
+
+                player.EnableEffect<Flashed>(duration: 0.75f);
+                player.EnableEffect<Blurred>(duration: 4.75f);
+                player.EnableEffect<Deafened>(duration: 4.75f);
+
+                switch (fate)
+                {
+                    case PlayerFate.EvacuatedByHelicopter:
+                        player.SendHint(Plugin.Singleton.Config.EvacuatedMessage, 10f);
+                        escaped += 1;
+                        break;
+                    case PlayerFate.SurvivedShelter:
+                        player.SendHint(Plugin.Singleton.Config.SurvivorMessage, 10f);
+                        survived += 1;
+                        break;
+                    case PlayerFate.KilledByWarhead:
+                        player.SendHint(Plugin.Singleton.Config.KilledMessage, 10f);
+                        dead += 1;
+                        break;
+                }
+            }
+
+            Timing.CallDelayed(10f, () =>
+            {
+                foreach (Player player in Player.ReadyList)
+                {
+                    player.SendBroadcast(Plugin.Singleton.Config.EndingBroadcast
+                        .Replace("{survived}", survived.ToString())
+                        .Replace("{escaped}", escaped.ToString())
+                        .Replace("{dead}", dead.ToString())
+                        .Replace("{code}", UnityEngine.Random.Range(1000, 9999).ToString())
+                        , duration: 15, shouldClearPrevious: true, type: Broadcast.BroadcastFlags.Normal);
+                }
+            });
+        }
+        #endregion
+
+        #region PlayerFate Enum
+        /// <summary>
+        /// Represents the outcome of a player during a critical event.
+        /// </summary>
+        public enum PlayerFate
+        {
+            EvacuatedByHelicopter,
+            SurvivedShelter,
+            KilledByWarhead,
+            Unknown
+        }
+        #endregion
     }
     #endregion
 }

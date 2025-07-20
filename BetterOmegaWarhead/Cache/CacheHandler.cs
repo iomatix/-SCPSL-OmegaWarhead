@@ -1,12 +1,14 @@
 ﻿namespace BetterOmegaWarhead
 {
     using BetterOmegaWarhead.Core.LoggingUtils;
+    using BetterOmegaWarhead.Core.PlayerUtils;
     using LabApi.Features.Wrappers;
     using MapGeneration;
     using PlayerRoles;
     using System;
     using System.Collections.Generic;
     using UnityEngine;
+    using static BetterOmegaWarhead.Core.PlayerUtils.PlayerMethods;
 
     /// <summary>
     /// Handles caching of runtime data for the BetterOmegaWarhead plugin,
@@ -20,6 +22,8 @@
         private HashSet<Vector3> _cachedShelterLocations;
         private HashSet<Player> _cachedHeliSurvivors;
         private HashSet<Faction> _cachedDisabledFactions;
+        private Dictionary<Player, PlayerFate> _cachedPlayerFates;
+
 
         #endregion
 
@@ -187,6 +191,76 @@
 
         #endregion
 
+        #region Player Fate Caching
+
+        /// <summary>
+        /// Gets the dictionary containing all cached player fates recorded during the current round.
+        /// This provides full access to player-to-fate mappings for analysis, filtering, or display.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Dictionary{Player, PlayerFate}"/> representing players and their associated fates.
+        /// </returns>
+        public Dictionary<Player, PlayerFate> GetCachedPlayerFates() => CachedPlayerFates;
+
+        /// <summary>
+        /// Caches the fate of a specific player within the current round context.
+        /// If the player already has a cached fate, it will be overwritten.
+        /// </summary>
+        /// <param name="player">The <see cref="Player"/> instance whose fate is being cached.</param>
+        /// <param name="fate">The <see cref="PlayerFate"/> value representing the player's outcome.</param>
+        public void CachePlayerFate(Player player, PlayerFate fate)
+        {
+            CachedPlayerFates[player] = fate;
+            LogHelper.Debug($"Cached fate for {player.Nickname}: {fate}");
+        }
+
+        /// <summary>
+        /// Retrieves the cached fate of a given player.
+        /// If no fate is found in the cache, <see cref="PlayerFate.Unknown"/> is returned.
+        /// </summary>
+        /// <param name="player">The <see cref="Player"/> instance to query.</param>
+        /// <returns>
+        /// The <see cref="PlayerFate"/> associated with the player, or <see cref="PlayerFate.Unknown"/> if not found.
+        /// </returns>
+        public PlayerFate GetCachedPlayerFate(Player player)
+        {
+            if (CachedPlayerFates.TryGetValue(player, out PlayerFate fate))
+                return fate;
+
+            LogHelper.Debug($"No cached fate found for {player.Nickname}, defaulting to Unknown.");
+            return PlayerFate.Unknown;
+        }
+
+        /// <summary>
+        /// Retrieves a collection of players who have a cached fate assigned during the current round.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="HashSet{Player}"/> containing all players with a known fate.
+        /// </returns>
+        public HashSet<Player> GetPlayersWithCachedFate()
+        {
+            HashSet<Player> playersWithFate = new HashSet<Player>(CachedPlayerFates.Keys);
+            LogHelper.Debug($"Retrieved {playersWithFate.Count} players with cached fate.");
+            return playersWithFate;
+        }
+
+
+
+        private Dictionary<Player, PlayerFate> CachedPlayerFates
+        {
+            get
+            {
+                if (_cachedPlayerFates == null)
+                {
+                    LogHelper.Debug("Initializing CachedPlayerFates as empty dictionary.");
+                    _cachedPlayerFates = new Dictionary<Player, PlayerFate>();
+                }
+                return _cachedPlayerFates;
+            }
+        }
+
+        #endregion
+
         #region Cache Reset
 
         /// <summary>
@@ -217,6 +291,13 @@
                 _cachedDisabledFactions = null;
                 LogHelper.Debug("Cleared _cachedDisabledFactions.");
             }
+
+            if (_cachedPlayerFates != null)
+            {
+                LogHelper.Debug("Clearing cached player fates.");
+                _cachedPlayerFates.Clear();
+            }
+
         }
 
         #endregion
