@@ -24,11 +24,24 @@
             }
 
             float detonationTime = Plugin.Singleton.Config.TimeToDetonation;
+            if (arguments.Count >= 1)
+            {
+                if (!float.TryParse(arguments.At(0), out float parsed))
+                {
+                    response = $"Unable to parse detonation time '{arguments.At(0)}'. Please provide a valid number.";
+                    return false;
+                }
 
-            if (arguments.Count >= 1 && float.TryParse(arguments.At(0), out float parsed))
+                if (parsed <= 0)
+                {
+                    response = "Detonation time must be greater than 0 seconds.";
+                    return false;
+                }
+
                 detonationTime = parsed;
+            }
 
-            Plugin.Singleton.WarheadMethods.StartSequence(detonationTime);
+            Plugin.Singleton.WarheadMethods.Activate(detonationTime);
 
             Warhead.Status = WarheadStatus.Armed;
             Warhead.DetonationTimer = detonationTime;
