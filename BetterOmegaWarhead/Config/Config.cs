@@ -233,6 +233,11 @@
         [Description("Message announcing checkpoint unlock.")]
         public string CheckpointUnlockMessage { get; set; } = "Facility update: Checkpoint doors are now accessible. Proceed with caution";
 
+        /// <summary>
+        /// Gets or sets a value indicating whether Cassie string messages (e.g., subtitles or on-screen text) should be disabled for important announcements.
+        /// </summary>
+        [Description("Disable Cassie string messages during message broadcasts?")]
+        public bool DisableCassieMessages { get; set; } = true;
 
         /// <summary>
         /// Gets or sets a value indicating whether to clear the Cassie queue before important messages.

@@ -42,9 +42,10 @@ namespace BetterOmegaWarhead.NotificationUtils
 
             if (Plugin.Singleton.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
 
-            bool hasSubtitles = !string.IsNullOrEmpty(customSubtitles);
+            bool displaySubtitles = !string.IsNullOrEmpty(customSubtitles) && !Plugin.Singleton.Config.DisableCassieMessages;
+
             string fullMessage = "pitch_0.95 " + message;
-            Cassie.Message(fullMessage, isSubtitles: hasSubtitles, isNoisy: false, isHeld: false, customSubtitles: customSubtitles);
+            Cassie.Message(fullMessage, isSubtitles: displaySubtitles, isNoisy: false, isHeld: false, customSubtitles: customSubtitles);
         }
 
         /// <summary>
@@ -57,10 +58,11 @@ namespace BetterOmegaWarhead.NotificationUtils
 
             if (Plugin.Singleton.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
 
-            bool hasSubtitles = !string.IsNullOrEmpty(customSubtitles);
+            bool displaySubtitles = !string.IsNullOrEmpty(customSubtitles) && !Plugin.Singleton.Config.DisableCassieMessages;
+
             string fullMessage = "pitch_1.05 " + message;
 
-            Cassie.Message(fullMessage, isSubtitles: hasSubtitles, isNoisy: false, isHeld: false, customSubtitles: customSubtitles);
+            Cassie.Message(fullMessage, isSubtitles: displaySubtitles, isNoisy: false, isHeld: false, customSubtitles: customSubtitles);
         }
         #endregion
 
