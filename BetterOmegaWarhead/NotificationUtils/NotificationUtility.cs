@@ -40,7 +40,7 @@ namespace BetterOmegaWarhead.NotificationUtils
         {
             if (string.IsNullOrEmpty(message)) return;
 
-            if (Plugin.Singleton.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
+            if (Plugin.Singleton.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
 
             bool hasSubtitles = !string.IsNullOrEmpty(customSubtitles);
             string fullMessage = "pitch_0.95 " + message;
@@ -137,9 +137,9 @@ namespace BetterOmegaWarhead.NotificationUtils
         /// <returns>A formatted Cassie message for the countdown.</returns>
         public static string GetCassieCounterNotifyMessage(int notifyTime)
         {
-            if (notifyTime <= 5) return $"{notifyTime} .G4";
-            if (notifyTime == 10 || notifyTime == 15) return $".G3 {notifyTime} Seconds .G5";
-            return $".G3 {notifyTime} Seconds until Omega Warhead Detonation .G5";
+            if (notifyTime <= 5) return $"{notifyTime.ToString()} .G4";
+            if (notifyTime == 10 || notifyTime == 15) return $".G3 {notifyTime.ToString()} Seconds .G5";
+            return $".G3 {notifyTime.ToString()} Seconds until Omega Warhead Detonation .G5";
         }
         #endregion
 

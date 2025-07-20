@@ -244,7 +244,7 @@
         /// Gets or sets a value indicating whether to clear the Cassie queue before warhead messages.
         /// </summary>
         [Description("Clear Cassie queue before warhead messages?")]
-        public bool CassieMessageClearBeforeWarheadMessage { get; set; } = true;
+        public bool CassieMessageClearBeforeWarheadMessage { get; set; } = false;
         #endregion
 
         #region Permissions & Debug
