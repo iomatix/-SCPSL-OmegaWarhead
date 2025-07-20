@@ -277,6 +277,7 @@
         public void OnDetonation()
         {
             LogHelper.Debug("OnDetonation called.");
+            Warhead.Detonate();
             _omegaActivated = false;
         }
 
