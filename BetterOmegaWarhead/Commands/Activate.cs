@@ -1,9 +1,11 @@
 ﻿namespace BetterOmegaWarhead.Commands
 {
-    using System;
+    using BetterOmegaWarhead.Core.LoggingUtils;
     using CommandSystem;
     using Exiled.API.Enums;
     using Exiled.API.Features;
+    using MEC;
+    using System;
 
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     [CommandHandler(typeof(GameConsoleCommandHandler))]
@@ -24,28 +26,31 @@
             }
 
             float detonationTime = Plugin.Singleton.Config.TimeToDetonation;
-            if (arguments.Count >= 1)
+            try
             {
-                if (!float.TryParse(arguments.At(0), out float parsed))
+                if (arguments.Count >= 1)
                 {
-                    response = $"Unable to parse detonation time '{arguments.At(0)}'. Please provide a valid number.";
-                    return true;
-                }
+                    if (!float.TryParse(arguments.At(0), out float parsed))
+                    {
+                        response = $"Unable to parse detonation time '{arguments.At(0)}'. Please provide a valid number.";
+                        return true;
+                    }
 
-                if (parsed <= 0)
-                {
-                    response = "Detonation time must be greater than 0 seconds.";
-                    return true;
-                }
+                    if (parsed <= 0)
+                    {
+                        response = "Detonation time must be greater than 0 seconds.";
+                        return true;
+                    }
 
-                detonationTime = parsed;
+                    detonationTime = parsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Warning($"Execute command arguments can not be parsed this time. Stack: {ex}");
             }
 
-            Plugin.Singleton.WarheadMethods.Activate(detonationTime);
-
-            Warhead.Status = WarheadStatus.Armed;
-            Warhead.DetonationTimer = detonationTime;
-            Warhead.Controller.IsLocked = !Plugin.Singleton.Config.IsStopAllowed;
+            Plugin.Singleton.WarheadMethods.StartSequence(detonationTime);
 
             response = $"Omega Warhead activated with detonation in {detonationTime}s.";
             return false;

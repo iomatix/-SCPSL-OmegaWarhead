@@ -28,10 +28,7 @@ namespace BetterOmegaWarhead.Core.PlayerUtils
         /// Initializes a new instance of the <see cref="PlayerMethods"/> class.
         /// </summary>
         /// <param name="plugin">Reference to the core plugin instance.</param>
-        public PlayerMethods(Plugin plugin)
-        {
-            _plugin = plugin;
-        }
+        public PlayerMethods(Plugin plugin) => _plugin = plugin;
         #endregion
 
         #region Escape Handling

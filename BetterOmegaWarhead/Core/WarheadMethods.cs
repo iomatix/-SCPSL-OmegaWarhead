@@ -2,6 +2,7 @@ namespace BetterOmegaWarhead
 {
     using BetterOmegaWarhead.Core.LoggingUtils;
     using BetterOmegaWarhead.NotificationUtils;
+    using Exiled.API.Enums;
     using LabApi.Features.Wrappers;
     using MEC;
     using System;
@@ -24,11 +25,7 @@ namespace BetterOmegaWarhead
         /// Initializes a new instance of the <see cref="WarheadMethods"/> class.
         /// </summary>
         /// <param name="plugin">Reference to the core plugin instance.</param>
-        public WarheadMethods(Plugin plugin)
-        {
-            _plugin = plugin;
-            _omegaWarheadManager = _plugin.OmegaManager;
-        }
+        public WarheadMethods(Plugin plugin) => _plugin = plugin;
         #endregion
 
         #region Sequence Management
@@ -38,8 +35,14 @@ namespace BetterOmegaWarhead
         /// <param name="timeToDetonation">The time in seconds until detonation.</param>
         public void StartSequence(float timeToDetonation)
         {
-            LogHelper.Debug("Starting Omega Warhead sequence chain...");
-            Activate(timeToDetonation);
+
+            Plugin.Singleton.OmegaManager.IsOmegaActive = true;
+
+            Timing.CallDelayed(Plugin.Singleton.Config.DelayBeforeOmegaSequence, () =>
+            {
+                LogHelper.Debug("Starting Omega Warhead sequence chain...");
+                Activate(timeToDetonation);
+            });
         }
 
         /// <summary>
@@ -67,7 +70,8 @@ namespace BetterOmegaWarhead
             float messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations(1f, countdownMessages);
             LogHelper.Debug($"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.");
             float adjustedTime = timeToDetonation + messageDurationAdjustment;
-
+            
+            // Alpha Warhead Sync Attempt
             if (Warhead.Exists)
             {
                 Warhead.Start(isAutomatic: true, suppressSubtitles: true);
@@ -80,9 +84,9 @@ namespace BetterOmegaWarhead
 
 
             _omegaWarheadManager.AddCoroutines(
-                    Timing.RunCoroutine(_plugin.OmegaManager.HandleCountdown(adjustedTime), "OmegaCountdown"),
-                    Timing.RunCoroutine(_plugin.OmegaManager.HandleHelicopter(), "OmegaHeli"),
-                    Timing.RunCoroutine(_plugin.OmegaManager.HandleCheckpointDoors(), "OmegaCheckpoints")
+                    Timing.RunCoroutine(_omegaWarheadManager.HandleCountdown(adjustedTime), "OmegaCountdown"),
+                    Timing.RunCoroutine(_omegaWarheadManager.HandleHelicopter(), "OmegaHeli"),
+                    Timing.RunCoroutine(_omegaWarheadManager.HandleCheckpointDoors(), "OmegaCheckpoints")
                 );
             #endregion
         }

@@ -37,11 +37,20 @@
         #endregion
 
         #region Properties
-        /// <summary>
-        /// Gets a value indicating whether the Omega Warhead is currently active.
-        /// </summary>
-        /// <value><c>true</c> if the Omega Warhead is active; otherwise, <c>false</c>.</value>
-        public bool IsOmegaActive => _omegaActivated;
+        /// <summary>  
+        /// Gets or sets a value indicating whether the Omega Warhead is currently active.  
+        /// </summary>  
+        public bool IsOmegaActive
+        {
+            get => _omegaActivated;
+            set => _omegaActivated = value;
+        }
+
+        /// <summary>  
+        /// Gets  a value indicating whether the Omega Warhead is already detonated.  
+        /// </summary>  
+        public bool IsOmegaDetonated => _omegaDetonated;
+
         #endregion
 
         #region Initialization and Cleanup
@@ -103,7 +112,7 @@
         {
             if (!ev.IsAllowed) return;
 
-            if (IsOmegaActive)
+            if (IsOmegaActive ||  IsOmegaDetonated)
             {
                 ev.IsAllowed = false;
                 return;
@@ -135,11 +144,9 @@
             #region Omega Activation
             LogHelper.Debug("WarheadStart triggered. Initiating Omega sequence...");
 
-            Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
-            {
-                _omegaActivated = true;
-                _plugin.WarheadMethods.StartSequence(_plugin.Config.TimeToDetonation);
-            });
+
+            _plugin.WarheadMethods.StartSequence(_plugin.Config.TimeToDetonation);
+
 
             LogHelper.Debug("HandleWarheadStart called.");
 
