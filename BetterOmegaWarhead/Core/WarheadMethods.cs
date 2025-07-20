@@ -53,7 +53,8 @@ namespace BetterOmegaWarhead
             #region Light Configuration
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
             LogHelper.Debug($"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
-            Map.SetColorOfLights(lightColor);
+            Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () => {Map.SetColorOfLights(lightColor)});
+
             #endregion
 
             #region Notifications
