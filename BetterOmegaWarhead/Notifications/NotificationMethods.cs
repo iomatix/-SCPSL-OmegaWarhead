@@ -9,14 +9,15 @@ namespace BetterOmegaWarhead
         public void SendCassieMessage(string message)
         {
             if (string.IsNullOrEmpty(message)) return;
-            Cassie.Message(message, isNoisy: false, isSubtitles: false, isHeld: false);
+            if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
+            Exiled.API.Features.Cassie.Message(message, isNoisy: false, isSubtitles: false, isHeld: false);
         }
 
         public void SendImportantCassieMessage(string message)
         {
             if (string.IsNullOrEmpty(message)) return;
-            if (_plugin.Config.CassieMessageClearBeforeImportant) Cassie.Clear();
-            Cassie.Message(message, isSubtitles: false, isHeld: false);
+            if (_plugin.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
+            Exiled.API.Features.Cassie.Message(message, isSubtitles: false, isHeld: false);
         }
 
         public void BroadcastOmegaActivation()

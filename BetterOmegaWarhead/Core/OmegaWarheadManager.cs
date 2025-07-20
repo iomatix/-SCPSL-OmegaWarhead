@@ -101,18 +101,18 @@
                 if (timeToDetonation >= notifyTime)
                 {
                     string message = GetCassieMessage(notifyTime);
-                    totalDuration += Cassie.CalculateDuration(message);
+                    totalDuration += Exiled.API.Features.Cassie.CalculateDuration(message);
                 }
             }
-            totalDuration += Cassie.CalculateDuration(_plugin.Config.DetonatingOmegaCassie);
+            totalDuration += Exiled.API.Features.Cassie.CalculateDuration(_plugin.Config.DetonatingOmegaCassie);
             return totalDuration;
         }
 
         private string GetCassieMessage(int notifyTime)
         {
-            return notifyTime <= 5
-                ? $"{notifyTime} .G5"
-                : $".G3 {notifyTime} Seconds until Omega Warhead Detonation .G5";
+            if (notifyTime < 5) return "";
+            if (notifyTime == 5) return $"{notifyTime}";
+            return $".G3 {notifyTime} Seconds until Omega Warhead Detonation .G5";
         }
 
         public void Stop()
@@ -133,9 +133,10 @@
                     {
                         string message = GetCassieMessage(notifyTime);
                         bool shouldClearCassie = _plugin.Config.CassieMessageClearBeforeWarheadMessage || notifyTime <= 5;
+                        
                         if (shouldClearCassie)
-                            Cassie.Clear();
-                        float messageDuration = Cassie.CalculateDuration(message);
+                            Exiled.API.Features.Cassie.Clear();
+                        float messageDuration = Exiled.API.Features.Cassie.CalculateDuration(message);
                         LogHelper.Debug($"Cassie message '{message}' duration: {messageDuration}s");
                         _plugin.NotificationMethods.SendCassieMessage(message);
                         if (notifyTime <= 5)
@@ -188,9 +189,9 @@
         private IEnumerator<float> HandleDetonation()
         {
             if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
-                Cassie.Clear();
+                Exiled.API.Features.Cassie.Clear();
             string detonationMessage = _plugin.Config.DetonatingOmegaCassie;
-            float detonationMessageDuration = Cassie.CalculateDuration(detonationMessage);
+            float detonationMessageDuration = Exiled.API.Features.Cassie.CalculateDuration(detonationMessage);
             LogHelper.Debug($"Detonation Cassie message '{detonationMessage}' duration: {detonationMessageDuration}s");
             _plugin.NotificationMethods.SendCassieMessage(detonationMessage);
 
@@ -220,7 +221,7 @@
             while (true)
             {
                 if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
-                    Cassie.Clear();
+                    Exiled.API.Features.Cassie.Clear();
                 yield return Timing.WaitForSeconds(0.175f);
             }
         }
