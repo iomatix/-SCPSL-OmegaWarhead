@@ -36,22 +36,32 @@ namespace BetterOmegaWarhead.NotificationUtils
         /// Sends a Cassie message with specified settings, optionally clearing previous messages.
         /// </summary>
         /// <param name="message">The message to send.</param>
-        public static void SendCassieMessage(string message)
+        public static void SendCassieMessage(string message, string customSubtitles = "")
         {
             if (string.IsNullOrEmpty(message)) return;
-            if (Plugin.Singleton.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
-            Cassie.Message("pitch_0.95 " + message, isNoisy: false, isSubtitles: false, isHeld: false);
+
+            if (Plugin.Singleton.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
+
+            bool hasSubtitles = !string.IsNullOrEmpty(customSubtitles);
+            string fullMessage = "pitch_0.95 " + message;
+
+            Cassie.Message(fullMessage, isSubtitles: hasSubtitles, isHeld: false, customSubtitles: customSubtitles);
         }
 
         /// <summary>
         /// Sends an important Cassie message, optionally clearing previous messages.
         /// </summary>
         /// <param name="message">The important message to send.</param>
-        public static void SendImportantCassieMessage(string message)
+        public static void SendImportantCassieMessage(string message, string customSubtitles = "")
         {
             if (string.IsNullOrEmpty(message)) return;
+
             if (Plugin.Singleton.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
-            Cassie.Message("pitch_0.95 " + message, isSubtitles: false, isHeld: false);
+
+            bool hasSubtitles = !string.IsNullOrEmpty(customSubtitles);
+            string fullMessage = "pitch_1.05 " + message;
+
+            Cassie.Message(fullMessage, isSubtitles: hasSubtitles, isHeld: false, customSubtitles: customSubtitles);
         }
         #endregion
 
