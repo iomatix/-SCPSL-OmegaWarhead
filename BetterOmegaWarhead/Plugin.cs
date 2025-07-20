@@ -1,9 +1,12 @@
 ﻿namespace BetterOmegaWarhead
 {
-    using BetterOmegaWarhead.Core.LoggingUtils;
-    using BetterOmegaWarhead.Core.PlayerUtils;
+    using Exiled.API.Features;
     using MEC;
     using System;
+
+    using BetterOmegaWarhead.Core.LoggingUtils;
+    using BetterOmegaWarhead.Core.PlayerUtils;
+
     using DoorUtility = BetterOmegaWarhead.Core.DoorUtils;
     using EscapeUtility = BetterOmegaWarhead.Core.PlayerUtils;
     using PlayerUtility = BetterOmegaWarhead.Core.PlayerUtils;
@@ -13,7 +16,7 @@
     /// The main plugin class for the BetterOmegaWarhead system, managing initialization, handlers, and lifecycle events.
     /// </summary>
     #region Plugin Class
-    public class Plugin : Exiled.API.Features.Plugin<Config>
+    public class Plugin : Plugin<Config>
     {
         #region Fields
         /// <summary>
@@ -88,9 +91,9 @@
         /// </summary>
         public override void OnEnabled()
         {
+            Singleton = this;
             LogHelper.Debug("Enabling BetterOmegaWarhead plugin.");
             Config.Validate();
-            Singleton = this;
 
             #region Initialize Handlers
             LogHelper.Debug("Initializing handlers.");

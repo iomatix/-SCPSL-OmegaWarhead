@@ -62,7 +62,8 @@ namespace BetterOmegaWarhead
             #endregion
 
             #region Coroutine Setup
-            float messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations(timeToDetonation);
+            string[] countdownMessages = OmegaWarheadManager.GetNotifyTimes().Select(notifyTime => NotificationUtility.GetCassieCounterNotifyMessage(notifyTime)).ToArray();
+            float messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations(1f, countdownMessages);
             LogHelper.Debug($"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.");
             float adjustedTime = timeToDetonation - messageDurationAdjustment;
             _omegaWarheadManager.AddCoroutines(

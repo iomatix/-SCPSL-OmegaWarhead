@@ -25,6 +25,7 @@
         private readonly List<CoroutineHandle> _coroutines = new List<CoroutineHandle>();
         private bool _omegaActivated, _omegaDetonated;
         private static readonly int[] NotifyTimes = { 300, 240, 180, 120, 60, 25, 15, 10, 5, 4, 3, 2, 1 };
+        public static int[] GetNotifyTimes() => NotifyTimes;
         #endregion
 
         #region Constructor
