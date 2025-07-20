@@ -66,17 +66,26 @@ namespace BetterOmegaWarhead
             string[] countdownMessages = OmegaWarheadManager.GetNotifyTimes().Select(notifyTime => NotificationUtility.GetCassieCounterNotifyMessage(notifyTime)).ToArray();
             float messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations(1f, countdownMessages);
             LogHelper.Debug($"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.");
-            float adjustedTime = timeToDetonation - messageDurationAdjustment;
+            float adjustedTime = timeToDetonation + messageDurationAdjustment;
+
+            if (Warhead.Exists)
+            {
+                Warhead.Start(isAutomatic: true, suppressSubtitles: true);
+                Warhead.DetonationTime = timeToDetonation; // activate synced Alpha  
+            }
+            else
+            {
+                LogHelper.Warning("Warhead components not yet initialized, cannot set detonation time");
+            }
+
+
             _omegaWarheadManager.AddCoroutines(
-                Timing.RunCoroutine(_plugin.OmegaManager.HandleCountdown(adjustedTime), "OmegaCountdown"),
-                Timing.RunCoroutine(_plugin.OmegaManager.HandleHelicopter(), "OmegaHeli"),
-                Timing.RunCoroutine(_plugin.OmegaManager.HandleCheckpointDoors(), "OmegaCheckpoints")
-            );
+                    Timing.RunCoroutine(_plugin.OmegaManager.HandleCountdown(adjustedTime), "OmegaCountdown"),
+                    Timing.RunCoroutine(_plugin.OmegaManager.HandleHelicopter(), "OmegaHeli"),
+                    Timing.RunCoroutine(_plugin.OmegaManager.HandleCheckpointDoors(), "OmegaCheckpoints")
+                );
             #endregion
-
-            Warhead.DetonationTime = timeToDetonation; // activate synced Alpha
         }
-
         /// <summary>
         /// Stops the Omega Warhead sequence and performs cleanup.
         /// </summary>
