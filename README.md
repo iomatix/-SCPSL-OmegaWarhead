@@ -15,7 +15,7 @@ If you appreciate my work, you can support me by [buying me a coffee](https://bu
 
 ### Contributors
 
-<a href="https://github.com/iomatix/-SCPSL-BetterOmegaWarhead/graphs/contributors">
+<a href="https://github.com/iomatix/-SCPSL-OmegaWarhead/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=iomatix/-SCPSL-BetterOmegaWarhead" />
 </a>
 
