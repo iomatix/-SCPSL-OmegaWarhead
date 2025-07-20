@@ -46,8 +46,8 @@
 
         #region Zones
 
-        [Description("Size of the helicopter escape zone.")]
-        public float HelicopterZoneSize { get; set; } = 7.75f;
+        [Description("Size of the escape zone.")]
+        public float EscapeZoneSize { get; set; } = 7.75f;
 
         [Description("Size of the breach shelter zone.")]
         public float ShelterZoneSize { get; set; } = 7.75f;

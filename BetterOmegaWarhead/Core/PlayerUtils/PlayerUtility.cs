@@ -36,15 +36,15 @@
         }
 
         /// <summary>
-        /// Checks if the player is eligible for helicopter escape.
+        /// Checks if the player is eligible for escape scenario.
         /// </summary>
-        public bool IsEligibleForEscape(Player player, Vector3 helicopterZone)
+        public bool IsEligibleForEscape(Player player, Vector3 escapeZone)
         {
             if (player.IsSCP || !player.IsAlive)
                 return false;
 
-            float distance = Vector3.Distance(player.Position, helicopterZone);
-            return distance <= _plugin.Config.HelicopterZoneSize;
+            float distance = Vector3.Distance(player.Position, escapeZone);
+            return distance <= _plugin.Config.EscapeZoneSize;
         }
 
         /// <summary>
