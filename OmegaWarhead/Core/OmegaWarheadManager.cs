@@ -210,11 +210,13 @@
             double warheadStartTime = Timing.LocalTime + timeToDetonation;
             var validNotifyTimes = GetNotifyTimes().Where(t => t <= timeToDetonation).OrderByDescending(t => t);
 
+            string message;
+            float msgDuration, buffer;
             foreach (int notifyTime in validNotifyTimes)
             {
-                string message = NotificationUtility.GetCassieCounterNotifyMessage(notifyTime);
-                float msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
-                float buffer = _plugin.Config.CassieTimingBuffer;
+                message = NotificationUtility.GetCassieCounterNotifyMessage(notifyTime);
+                msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
+                buffer = _plugin.Config.CassieTimingBuffer;
 
                 // Compute when to *start* this announcement
                 double targetStart = warheadStartTime - notifyTime - msgDuration - buffer;
@@ -230,10 +232,15 @@
                 if (!IsOmegaActive)
                     break;
 
-                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage || notifyTime <= 5)
-                    Exiled.API.Features.Cassie.Clear();
+                // Only send Cassie messages for notifyTime >= 5
+                if (notifyTime >= 5)
+                {
+                    if (_plugin.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
 
-                NotificationUtility.SendCassieMessage(message, $"Warhead -> {notifyTime}...");
+                    NotificationUtility.SendCassieMessage(message, $"Warhead -> {notifyTime}...");
+                }
+
+                // Dim lights for notifyTime <= 5
                 if (notifyTime <= 5)
                     Map.TurnOffLights(0.75f);
 
@@ -241,6 +248,12 @@
                 yield return Timing.WaitForSeconds(msgDuration + buffer);
             }
 
+            message = "Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
+            msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
+            buffer = _plugin.Config.CassieTimingBuffer;
+            if (_plugin.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
+            NotificationUtility.SendCassieMessage(message, $"Warhead...");
+            yield return Timing.WaitForSeconds(msgDuration + buffer);
             if (_plugin.OmegaManager.IsOmegaActive)
             {
                 AddCoroutines(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
@@ -289,8 +302,7 @@
         /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleDetonation()
         {
-            if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
-                Exiled.API.Features.Cassie.Clear();
+            if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
             string detonationMessage = _plugin.Config.DetonatingOmegaCassie;
             float detonationMessageDuration = NotificationUtility.CalculateCassieMessageDuration(detonationMessage, Plugin.Singleton.Config.CassieDetonationSpeed);
             LogHelper.Debug($"Detonation Cassie message '{detonationMessage}' duration: {detonationMessageDuration}s");
