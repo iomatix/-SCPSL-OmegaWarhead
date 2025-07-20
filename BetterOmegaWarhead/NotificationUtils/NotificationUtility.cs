@@ -40,7 +40,7 @@ namespace BetterOmegaWarhead.NotificationUtils
         {
             if (string.IsNullOrEmpty(message)) return;
             if (Plugin.Singleton.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
-            Cassie.Message("pitch_1.0" + message, isNoisy: false, isSubtitles: false, isHeld: false);
+            Cassie.Message("pitch_0.95 " + message, isNoisy: false, isSubtitles: false, isHeld: false);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace BetterOmegaWarhead.NotificationUtils
         {
             if (string.IsNullOrEmpty(message)) return;
             if (Plugin.Singleton.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
-            Cassie.Message("pitch_1.0" + message, isSubtitles: false, isHeld: false);
+            Cassie.Message("pitch_0.95 " + message, isSubtitles: false, isHeld: false);
         }
         #endregion
 
