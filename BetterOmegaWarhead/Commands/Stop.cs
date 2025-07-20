@@ -25,8 +25,7 @@
             }
 
             Plugin.Singleton.WarheadMethods.StopSequence();
-            Warhead.Status = WarheadStatus.NotArmed;
-            Warhead.IsLocked = false;
+
 
             response = "Omega Warhead stopped.";
             return false;

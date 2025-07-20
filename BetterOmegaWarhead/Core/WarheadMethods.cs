@@ -17,7 +17,6 @@ namespace BetterOmegaWarhead
     {
         #region Fields
         private readonly Plugin _plugin;
-        private readonly OmegaWarheadManager _omegaWarheadManager;
         #endregion
 
         #region Constructor
@@ -74,8 +73,7 @@ namespace BetterOmegaWarhead
             // Alpha Warhead Sync Attempt
             if (Warhead.Exists)
             {
-                Warhead.Start(isAutomatic: true, suppressSubtitles: true);
-                Warhead.DetonationTime = timeToDetonation; // activate synced Alpha  
+                Warhead.DetonationTime = adjustedTime; // activate synced Alpha  
             }
             else
             {
@@ -83,10 +81,10 @@ namespace BetterOmegaWarhead
             }
 
 
-            _omegaWarheadManager.AddCoroutines(
-                    Timing.RunCoroutine(_omegaWarheadManager.HandleCountdown(adjustedTime), "OmegaCountdown"),
-                    Timing.RunCoroutine(_omegaWarheadManager.HandleHelicopter(), "OmegaHeli"),
-                    Timing.RunCoroutine(_omegaWarheadManager.HandleCheckpointDoors(), "OmegaCheckpoints")
+            Plugin.Singleton.OmegaManager.AddCoroutines(
+                    Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCountdown(timeToDetonation), "OmegaCountdown"),
+                    Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleHelicopter(), "OmegaHeli"),
+                    Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCheckpointDoors(), "OmegaCheckpoints")
                 );
             #endregion
         }
@@ -98,7 +96,7 @@ namespace BetterOmegaWarhead
             LogHelper.Debug("Stopping Omega Warhead sequence.");
 
             NotificationUtility.SendImportantCassieMessage(Plugin.Singleton.Config.StoppingOmegaCassie);
-            _omegaWarheadManager.Cleanup();
+            Plugin.Singleton.OmegaManager.Cleanup();
         }
 
         /// <summary>
@@ -107,7 +105,7 @@ namespace BetterOmegaWarhead
         public void ResetSequence()
         {
             LogHelper.Debug("Resetting Omega Warhead state.");
-            _omegaWarheadManager.Cleanup();
+            Plugin.Singleton.OmegaManager.Cleanup();
         }
         #endregion
 
@@ -119,7 +117,7 @@ namespace BetterOmegaWarhead
         {
             #region Warhead Detonation
             // Alpha warhead detonation  
-            Warhead.Detonate();
+            Warhead.DetonationTime = 0f;
             Warhead.Shake();
             #endregion
 

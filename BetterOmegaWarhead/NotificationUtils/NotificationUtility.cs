@@ -127,8 +127,8 @@ namespace BetterOmegaWarhead.NotificationUtils
         /// <returns>A formatted Cassie message for the countdown.</returns>
         public static string GetCassieCounterNotifyMessage(int notifyTime)
         {
-            if (notifyTime <= 5) return ".G5";
-            if (notifyTime == 10) return $"{notifyTime} Seconds";
+            if (notifyTime <= 5) return $"{notifyTime} .G4";
+            if (notifyTime == 10 || notifyTime == 15) return $".G3 {notifyTime} Seconds .G5";
             return $".G3 {notifyTime} Seconds until Omega Warhead Detonation .G5";
         }
         #endregion

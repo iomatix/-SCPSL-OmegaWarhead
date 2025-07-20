@@ -77,9 +77,9 @@
         public void Cleanup()
         {
             LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}, Coroutines: {_coroutines.Count}.");
+            Warhead.Scenario = default; // Should trigger the reset logic that automatically resets the warhead to its initial scenario 
             _omegaActivated = false;
             _omegaDetonated = false;
-            Warhead.Scenario = default; // Should trigger the reset logic that automatically resets the warhead to its initial scenario 
             Map.ResetColorOfLights();
             foreach (CoroutineHandle coroutine in _coroutines)
             {
@@ -173,7 +173,7 @@
                 return;
             }
 
-            if (_plugin.Config.ResetOmegaOnWarheadStop && Warhead.IsDetonated)
+            if (_plugin.Config.ResetOmegaOnWarheadStop && IsOmegaDetonated)
             {
                 LogHelper.Debug("WarheadStop triggered. Resetting Omega sequence...");
                 _plugin.WarheadMethods.ResetSequence();
@@ -218,12 +218,13 @@
 
                         if (shouldClearCassie)
                             Exiled.API.Features.Cassie.Clear();
-                        float messageDuration = Exiled.API.Features.Cassie.CalculateDuration(message);
+                        float messageDuration = NotificationUtility.CalculateCassieMessageDuration(message);
                         LogHelper.Debug($"Cassie message '{message}' duration: {messageDuration}s");
                         NotificationUtility.SendCassieMessage(message);
-                        if (notifyTime <= 5)
-                            Map.TurnOffLights(0.75f);
+
+                        if (notifyTime <= 5) Map.TurnOffLights(0.75f);
                         yield return Timing.WaitForSeconds(messageDuration);
+
                         timeToDetonation = notifyTime;
                     }
                     else
