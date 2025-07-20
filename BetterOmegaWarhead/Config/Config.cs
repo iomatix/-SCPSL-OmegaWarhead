@@ -163,7 +163,7 @@
             "\nDespite catastrophic losses, <color=#FFD700><b>humanity endures</b></color>." +
             "\nThe Foundation's work continues at <i>Secondary Locations</i>." +
             "\n<size=20>Those who remain will rebuild...</size>\n" +
-            "\n< size=18><color=#A9A9A9>// Automated System Log #{code} from SITE-██</color></size>;";
+            "\n<size=18><color=#A9A9A9>// Automated System Log #{code} from SITE-██</color></size>;";
 
 
 
