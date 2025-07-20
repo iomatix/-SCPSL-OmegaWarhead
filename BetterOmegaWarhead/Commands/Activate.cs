@@ -20,7 +20,7 @@
             if (Plugin.Singleton.OmegaManager.IsOmegaActive)
             {
                 response = "Omega Warhead is already active.";
-                return false;
+                return true;
             }
 
             float detonationTime = Plugin.Singleton.Config.TimeToDetonation;
@@ -29,13 +29,13 @@
                 if (!float.TryParse(arguments.At(0), out float parsed))
                 {
                     response = $"Unable to parse detonation time '{arguments.At(0)}'. Please provide a valid number.";
-                    return false;
+                    return true;
                 }
 
                 if (parsed <= 0)
                 {
                     response = "Detonation time must be greater than 0 seconds.";
-                    return false;
+                    return true;
                 }
 
                 detonationTime = parsed;
@@ -48,7 +48,7 @@
             Warhead.Controller.IsLocked = !Plugin.Singleton.Config.IsStopAllowed;
 
             response = $"Omega Warhead activated with detonation in {detonationTime}s.";
-            return true;
+            return false;
         }
     };
 }

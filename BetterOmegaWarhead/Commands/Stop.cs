@@ -21,7 +21,7 @@
             if (!Plugin.Singleton.OmegaManager.IsOmegaActive)
             {
                 response = "Omega Warhead is already stopped.";
-                return false;
+                return true;
             }
 
             Plugin.Singleton.WarheadMethods.StopSequence();
