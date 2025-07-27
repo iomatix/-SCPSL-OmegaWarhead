@@ -110,7 +110,14 @@
             if (_sirenControllerId != 0)
             {
                 sharedAudioManager.FadeOutAudio(_sirenControllerId, 2f);
-                StaticSpeakerFactory.RemoveSpeaker(_sirenControllerId);
+                try
+                {
+                    StaticSpeakerFactory.RemoveSpeaker(_sirenControllerId);
+                }
+                catch (NullReferenceException)
+                {
+                    // Speaker already destroyed, ignore  
+                }
                 Log.Info($"[OmegaAudioManager] Stopped Omega siren with controller ID {_sirenControllerId}.");
                 _sirenControllerId = 0;
             }
@@ -121,7 +128,14 @@
             if (_endingMusicControllerId != 0)
             {
                 sharedAudioManager.FadeOutAudio(_endingMusicControllerId, 2f);
-                StaticSpeakerFactory.RemoveSpeaker(_endingMusicControllerId);
+                try
+                {
+                    StaticSpeakerFactory.RemoveSpeaker(_endingMusicControllerId);
+                }
+                catch (NullReferenceException)
+                {
+                    // Speaker already destroyed, ignore  
+                }
                 Log.Debug($"[OmegaAudioManager] Stopped existing ending music with controller ID {_endingMusicControllerId}.");
             }
 
