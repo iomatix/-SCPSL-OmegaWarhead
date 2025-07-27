@@ -288,7 +288,7 @@
                 NotificationUtility.SendImportantCassieMessage(_plugin.Config.CheckpointUnlockCassie, _plugin.Config.CheckpointUnlockMessage);
                 foreach (Door door in Door.List)
                 {
-                    if (door.DoorName is DoorName.LczCheckpointA || door.DoorName is DoorName.LczCheckpointB || door.DoorName is DoorName.HczCheckpoint)
+                    if (door.DoorName is DoorName.LczCheckpointA || door.DoorName is DoorName.LczCheckpointB || door.DoorName is DoorName.HczCheckpoint || door.DoorName is DoorName.EzGateA || door.DoorName is DoorName.EzGateB || door.DoorName is DoorName.SurfaceGate)
                     {
                         door.IsOpened = true;
                         door.PlayLockBypassDeniedSound();
