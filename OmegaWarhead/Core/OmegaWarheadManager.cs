@@ -1,12 +1,13 @@
 ﻿namespace OmegaWarhead
 {
-    using OmegaWarhead.Core.LoggingUtils;
-    using OmegaWarhead.Core.RoundScenarioUtils;
-    using OmegaWarhead.NotificationUtils;
     using LabApi.Events.Arguments.WarheadEvents;
     using LabApi.Features.Enums;
     using LabApi.Features.Wrappers;
     using MEC;
+    using OmegaWarhead.Core.AudioUtils;
+    using OmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Core.RoundScenarioUtils;
+    using OmegaWarhead.NotificationUtils;
     using System;
     using System.Collections.Generic;
     using System.Linq;
@@ -80,6 +81,7 @@
             Warhead.Scenario = default; // Should trigger the reset logic that automatically resets the warhead to its initial scenario 
             _omegaActivated = false;
             _omegaDetonated = false;
+            _plugin.AudioManager.StopOmegaSiren();
             Map.ResetColorOfLights();
             foreach (CoroutineHandle coroutine in _coroutines)
             {
@@ -313,6 +315,7 @@
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             _omegaActivated = false;
             _omegaDetonated = true;
+            _plugin.AudioManager.PlayEndingMusic();
             _plugin.RoundController.ExecuteScenario(_plugin.RoundController.GetScenario<DetonationEndingScenario>());
 
             while (true)

@@ -1,11 +1,12 @@
 namespace OmegaWarhead
 {
-    using OmegaWarhead.Core.LoggingUtils;
-    using OmegaWarhead.NotificationUtils;
     using CustomPlayerEffects;
     using Exiled.API.Enums;
     using LabApi.Features.Wrappers;
     using MEC;
+    using OmegaWarhead.Core.AudioUtils;
+    using OmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.NotificationUtils;
     using System;
     using System.Linq;
     using UnityEngine;
@@ -69,6 +70,7 @@ namespace OmegaWarhead
                 {
                     NotificationUtility.SendImportantCassieMessage(_plugin.Config.StartingOmegaCassie, _plugin.Config.StartingOmegaMessage);
                     NotificationUtility.BroadcastOmegaActivation();
+                    _plugin.AudioManager.PlayOmegaSiren();
                 }
             });
             #endregion

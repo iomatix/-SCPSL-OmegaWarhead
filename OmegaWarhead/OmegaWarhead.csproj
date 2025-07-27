@@ -48,6 +48,9 @@
       <HintPath>..\packages\ExMod.Exiled.9.6.3\lib\net48\Assembly-CSharp-Publicized.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="AudioManagerAPI, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SCPSL-AudioManagerAPI.1.6.0\lib\net48\AudioManagerAPI.dll</HintPath>
+    </Reference>
     <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ExMod.Exiled.9.6.3\lib\net48\CommandSystem.Core.dll</HintPath>
     </Reference>
@@ -73,7 +76,7 @@
       <HintPath>..\packages\ExMod.Exiled.9.6.3\lib\net48\Exiled.Permissions.dll</HintPath>
     </Reference>
     <Reference Include="LabApi, Version=1.1.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\ExMod.Exiled.9.6.3\lib\net48\LabApi.dll</HintPath>
+      <HintPath>..\packages\Northwood.LabAPI.1.1.0\lib\net48\LabApi.dll</HintPath>
     </Reference>
     <Reference Include="Mirror">
       <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\SCP Secret Laboratory Dedicated Server\SCPSL_Data\Managed\Mirror.dll</HintPath>
@@ -109,6 +112,8 @@
     <Compile Include="Commands\BaseCommand.cs" />
     <Compile Include="Commands\Stop.cs" />
     <Compile Include="Config\Config.cs" />
+    <Compile Include="Core\AudioUtils\OmegaAudioManager.cs" />
+    <Compile Include="Core\AudioUtils\OmegaWarheadAudioExtensions.cs" />
     <Compile Include="Core\EscapeScenarioUtils\EscapeScenario.cs" />
     <Compile Include="Core\EscapeScenarioUtils\EscapeScenarioHelper.cs" />
     <Compile Include="Core\OmegaWarheadManager.cs" />
@@ -137,11 +142,15 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Shared\Audio\Files\readme_contribution.md" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\StyleCop.Analyzers.Unstable.1.2.0.556\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\packages\StyleCop.Analyzers.Unstable.1.2.0.556\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Shared\Audio\Files\omegawarhead.endingmusic.wav" />
+    <EmbeddedResource Include="Shared\Audio\Files\omegawarhead.siren.wav" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

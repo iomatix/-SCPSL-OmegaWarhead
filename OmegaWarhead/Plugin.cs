@@ -1,17 +1,19 @@
 ﻿namespace OmegaWarhead
 {
+    using AudioManagerAPI.Defaults;
     using Exiled.API.Features;
     using MEC;
-    using System;
-    using OmegaWarhead.Core.RoundScenarioUtils;
-    using OmegaWarhead.Core.PlayerUtils;
+    using OmegaWarhead.Core.Audio;
+    using OmegaWarhead.Core.AudioUtils;
     using OmegaWarhead.Core.LoggingUtils;
-
-    using RoundUtility = OmegaWarhead.Core.RoundScenarioUtils;
+    using OmegaWarhead.Core.PlayerUtils;
+    using OmegaWarhead.Core.RoundScenarioUtils;
+    using System;
     using DoorUtility = OmegaWarhead.Core.DoorUtils;
     using EscapeUtility = OmegaWarhead.Core.PlayerUtils;
     using PlayerUtility = OmegaWarhead.Core.PlayerUtils;
     using RoomUtility = OmegaWarhead.Core.RoomUtils;
+    using RoundUtility = OmegaWarhead.Core.RoundScenarioUtils;
 
 
     /// <summary>
@@ -32,6 +34,8 @@
         private EventHandler _eventHandler;
         private CacheHandler _cacheHandler;
         private OmegaWarheadManager _omegaManager;
+        private OmegaAudioManager _omegaAudioManager;
+
         #endregion
 
         #region Plugin Metadata
@@ -53,7 +57,7 @@
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version { get; } = new Version(7, 2, 1);
+        public override Version Version { get; } = new Version(7, 3, 0);
 
         /// <summary>
         /// Gets the minimum required version of Exiled for the plugin.
@@ -91,6 +95,10 @@
         /// Gets the Omega Warhead manager for handling warhead activation and detonation.
         /// </summary>
         internal OmegaWarheadManager OmegaManager { get => _omegaManager; private set => _omegaManager = value; }
+        /// <summary>
+        /// Gets the Omega Audio for audio management provided by AudioManagerAPI.
+        /// </summary>
+        public OmegaAudioManager AudioManager { get => _omegaAudioManager; private set => _omegaAudioManager = value; }
         #endregion
 
         #region Lifecycle Methods
@@ -120,7 +128,9 @@
             PlayerMethods = new PlayerMethods(this);
             WarheadMethods = new WarheadMethods(this);
             OmegaManager = new OmegaWarheadManager(this);
+            AudioManager = new OmegaAudioManager(this);
             #endregion
+
 
             #region Register Events
             LogHelper.Debug("Registering events.");
@@ -129,7 +139,8 @@
             #endregion
 
             base.OnEnabled();
-            LogHelper.Debug("OmegaWarhead plugin enabled.");
+            LogHelper.Info("OmegaWarhead plugin enabled.");
+            OmegaManager.Init();
         }
 
         /// <summary>
