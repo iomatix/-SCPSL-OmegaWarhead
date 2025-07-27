@@ -166,8 +166,22 @@
                 Log.Debug($"[OmegaAudioManager] Cleaned up ending music with controller ID {_endingMusicControllerId}.");
                 _endingMusicControllerId = 0;
             }
-            sharedAudioManager.CleanupAllSpeakers();
-            Log.Debug("[OmegaAudioManager] Cleaned up all audio speakers.");
+            try
+            {
+                sharedAudioManager.CleanupAllSpeakers();
+            }
+            catch (NullReferenceException ex)
+            {
+                Log.Debug($"[OmegaAudioManager][Cleanup] Speaker was already cleaned up: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"[OmegaAudioManager][Cleanup] Unexpected error during cleanup: {ex.Message}");
+            }
+            finally
+            {
+                Log.Debug("[OmegaAudioManager] Cleaned up all audio speakers.");
+            }
         }
     }
 }
