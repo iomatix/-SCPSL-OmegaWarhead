@@ -4,17 +4,12 @@
     using LabApi.Features.Enums;
     using LabApi.Features.Wrappers;
     using MEC;
-    using OmegaWarhead.Core.AudioUtils;
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Core.RoundScenarioUtils;
     using OmegaWarhead.NotificationUtils;
-    using System;
     using System.Collections.Generic;
     using System.Linq;
-    using UnityEngine;
-    using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
-    using ServerHandler = LabApi.Events.Handlers.ServerEvents;
-    using WarheadHandler = LabApi.Events.Handlers.WarheadEvents;
+
 
     /// <summary>
     /// Manages the Omega Warhead functionality, including activation, countdown, and detonation sequences.
