@@ -28,20 +28,9 @@
         public OmegaAudioManager(Plugin plugin)
         {
             _plugin = plugin ?? throw new ArgumentNullException(nameof(plugin), "Plugin instance cannot be null.");
-            if (DefaultAudioManager.Instance == null)
-            {
-                Log.Debug("[OmegaAudioManager] Initializing DefaultAudioManager.Instance.");
-                DefaultAudioManager.RegisterDefaults(cacheSize: 120);
-                sharedAudioManager = DefaultAudioManager.Instance;
-                Log.Debug($"[OmegaAudioManager] sharedAudioManager initialized: {sharedAudioManager}");
-                RegisterAudioResources();
-            }
-            else
-            {
-                Log.Debug("[OmegaAudioManager] DefaultAudioManager.Instance already initialized, using existing instance.");
-                sharedAudioManager = DefaultAudioManager.Instance;
-                RegisterAudioResources();
-            }
+
+            sharedAudioManager = DefaultAudioManager.Instance;
+            RegisterAudioResources();
         }
 
         private void RegisterAudioResources()
