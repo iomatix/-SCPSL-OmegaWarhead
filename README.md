@@ -9,7 +9,7 @@ This plugins adds a new Warhead to SCP:SL. It can be activated replacing Alpha W
 
 ## Dependencies:
 
-- **SCPSL-AudioManagerAPI**: `https://github.com/iomatix/-SCPSL-AudioManagerAPI/releases`
+- **[SCPSL-AudioManagerAPI](https://github.com/iomatix/-SCPSL-AudioManagerAPI/tree/main/AudioManagerAPI)**: `https://github.com/iomatix/-SCPSL-AudioManagerAPI/releases`
 
 ### Supporting Development
 
