@@ -78,7 +78,7 @@ ending_broadcast: |-
 
   <color=green> 🌿 Survived: {survived}</color> souls preserved in shelters.
   <color=blue> 🚁 Evacuated: {escaped}</color> heroes airlifted to safety.
-  <color=red> 💀 Lost: {dead}</color> absorbed by the nuclear blast
+  <color=red> 💀 Lost: {dead}</color> absorbed by the nuclear blast.
 
   <b><color=#DAA520>FINAL TRANSMISSION FROM SITE-██</color></b>
   Despite catastrophic losses, <color=#FFD700><b>humanity endures</b></color>.
@@ -122,3 +122,4 @@ permissions: 'omegawarhead'
 debug: true
 
 ```
+
