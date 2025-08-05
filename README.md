@@ -28,9 +28,6 @@ When Omega is counting down, you've got two ways out:
 - Set custom messages for survivors, evacuees, and those who perish.
 - Broadcast a dramatic end-of-round report with survival stats and lore flavor.
 
-## 🗣️ Immersive Audio & Messaging
-- Cassie announcements and hint messages guide players through the chaos — from activation to detonation.
-
 ### Supporting Development
 
 My mods are **always free to use**.
@@ -142,6 +139,7 @@ permissions: 'omegawarhead'
 debug: true
 
 ```
+
 
 
 
