@@ -8,7 +8,7 @@ This plugin introduces the Omega Warhead, a high-stakes alternative to the stand
 ## 🔧 How It Works
 
 - The plugin can randomly replace the Alpha Warhead with Omega (15% chance by default).
-- The odds go up with each generator activated — and if 3 are online, Omega is guaranteed to launch.
+- The odds go up with each generator activated - and if 3 are online, Omega is guaranteed to launch.
 - Once activated, Omega cannot be stopped (unless you change that in the config).
 - Countdown to detonation: 320 seconds.
 - Key events like checkpoint door locks and helicopter broadcasts are timed for dramatic effect.
@@ -142,5 +142,6 @@ permissions: 'omegawarhead'
 debug: true
 
 ```
+
 
 
