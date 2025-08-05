@@ -194,7 +194,7 @@
         public string EndingBroadcast { get; set; } = "<size=26><color=#FFA500>--- OMEGA WARHEAD AFTERMATH ---</color></size>\n<b>CASUALTY REPORT</b>\n" +
             "\n<color=green> 🌿 Survived: {survived}</color> souls preserved in shelters." +
             "\n<color=blue> 🚁 Evacuated: {escaped}</color> heroes airlifted to safety." +
-            "\n<color=red> 💀 Lost: {dead}</color> absorbed by the nuclear blast\n" +
+            "\n<color=red> 💀 Lost: {dead}</color> absorbed by the nuclear blast.\n" +
             "\n<b><color=#DAA520>FINAL TRANSMISSION FROM SITE-██</color></b>" +
             "\nDespite catastrophic losses, <color=#FFD700><b>humanity endures</b></color>." +
             "\nThe Foundation's work continues at <i>Secondary Locations</i>." +
