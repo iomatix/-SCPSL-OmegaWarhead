@@ -17,7 +17,7 @@ This plugin introduces the Omega Warhead, a high-stakes alternative to the stand
 
 When Omega is counting down, you've got two ways out:
 - Shelter deep underground in the Breach/Evacuation zone.
-- Escape via helicopter on the surface — if you can reach it in time.
+- Escape via helicopter on the surface, only if you can reach it in time.
 
 ## 🧠 Customizable Features
 - Control lighting effects in the Omega room.
@@ -142,6 +142,7 @@ permissions: 'omegawarhead'
 debug: true
 
 ```
+
 
 
 
