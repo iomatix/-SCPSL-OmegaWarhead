@@ -5,6 +5,10 @@
 
 This plugin introduces the Omega Warhead, a high-stakes alternative to the standard Alpha Warhead in SCP: Secret Laboratory.
 
+## Dependencies:
+
+- **[SCPSL-AudioManagerAPI](https://github.com/iomatix/-SCPSL-AudioManagerAPI/tree/main/AudioManagerAPI)**: `https://github.com/iomatix/-SCPSL-AudioManagerAPI/releases`
+
 ## 🔧 How It Works
 
 - The plugin can randomly replace the Alpha Warhead with Omega (15% chance by default).
@@ -26,10 +30,6 @@ When Omega is counting down, you've got two ways out:
 
 ## 🗣️ Immersive Audio & Messaging
 - Cassie announcements and hint messages guide players through the chaos — from activation to detonation.
-
-## Dependencies:
-
-- **[SCPSL-AudioManagerAPI](https://github.com/iomatix/-SCPSL-AudioManagerAPI/tree/main/AudioManagerAPI)**: `https://github.com/iomatix/-SCPSL-AudioManagerAPI/releases`
 
 ### Supporting Development
 
@@ -142,6 +142,7 @@ permissions: 'omegawarhead'
 debug: true
 
 ```
+
 
 
 
