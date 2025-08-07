@@ -1,15 +1,32 @@
-# BetterOmegaWarhead 
+# Omega-Warhead
 
 [![Download Latest Release](https://img.shields.io/badge/Download-Latest%20Release-blue?style=for-the-badge)](https://github.com/iomatix/-SCPSL-OmegaWarhead/releases/latest)
 [![GitHub Downloads](https://img.shields.io/github/downloads/iomatix/-SCPSL-OmegaWarhead/latest/total?sort=date&style=for-the-badge)](https://github.com/iomatix/-SCPSL-OmegaWarhead/releases/latest)
 
-This plugins adds a new Warhead to SCP:SL. It can be activated replacing Alpha Warhead with the Omega Warhead (deactivated by default) or via commands (activateomegawarhead). The ways to survive the Omega Warhead are 2:
-1. Stay in the Breach/Evacuation Shelter
-2. Escape in the rescue Helicopter at surface zone.
+This plugin introduces the Omega Warhead, a high-stakes alternative to the standard Alpha Warhead in SCP: Secret Laboratory.
 
 ## Dependencies:
 
 - **[SCPSL-AudioManagerAPI](https://github.com/iomatix/-SCPSL-AudioManagerAPI/tree/main/AudioManagerAPI)**: `https://github.com/iomatix/-SCPSL-AudioManagerAPI/releases`
+
+## 🔧 How It Works
+
+- The plugin can randomly replace the Alpha Warhead with Omega (15% chance by default).
+- The odds go up with each generator activated - and if 3 are online, Omega is guaranteed to launch.
+- Once activated, Omega cannot be stopped (unless you change that in the config).
+- Countdown to detonation: 320 seconds.
+- Key events like checkpoint door locks and helicopter broadcasts are timed for dramatic effect.
+
+## 🚨 Survival Options
+
+When Omega is counting down, you've got two ways out:
+- Shelter deep underground in the Breach/Evacuation zone.
+- Escape via helicopter on the surface, only if you can reach it in time.
+
+## 🧠 Customizable Features
+- Control lighting effects in the Omega room.
+- Set custom messages for survivors, evacuees, and those who perish.
+- Broadcast a dramatic end-of-round report with survival stats and lore flavor.
 
 ### Supporting Development
 
@@ -78,7 +95,7 @@ ending_broadcast: |-
 
   <color=green> 🌿 Survived: {survived}</color> souls preserved in shelters.
   <color=blue> 🚁 Evacuated: {escaped}</color> heroes airlifted to safety.
-  <color=red> 💀 Lost: {dead}</color> absorbed by the nuclear blast
+  <color=red> 💀 Lost: {dead}</color> absorbed by the nuclear blast.
 
   <b><color=#DAA520>FINAL TRANSMISSION FROM SITE-██</color></b>
   Despite catastrophic losses, <color=#FFD700><b>humanity endures</b></color>.
@@ -122,3 +139,9 @@ permissions: 'omegawarhead'
 debug: true
 
 ```
+
+
+
+
+
+
