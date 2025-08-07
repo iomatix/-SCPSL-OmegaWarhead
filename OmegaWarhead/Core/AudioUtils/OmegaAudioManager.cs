@@ -63,10 +63,23 @@
                 Log.Debug($"[OmegaAudioManager] Stopped existing siren with controller ID {_sirenControllerId}.");
             }
 
+            if (sharedAudioManager == null)
+            {
+                Log.Warn("[OmegaAudioManager] sharedAudioManager is null. Cannot play siren.");
+                return 0;
+            }
+
+            var audioKey = OmegaWarheadAudio.Siren.GetAudioKey();
+            if (string.IsNullOrEmpty(audioKey))
+            {
+                Log.Warn("[OmegaAudioManager] Audio key for siren is null or empty.");
+                return 0;
+            }
+
             try
             {
                 _sirenControllerId = sharedAudioManager.PlayGlobalAudioWithFilter(
-                    key: OmegaWarheadAudio.Siren.GetAudioKey(),
+                    key: audioKey,
                     loop: true,
                     volume: 0.8f,
                     priority: AudioPriority.High,
@@ -128,10 +141,23 @@
                 Log.Debug($"[OmegaAudioManager] Stopped existing ending music with controller ID {_endingMusicControllerId}.");
             }
 
+            if (sharedAudioManager == null)
+            {
+                Log.Warn("[OmegaAudioManager] sharedAudioManager is null. Cannot play siren.");
+                return 0;
+            }
+
+            var audioKey = OmegaWarheadAudio.EndingMusic.GetAudioKey();
+            if (string.IsNullOrEmpty(audioKey))
+            {
+                Log.Warn("[OmegaAudioManager] Audio key for Ending Music is null or empty.");
+                return 0;
+            }
+
             try
             {
                 _endingMusicControllerId = sharedAudioManager.PlayGlobalAudioWithFilter(
-                    key: OmegaWarheadAudio.EndingMusic.GetAudioKey(),
+                    key: audioKey,
                     loop: false,
                     volume: 0.9f,
                     priority: AudioPriority.High,
