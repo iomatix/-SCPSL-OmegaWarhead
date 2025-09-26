@@ -54,7 +54,7 @@
         /// Gets or sets the time (in seconds) until Omega Warhead detonation.
         /// </summary>
         [Description("Time until Omega detonation (in seconds).")]
-        public float TimeToDetonation { get; set; } = 320f;
+        public float TimeToDetonation { get; set; } = 345f;
 
         /// <summary>
         /// Notification times (in seconds) at which Cassie announcements are triggered.
