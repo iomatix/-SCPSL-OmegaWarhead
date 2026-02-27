@@ -326,40 +326,65 @@
                 LogHelper.Warning($"[Config] ReplaceAlphaChance should be between 0 and 100. Current: {ReplaceAlphaChance}");
 
             if (GeneratorsNumGuaranteeOmega < 0 || GeneratorsNumGuaranteeOmega > 5)
-                LogHelper.Warning($"[Config] GeneratorsNumGuaranteeOmega should be between 0 and 5 (max generators in game). Current: {GeneratorsNumGuaranteeOmega}");
+                LogHelper.Warning($"[Config] GeneratorsNumGuaranteeOmega should be between 0 and 5. Current: {GeneratorsNumGuaranteeOmega}");
 
             if (GeneratorsIncreaseChanceBy < 0)
                 LogHelper.Warning($"[Config] GeneratorsIncreaseChanceBy shouldn't be negative. Current: {GeneratorsIncreaseChanceBy}");
 
-            if (IsEnabled == false)
-                LogHelper.Warning($"[Config] IsEnabled is set to false. Plugin will not function.");
+            if (!IsEnabled)
+                LogHelper.Warning("[Config] IsEnabled is set to false. Plugin will not function.");
 
             // Timing
             if (TimeToDetonation < 10)
                 LogHelper.Warning($"[Config] TimeToDetonation should be at least 10 seconds to allow evacuation. Current: {TimeToDetonation}s");
 
-            if (CassieNotifySpeed < 0.3f || CassieNotifySpeed > 1.5f)
-                LogHelper.Warning($"[Config] CassieNotifySpeed ({CassieNotifySpeed}) is outside safe estimation range. This affects timing calculations — not voice speed. Recommended: 0.65 to 0.75.");
+            // Cassie Timing Adjustments
+            if (CassieNotifySpeed < 0.3 || CassieNotifySpeed > 1.5)
+                LogHelper.Warning($"[Config] CassieNotifySpeed ({CassieNotifySpeed}) is outside safe estimation range. Recommended: 0.65 to 1.25.");
 
-            if (CassieDetonationSpeed < 0.3f || CassieDetonationSpeed > 1.5f)
-                LogHelper.Warning($"[Config] CassieDetonationSpeed ({CassieDetonationSpeed}) may lead to incorrect detonation timing. This is for estimating playback duration only. Recommended: 0.4 to 0.6.");
+            if (CassieDetonationSpeed < 0.3 || CassieDetonationSpeed > 1.5)
+                LogHelper.Warning($"[Config] CassieDetonationSpeed ({CassieDetonationSpeed}) may lead to incorrect detonation timing. Recommended: 0.35 to 0.65.");
 
-            if (CassieTimingBuffer < 0f || CassieTimingBuffer > 3f)
-                LogHelper.Warning($"[Config] CassieTimingBuffer ({CassieTimingBuffer}s) is outside recommended range. A value between 0.5 and 1.5 seconds typically ensures smooth playback. Avoid excessive buffering.");
-            else if (CassieTimingBuffer < 0.5f || CassieTimingBuffer > 1.5f)
-                LogHelper.Warning($"[Config] CassieTimingBuffer ({CassieTimingBuffer}s) is valid but outside optimal range. Recommended: 0.5 to 1.5 seconds.");
-
+            // Unified Buffer Validation
             if (CassieTimingBuffer < 0f || CassieTimingBuffer > 5f)
-                LogHelper.Warning($"[Config] CassieTimingBuffer is recommended to be between 0.0 and 5.0 seconds. Current: {CassieTimingBuffer}");
+            {
+                LogHelper.Warning($"[Config] CassieTimingBuffer ({CassieTimingBuffer}s) is extreme. Hard limit is 0 to 5 seconds. Resetting to default (0.65s).");
+                CassieTimingBuffer = 0.65f; // Automatyczna korekta wartości krytycznej
+            }
+            else if (CassieTimingBuffer < 0.45f || CassieTimingBuffer > 1.5f)
+            {
+                LogHelper.Warning($"[Config] CassieTimingBuffer ({CassieTimingBuffer}s) is valid but outside optimal range. Recommended: 0.45 to 1.5 seconds.");
+            }
 
+            // Notify Times Sorting Validation
+            if (NotifyTimes != null && NotifyTimes.Count > 1)
+            {
+                bool isSorted = true;
+                for (int i = 0; i < NotifyTimes.Count - 1; i++)
+                {
+                    if (NotifyTimes[i] < NotifyTimes[i + 1])
+                    {
+                        isSorted = false;
+                        break;
+                    }
+                }
+
+                if (!isSorted)
+                {
+                    LogHelper.Warning("[Config] NotifyTimes list is not sorted in descending order. Sorting automatically.");
+                    NotifyTimes.Sort((a, b) => b.CompareTo(a)); // Wymuszenie poprawnego sortowania malejącego
+                }
+            }
+
+            // Sequence Delays
             if (OpenAndLockCheckpointDoorsDelay < 0 || OpenAndLockCheckpointDoorsDelay >= TimeToDetonation)
-                LogHelper.Warning($"[Config] OpenAndLockCheckpointDoorsDelay should be non-negative and less than TimeToDetonation ({TimeToDetonation}s). Current: {OpenAndLockCheckpointDoorsDelay}s");
+                LogHelper.Warning($"[Config] OpenAndLockCheckpointDoorsDelay must be positive and less than TimeToDetonation. Current: {OpenAndLockCheckpointDoorsDelay}s");
 
             if (HelicopterBroadcastDelay < 0 || HelicopterBroadcastDelay >= TimeToDetonation)
-                LogHelper.Warning($"[Config] HelicopterBroadcastDelay should be non-negative and less than TimeToDetonation ({TimeToDetonation}s). Current: {HelicopterBroadcastDelay}s");
+                LogHelper.Warning($"[Config] HelicopterBroadcastDelay must be positive and less than TimeToDetonation. Current: {HelicopterBroadcastDelay}s");
 
             if (DelayBeforeOmegaSequence < 0 || DelayBeforeOmegaSequence >= TimeToDetonation)
-                LogHelper.Warning($"[Config] DelayBeforeOmegaSequence should be non-negative and less than TimeToDetonation ({TimeToDetonation}s). Current: {DelayBeforeOmegaSequence}s");
+                LogHelper.Warning($"[Config] DelayBeforeOmegaSequence must be positive and less than TimeToDetonation. Current: {DelayBeforeOmegaSequence}s");
 
             // Zones
             if (EscapeZoneSize <= 0)
@@ -372,64 +397,36 @@
             if (LightsColorR < 0f || LightsColorR > 1f || LightsColorG < 0f || LightsColorG > 1f || LightsColorB < 0f || LightsColorB > 1f)
                 LogHelper.Warning($"[Config] Light color RGB values should be between 0.0 and 1.0. Current: R={LightsColorR}, G={LightsColorG}, B={LightsColorB}");
 
-            // Messages
-            if (string.IsNullOrEmpty(HelicopterIncomingMessage))
-                LogHelper.Warning("[Config] HelicopterIncomingMessage is empty.");
+            // Messages & Strings (DRY optimization)
+            ValidateString(HelicopterIncomingMessage, nameof(HelicopterIncomingMessage));
+            ValidateString(HelicopterEscapeMessage, nameof(HelicopterEscapeMessage));
+            ValidateString(ActivatedMessage, nameof(ActivatedMessage));
+            ValidateString(StoppingOmegaCassie, nameof(StoppingOmegaCassie));
+            ValidateString(StartingOmegaCassie, nameof(StartingOmegaCassie));
+            ValidateString(DetonatingOmegaCassie, nameof(DetonatingOmegaCassie));
+            ValidateString(HeliIncomingCassie, nameof(HeliIncomingCassie));
+            ValidateString(CheckpointUnlockCassie, nameof(CheckpointUnlockCassie));
+            ValidateString(StoppingOmegaMessage, nameof(StoppingOmegaMessage));
+            ValidateString(StartingOmegaMessage, nameof(StartingOmegaMessage));
+            ValidateString(DetonatingOmegaMessage, nameof(DetonatingOmegaMessage));
+            ValidateString(HeliIncomingMessage, nameof(HeliIncomingMessage));
+            ValidateString(CheckpointUnlockMessage, nameof(CheckpointUnlockMessage));
+            ValidateString(SurvivorMessage, nameof(SurvivorMessage));
+            ValidateString(EvacuatedMessage, nameof(EvacuatedMessage));
+            ValidateString(KilledMessage, nameof(KilledMessage));
+            ValidateString(EndingBroadcast, nameof(EndingBroadcast));
+            ValidateString(Permissions, nameof(Permissions));
+        }
 
-            if (string.IsNullOrEmpty(HelicopterEscapeMessage))
-                LogHelper.Warning("[Config] HelicopterEscapeMessage is empty.");
-
-            if (string.IsNullOrEmpty(ActivatedMessage))
-                LogHelper.Warning("[Config] ActivatedMessage is empty.");
-
-            if (string.IsNullOrEmpty(StoppingOmegaCassie))
-                LogHelper.Warning("[Config] StoppingOmegaCassie is empty.");
-
-            if (string.IsNullOrEmpty(StartingOmegaCassie))
-                LogHelper.Warning("[Config] StartingOmegaCassie is empty.");
-
-            if (string.IsNullOrEmpty(DetonatingOmegaCassie))
-                LogHelper.Warning("[Config] DetonatingOmegaCassie is empty.");
-
-            if (string.IsNullOrEmpty(HeliIncomingCassie))
-                LogHelper.Warning("[Config] HeliIncomingCassie is empty.");
-
-            if (string.IsNullOrEmpty(CheckpointUnlockCassie))
-                LogHelper.Warning("[Config] CheckpointUnlockCassie is empty.");
-
-            if (string.IsNullOrEmpty(StoppingOmegaMessage))
-                LogHelper.Warning("[Config] StoppingOmegaMessage is empty.");
-
-            if (string.IsNullOrEmpty(StartingOmegaMessage))
-                LogHelper.Warning("[Config] StartingOmegaMessage is empty.");
-
-            if (string.IsNullOrEmpty(DetonatingOmegaMessage))
-                LogHelper.Warning("[Config] DetonatingOmegaMessage is empty.");
-
-            if (string.IsNullOrEmpty(HeliIncomingMessage))
-                LogHelper.Warning("[Config] HeliIncomingMessage is empty.");
-
-            if (string.IsNullOrEmpty(CheckpointUnlockMessage))
-                LogHelper.Warning("[Config] CheckpointUnlockMessage is empty.");
-
-            if (string.IsNullOrEmpty(SurvivorMessage))
-                LogHelper.Warning("[Config] SurvivorMessage is empty.");
-
-            if (string.IsNullOrEmpty(EvacuatedMessage))
-                LogHelper.Warning("[Config] EvacuatedMessage is empty.");
-
-            if (string.IsNullOrEmpty(KilledMessage))
-                LogHelper.Warning("[Config] KilledMessage is empty.");
-
-            if (string.IsNullOrEmpty(EndingBroadcast))
-                LogHelper.Warning("[Config] EndingBroadcast is empty.");
-
-            // Permissions
-            if (string.IsNullOrEmpty(Permissions))
-                LogHelper.Warning("[Config] Permissions cannot be null or empty.");
+        /// <summary>
+        /// Helper method to validate string properties.
+        /// </summary>
+        private void ValidateString(string value, string propertyName)
+        {
+            if (string.IsNullOrEmpty(value))
+                LogHelper.Warning($"[Config] {propertyName} is empty or null.");
         }
         #endregion
-
     }
     #endregion
 }
