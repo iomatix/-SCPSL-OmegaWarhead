@@ -270,6 +270,7 @@
         public void ResetCache()
         {
             LogHelper.Debug("ResetCache called, clearing all caches.");
+
             _cachedShelterLocations = null;
             LogHelper.Debug("Cleared _cachedShelterLocations.");
 
@@ -278,9 +279,21 @@
                 LogHelper.Debug($"Disabling god mode for {_cachedHeliSurvivors.Count} evacuated players.");
                 foreach (Player player in _cachedHeliSurvivors)
                 {
-                    player.IsGodModeEnabled = false;
-                    LogHelper.Debug($"Disabled god mode for {player.Nickname}.");
+
+                    if (player != null && player.IsReady)
+                    {
+                        try
+                        {
+                            player.IsGodModeEnabled = false;
+                            LogHelper.Debug($"Disabled god mode for {player.Nickname}.");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogHelper.Warning($"Could not disable godmode for {player.Nickname}: {ex.Message}");
+                        }
+                    }
                 }
+                _cachedHeliSurvivors.Clear();
                 _cachedHeliSurvivors = null;
                 LogHelper.Debug("Cleared _cachedHeliSurvivors.");
             }
@@ -288,6 +301,7 @@
             if (_cachedDisabledFactions != null)
             {
                 LogHelper.Debug($"Clearing {_cachedDisabledFactions.Count} disabled factions.");
+                _cachedDisabledFactions.Clear();
                 _cachedDisabledFactions = null;
                 LogHelper.Debug("Cleared _cachedDisabledFactions.");
             }
@@ -296,8 +310,8 @@
             {
                 LogHelper.Debug("Clearing cached player fates.");
                 _cachedPlayerFates.Clear();
+                _cachedPlayerFates = null;
             }
-
         }
 
         #endregion
