@@ -145,6 +145,19 @@
         #endregion
 
         #region Messages
+
+        /// <summary>
+        /// Priority level for Cassie’s messages. Higher values will skip more of the message queue before playing these announcements.
+        /// </summary>
+        [Description("Priority for Cassie messages.")]
+        public float CassieMessagePriority { get; set; } = 7.51f;
+
+        /// <summary>
+        /// Priority level for Cassie’s important messages. Higher values will skip more of the message queue before playing these announcements.
+        /// </summary>
+        [Description("Priority for important Cassie messages.")]
+        public float CassieMessageImportantPriority { get; set; } = 10.1f;
+
         /// <summary>
         /// Gets or sets the hint message displayed when the evacuation helicopter is inbound.
         /// </summary>

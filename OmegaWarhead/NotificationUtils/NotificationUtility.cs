@@ -39,38 +39,66 @@ namespace OmegaWarhead.NotificationUtils
     public static class NotificationUtility
     {
         #region Cassie Message Methods
+
         /// <summary>
-        /// Sends a Cassie message with specified settings, optionally clearing previous messages.
+        /// Sends a standard Cassie message with specified settings, optionally clearing previous messages.
         /// </summary>
         /// <param name="message">The message to send.</param>
+        /// <param name="customSubtitles">Optional custom subtitles for the message.</param>
         public static void SendCassieMessage(string message, string customSubtitles = "")
         {
-            if (string.IsNullOrEmpty(message)) return;
-
-            if (Plugin.Singleton.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
-
-            bool displaySubtitles = !string.IsNullOrEmpty(customSubtitles) && !Plugin.Singleton.Config.DisableCassieMessages;
-
-            string fullMessage = "pitch_0.95 " + message;
-            Cassie.Message(fullMessage, isSubtitles: displaySubtitles, isNoisy: false, isHeld: false, customSubtitles: customSubtitles);
+            ProcessAndDispatchMessage(
+                message,
+                customSubtitles,
+                Plugin.Singleton.Config.CassieMessageClearBeforeWarheadMessage,
+                "pitch_0.95",
+                Plugin.Singleton.Config.CassieMessagePriority
+            );
         }
 
         /// <summary>
-        /// Sends an important Cassie message, optionally clearing previous messages.
+        /// Sends an important Cassie message with adjusted pitch and higher priority, optionally clearing previous messages.
         /// </summary>
         /// <param name="message">The important message to send.</param>
+        /// <param name="customSubtitles">Optional custom subtitles for the message.</param>
         public static void SendImportantCassieMessage(string message, string customSubtitles = "")
         {
-            if (string.IsNullOrEmpty(message)) return;
-
-            if (Plugin.Singleton.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
-
-            bool displaySubtitles = !string.IsNullOrEmpty(customSubtitles) && !Plugin.Singleton.Config.DisableCassieMessages;
-
-            string fullMessage = "pitch_1.05 " + message;
-
-            Cassie.Message(fullMessage, isSubtitles: displaySubtitles, isNoisy: false, isHeld: false, customSubtitles: customSubtitles);
+            ProcessAndDispatchMessage(
+                message,
+                customSubtitles,
+                Plugin.Singleton.Config.CassieMessageClearBeforeImportant,
+                "pitch_1.05",
+                Plugin.Singleton.Config.CassieMessageImportantPriority
+            );
         }
+
+        /// <summary>
+        /// Core method responsible for validating, formatting, and dispatching Cassie messages.
+        /// </summary>
+        /// <param name="message">The base message to be processed.</param>
+        /// <param name="customSubtitles">The subtitles to display alongside the message.</param>
+        /// <param name="shouldClear">Indicates whether the Cassie queue should be cleared before sending.</param>
+        /// <param name="pitchModifier">The pitch modification string (e.g., "pitch_0.95").</param>
+        /// <param name="priority">The priority level of the message in the queue.</param>
+        private static void ProcessAndDispatchMessage(string message, string customSubtitles, bool shouldClear, string pitchModifier, float priority)
+        {
+            if (string.IsNullOrEmpty(message))
+                return;
+
+            if (shouldClear)
+                Exiled.API.Features.Cassie.Clear();
+
+            string processedSubtitles = string.Empty;
+            if (!string.IsNullOrEmpty(customSubtitles) && !Plugin.Singleton.Config.DisableCassieMessages)
+            {
+                processedSubtitles = customSubtitles;
+            }
+
+            string fullMessage = $"{pitchModifier} {message}";
+
+            Announcer.Message(fullMessage, customSubtitles: processedSubtitles, priority: priority);
+        }
+
         #endregion
 
         #region Message Duration Calculations
