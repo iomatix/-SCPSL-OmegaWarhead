@@ -44,25 +44,28 @@ namespace OmegaWarhead.Core.PlayerUtils
 
             DisableFactionSpawn();
 
-            #region Player Processing
-            // Single loop to handle both hint sending and delayed escape processing  
+            // Broadcast the initial hint to all ready players immediately
             foreach (Player player in Player.ReadyList)
             {
                 player.SendHint(scenario.InitialMessage, 6.0f);
-
-                float totalDelay = scenario.InitialDelay + scenario.ProcessingDelay;
-                Timing.CallDelayed(totalDelay, () => ProcessPlayerEscape(player, scenario));
             }
-            #endregion
 
-            #region Scenario Timing
+            // Wait for the initial delay (e.g., helicopter flying in)
             yield return Timing.WaitForSeconds(scenario.InitialDelay);
 
+            // Trigger physical event (e.g., spawn chopper)
             scenario.OnEscapeTriggered?.Invoke();
 
+            // Wait for the processing delay (e.g., boarding time)
             yield return Timing.WaitForSeconds(scenario.ProcessingDelay);
+
+            // Now process the escape for all players efficiently in one pass
+            foreach (Player player in Player.ReadyList)
+            {
+                ProcessPlayerEscape(player, scenario);
+            }
+
             LogHelper.Debug($"{scenario.Name} escape sequence completed.");
-            #endregion
         }
 
         /// <summary>
@@ -142,45 +145,15 @@ namespace OmegaWarhead.Core.PlayerUtils
         {
             LogHelper.Debug("DisableFactionSpawn called.");
 
-            #region Faction Role Processing
-            var spawnableRoles = new[]
+            // Direct faction manipulation avoids unnecessary role mapping loops
+            Faction[] factionsToDisable = { Faction.FoundationStaff, Faction.FoundationEnemy };
+
+            foreach (Faction faction in factionsToDisable)
             {
-                RoleTypeId.NtfCaptain,
-                RoleTypeId.NtfSergeant,
-                RoleTypeId.NtfSpecialist,
-                RoleTypeId.NtfPrivate,
-                RoleTypeId.ChaosConscript,
-                RoleTypeId.ChaosMarauder,
-                RoleTypeId.ChaosRepressor,
-                RoleTypeId.ChaosRifleman
-            };
-
-            foreach (var role in spawnableRoles)
-            {
-                Team team = role.GetTeam();
-                Faction faction;
-
-                switch (team)
-                {
-                    case Team.FoundationForces:
-                        faction = Faction.FoundationStaff;
-                        break;
-                    case Team.ChaosInsurgency:
-                        faction = Faction.FoundationEnemy;
-                        break;
-                    default:
-                        faction = Faction.Unclassified;
-                        break;
-                }
-
-                if (faction != Faction.Unclassified)
-                {
-                    FactionInfluenceManager.Set(faction, 0f);
-                    _plugin.CacheHandler.CacheDisabledFaction(faction);
-                    LogHelper.Debug($"Disabled faction: {faction} for role: {role}");
-                }
+                FactionInfluenceManager.Set(faction, 0f);
+                _plugin.CacheHandler.CacheDisabledFaction(faction);
+                LogHelper.Debug($"Disabled faction spawn: {faction}");
             }
-            #endregion
 
             LogHelper.Debug("DisableFactionSpawn completed.");
         }
@@ -285,7 +258,6 @@ namespace OmegaWarhead.Core.PlayerUtils
             LogHelper.Debug($"HandleSavePlayer coroutine completed for {player.Nickname}.");
         }
         #endregion
-
         #region Player Fate Ending
         /// <summary>
         /// Applies ending effects and messages to players based on their cached fate after a critical event.
@@ -293,6 +265,7 @@ namespace OmegaWarhead.Core.PlayerUtils
         public void HandleEndingByFate()
         {
             ushort survived = 0, escaped = 0, dead = 0;
+
             foreach (var entry in _plugin.CacheHandler.GetCachedPlayerFates())
             {
                 Player player = entry.Key;
@@ -306,34 +279,36 @@ namespace OmegaWarhead.Core.PlayerUtils
                 {
                     case PlayerFate.EvacuatedByHelicopter:
                         player.SendHint(Plugin.Singleton.Config.EvacuatedMessage, 10f);
-                        escaped += 1;
+                        escaped++;
                         break;
                     case PlayerFate.SurvivedShelter:
                         player.SendHint(Plugin.Singleton.Config.SurvivorMessage, 10f);
-                        survived += 1;
+                        survived++;
                         break;
                     case PlayerFate.KilledByWarhead:
                         player.SendHint(Plugin.Singleton.Config.KilledMessage, 10f);
-                        dead += 1;
+                        dead++;
                         break;
                 }
             }
+
+            // Memory Optimization: Format the broadcast string exactly once before the loop
+            string endingCode = UnityEngine.Random.Range(1000, 99999).ToString();
+            string formattedBroadcast = Plugin.Singleton.Config.EndingBroadcast
+                .Replace("{survived}", survived.ToString())
+                .Replace("{escaped}", escaped.ToString())
+                .Replace("{dead}", dead.ToString())
+                .Replace("{code}", endingCode);
 
             Timing.CallDelayed(10f, () =>
             {
                 foreach (Player player in Player.ReadyList)
                 {
-                    player.SendHint(Plugin.Singleton.Config.EndingBroadcast
-                        .Replace("{survived}", survived.ToString())
-                        .Replace("{escaped}", escaped.ToString())
-                        .Replace("{dead}", dead.ToString())
-                        .Replace("{code}", UnityEngine.Random.Range(1000, 99999).ToString())
-                        , duration: 15);
+                    player.SendHint(formattedBroadcast, duration: 15f);
                 }
             });
         }
         #endregion
-
         #region PlayerFate Enum
         /// <summary>
         /// Represents the outcome of a player during a critical event.
