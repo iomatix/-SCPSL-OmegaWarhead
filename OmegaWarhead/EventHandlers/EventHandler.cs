@@ -2,7 +2,6 @@
 {
     using MEC;
     using OmegaWarhead.Core.LoggingUtils;
-    using InventorySystem.Items.Usables;
     using PlayerRoles;
     using System.Collections.Generic;
     using ServerHandler = LabApi.Events.Handlers.ServerEvents;
@@ -42,12 +41,20 @@
         public void RegisterEvents()
         {
             LogHelper.Debug("Registering event handlers.");
-            ServerHandler.WaitingForPlayers += OnWaitingForPlayers;
+
+            // Server Events
+            ServerHandler.RoundStarting += OnRoundStart;
+            ServerHandler.RoundEnded += OnRoundEnd;
+            ServerHandler.WaveRespawning += OnWaveRespawning;
+
+            // Warhead Events
             WarheadHandler.Starting += OnWarheadStart;
             WarheadHandler.Stopping += OnWarheadStop;
             WarheadHandler.Detonating += OnWarheadDetonate;
-            ServerHandler.WaveRespawning += OnWaveRespawning;
+
+            // Player Events
             PlayerHandler.ChangingRole += OnChangingRole;
+
             LogHelper.Debug("Event handlers registered.");
         }
 
@@ -57,33 +64,47 @@
         public void UnregisterEvents()
         {
             LogHelper.Debug("Unregistering event handlers.");
-            ServerHandler.WaitingForPlayers -= OnWaitingForPlayers;
+
+            // Server Events
+            ServerHandler.RoundStarting -= OnRoundStart; 
+            ServerHandler.RoundEnded -= OnRoundEnd;
+            ServerHandler.WaveRespawning -= OnWaveRespawning;
+
+            // Warhead Events
             WarheadHandler.Starting -= OnWarheadStart;
             WarheadHandler.Stopping -= OnWarheadStop;
             WarheadHandler.Detonating -= OnWarheadDetonate;
-            ServerHandler.WaveRespawning -= OnWaveRespawning;
+
+            // Player Events
             PlayerHandler.ChangingRole -= OnChangingRole;
+
             LogHelper.Debug("Event handlers unregistered.");
+        }
+        #endregion
+
+        #region Coroutine Management
+        /// <summary>
+        /// Safely kills all coroutines tracked by the event handler and clears the list.
+        /// </summary>
+        private void KillTrackedCoroutines()
+        {
+            if (Coroutines.Count > 0)
+            {
+                Timing.KillCoroutines(Coroutines.ToArray());
+                LogHelper.Debug($"Killed {Coroutines.Count} tracked coroutines in EventHandler.");
+                Coroutines.Clear();
+            }
         }
         #endregion
 
         #region Server Event Handlers
         /// <summary>
-        /// Handles the WaitingForPlayers event, resetting the cache and disabling warhead methods.
-        /// </summary>
-        public void OnWaitingForPlayers()
-        {
-            LogHelper.Debug("OnWaitingForPlayers triggered: resetting cache and disabling warhead methods.");
-            _plugin.CacheHandler.ResetCache();
-            _plugin.OmegaManager.Disable();
-        }
-
-        /// <summary>
         /// Handles the RoundStart event, resetting the cache and initializing the Omega Warhead manager.
         /// </summary>
-        public void OnRoundStart()
+        public void OnRoundStart(LabApi.Events.Arguments.ServerEvents.RoundStartingEventArgs ev)
         {
             LogHelper.Debug("OnRoundStart triggered: resetting cache and initializing OmegaWarheadManager.");
+            KillTrackedCoroutines();
             _plugin.CacheHandler.ResetCache();
             _plugin.OmegaManager.Init();
         }
@@ -95,6 +116,7 @@
         public void OnRoundEnd(LabApi.Events.Arguments.ServerEvents.RoundEndedEventArgs ev)
         {
             LogHelper.Debug($"OnRoundEnd triggered, leading team: {ev.LeadingTeam}. Disabling OmegaWarheadManager.");
+            KillTrackedCoroutines();
             _plugin.CacheHandler.ResetCache();
             _plugin.OmegaManager.Disable();
         }
