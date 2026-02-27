@@ -37,9 +37,9 @@ namespace OmegaWarhead
         public void StartSequence(float timeToDetonation)
         {
 
-                Plugin.Singleton.OmegaManager.IsOmegaActive = true;
-                LogHelper.Debug("Starting Omega Warhead sequence chain...");
-                Activate(timeToDetonation);
+            Plugin.Singleton.OmegaManager.IsOmegaActive = true;
+            LogHelper.Debug("Starting Omega Warhead sequence chain...");
+            Activate(timeToDetonation);
 
         }
 
@@ -60,7 +60,6 @@ namespace OmegaWarhead
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
             LogHelper.Debug($"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
             Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () => { if (_plugin.OmegaManager.IsOmegaActive) Map.SetColorOfLights(lightColor); });
-
             #endregion
 
             #region Notifications
@@ -79,11 +78,11 @@ namespace OmegaWarhead
             string[] countdownMessages = OmegaWarheadManager.GetNotifyTimes().Select(notifyTime => NotificationUtility.GetCassieCounterNotifyMessage(notifyTime)).ToArray();
             double messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations(1f, countdownMessages);
             LogHelper.Debug($"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.");
+
             double adjustedTime = timeToDetonation + messageDurationAdjustment;
 
-
             Plugin.Singleton.OmegaManager.AddCoroutines(
-                    Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCountdown(timeToDetonation), "OmegaCountdown"),
+                    Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCountdown((float)adjustedTime), "OmegaCountdown"),
                     Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleHelicopter(), "OmegaHeli"),
                     Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCheckpointDoors(), "OmegaCheckpoints")
                 );

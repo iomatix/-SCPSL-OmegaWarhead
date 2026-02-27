@@ -78,11 +78,12 @@
             _omegaDetonated = false;
             _plugin.AudioManager.StopOmegaSiren();
             Map.ResetColorOfLights();
-            foreach (CoroutineHandle coroutine in _coroutines)
+
+            if (_coroutines.Count > 0)
             {
-                Timing.KillCoroutines(coroutine);
+                Timing.KillCoroutines(_coroutines.ToArray());
+                _coroutines.Clear();
             }
-            _coroutines.Clear();
         }
         #endregion
 
@@ -170,15 +171,18 @@
                 return;
             }
 
-            if (_plugin.Config.ResetOmegaOnWarheadStop && IsOmegaDetonated)
+            if (_plugin.Config.ResetOmegaOnWarheadStop)
             {
                 LogHelper.Debug("WarheadStop triggered. Resetting Omega sequence...");
                 _plugin.WarheadMethods.ResetSequence();
             }
+            else
+            {
+                LogHelper.Debug("Omega is active during warhead stop, stopping Omega...");
+                _plugin.WarheadMethods.StopSequence();
+            }
 
-            LogHelper.Debug("Omega is active during warhead stop, stopping Omega...");
-            _plugin.WarheadMethods.StopSequence();
-            ev.IsAllowed = false;
+            ev.IsAllowed = false; // Blokujemy domyślne zachowanie Alpha Warhead
         }
 
         /// <summary>
