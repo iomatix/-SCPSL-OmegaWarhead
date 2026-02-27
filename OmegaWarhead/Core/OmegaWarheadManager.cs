@@ -264,11 +264,9 @@
         public IEnumerator<float> HandleHelicopter()
         {
             yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
-            if (IsOmegaActive)
-            {
-                NotificationUtility.BroadcastHelicopterCountdown();
-                _coroutines.Add(Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(), "OmegaHeliEvacuation"));
-            }
+            if (!IsOmegaActive) yield break;
+            NotificationUtility.BroadcastHelicopterCountdown();
+            _coroutines.Add(Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(), "OmegaHeliEvacuation"));
         }
 
         /// <summary>
@@ -278,17 +276,16 @@
         public IEnumerator<float> HandleCheckpointDoors()
         {
             yield return Timing.WaitForSeconds(_plugin.Config.OpenAndLockCheckpointDoorsDelay);
-            if (_plugin.OmegaManager.IsOmegaActive)
+            if (!_plugin.OmegaManager.IsOmegaActive) yield break;
+
+            NotificationUtility.SendImportantCassieMessage(_plugin.Config.CheckpointUnlockCassie, _plugin.Config.CheckpointUnlockMessage);
+            foreach (Door door in Door.List)
             {
-                NotificationUtility.SendImportantCassieMessage(_plugin.Config.CheckpointUnlockCassie, _plugin.Config.CheckpointUnlockMessage);
-                foreach (Door door in Door.List)
+                if (door.DoorName is DoorName.LczCheckpointA || door.DoorName is DoorName.LczCheckpointB || door.DoorName is DoorName.HczCheckpoint || door.DoorName is DoorName.EzGateA || door.DoorName is DoorName.EzGateB || door.DoorName is DoorName.SurfaceGate)
                 {
-                    if (door.DoorName is DoorName.LczCheckpointA || door.DoorName is DoorName.LczCheckpointB || door.DoorName is DoorName.HczCheckpoint || door.DoorName is DoorName.EzGateA || door.DoorName is DoorName.EzGateB || door.DoorName is DoorName.SurfaceGate)
-                    {
-                        door.IsOpened = true;
-                        door.PlayLockBypassDeniedSound();
-                        door.Lock(Interactables.Interobjects.DoorUtils.DoorLockReason.Warhead, true);
-                    }
+                    door.IsOpened = true;
+                    door.PlayLockBypassDeniedSound();
+                    door.Lock(Interactables.Interobjects.DoorUtils.DoorLockReason.Warhead, true);
                 }
             }
         }
