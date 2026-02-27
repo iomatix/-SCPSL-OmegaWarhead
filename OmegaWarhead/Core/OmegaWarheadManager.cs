@@ -208,7 +208,7 @@
             var validNotifyTimes = GetNotifyTimes().Where(t => t <= timeToDetonation).OrderByDescending(t => t);
 
             string message;
-            float msgDuration, buffer;
+            double msgDuration, buffer;
             foreach (int notifyTime in validNotifyTimes)
             {
                 message = NotificationUtility.GetCassieCounterNotifyMessage(notifyTime);
@@ -242,7 +242,7 @@
                     Map.TurnOffLights(0.75f);
 
                 // Let it finish (with buffer)
-                yield return Timing.WaitForSeconds(msgDuration + buffer);
+                yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
             }
 
             message = "Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
@@ -250,7 +250,7 @@
             buffer = _plugin.Config.CassieTimingBuffer;
             if (_plugin.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
             NotificationUtility.SendCassieMessage(message, $"Warhead...");
-            yield return Timing.WaitForSeconds(msgDuration + buffer);
+            yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
             if (_plugin.OmegaManager.IsOmegaActive)
             {
                 AddCoroutines(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
@@ -301,11 +301,11 @@
         {
             if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
             string detonationMessage = _plugin.Config.DetonatingOmegaCassie;
-            float detonationMessageDuration = NotificationUtility.CalculateCassieMessageDuration(detonationMessage, Plugin.Singleton.Config.CassieDetonationSpeed);
+            double detonationMessageDuration = NotificationUtility.CalculateCassieMessageDuration(detonationMessage, Plugin.Singleton.Config.CassieDetonationSpeed);
             LogHelper.Debug($"Detonation Cassie message '{detonationMessage}' duration: {detonationMessageDuration}s");
             NotificationUtility.SendCassieMessage(detonationMessage, _plugin.Config.DetonatingOmegaMessage);
 
-            yield return Timing.WaitForSeconds(detonationMessageDuration);
+            yield return Timing.WaitForSeconds((float)detonationMessageDuration);
 
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             _omegaActivated = false;

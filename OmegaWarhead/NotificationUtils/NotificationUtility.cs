@@ -3,6 +3,7 @@ namespace OmegaWarhead.NotificationUtils
     using AudioManagerAPI.Defaults;
     using AudioManagerAPI.Features.Speakers;
     using AudioManagerAPI.Features.Static;
+    using Cassie;
     using Exiled.API.Interfaces;
     using LabApi.Features.Wrappers;
     using OmegaWarhead.Core.AudioUtils;
@@ -102,67 +103,65 @@ namespace OmegaWarhead.NotificationUtils
         #endregion
 
         #region Message Duration Calculations
+
         /// <summary>
         /// Calculates the duration of a Cassie message based on its content and speed.
+        /// Uses the updated LabAPI CassiePlaybackModifiers.
         /// </summary>
         /// <param name="message">The message to calculate duration for.</param>
-        /// <param name="speed">The speed at which the message is played (default is 0.95).</param>
-        /// <returns>The duration of the message in seconds.</returns>
-        public static float CalculateCassieMessageDuration(string message, float speed = 0.95f)
+        /// <param name="speed">The playback speed multiplier (default is 0.95).</param>
+        /// <returns>The precise duration of the message in seconds.</returns>
+        public static double CalculateCassieMessageDuration(string message, double speed = 0.95)
         {
-            return Cassie.CalculateDuration(message, speed: speed);
+            CassiePlaybackModifiers modifiers = default;
+            modifiers.Pitch = (float)speed;
+
+            return Announcer.CalculateDuration(message, modifiers);
         }
 
         /// <summary>
         /// Calculates the total duration of a dictionary of messages with their respective speeds.
         /// </summary>
         /// <param name="messageSpeedDictionary">A dictionary mapping messages to their playback speeds.</param>
-        /// <returns>The total duration of all messages in seconds.</returns>
-        public static float CalculateTotalMessagesDurations(Dictionary<string, float> messageSpeedDictionary)
+        /// <returns>The total precise duration of all messages in seconds.</returns>
+        public static double CalculateTotalMessagesDurations(IDictionary<string, float> messageSpeedDictionary)
         {
-            float totalDuration = 0f;
-            foreach ((string message, float speed) in messageSpeedDictionary)
+            double totalDuration = 0d;
+            foreach (var kvp in messageSpeedDictionary)
             {
-                totalDuration += CalculateCassieMessageDuration(message, speed);
+                totalDuration += CalculateCassieMessageDuration(kvp.Key, kvp.Value);
             }
             return totalDuration;
         }
 
         /// <summary>
-        /// Calculates the total duration of an array of messages with a default speed.
+        /// Calculates the total duration of a collection of messages with a default speed.
+        /// Supports both List<string> and array collections.
         /// </summary>
+        /// <param name="messages">The collection of messages to calculate duration for.</param>
         /// <param name="defaultSpeed">The default speed for all messages (default is 1).</param>
+        /// <returns>The total precise duration of all messages in seconds.</returns>
+        public static double CalculateTotalMessagesDurations(IEnumerable<string> messages, float defaultSpeed = 1f)
+        {
+            double totalDuration = 0d;
+            foreach (string message in messages)
+            {
+                totalDuration += CalculateCassieMessageDuration(message, defaultSpeed);
+            }
+            return totalDuration;
+        }
+
+        /// <summary>
+        /// Calculates the total duration of parameters array of messages with a default speed.
+        /// </summary>
+        /// <param name="defaultSpeed">The default speed for all messages.</param>
         /// <param name="messages">The array of messages to calculate duration for.</param>
-        /// <returns>The total duration of all messages in seconds.</returns>
-        public static float CalculateTotalMessagesDurations(float defaultSpeed = 1f, params string[] messages)
+        /// <returns>The total precise duration of all messages in seconds.</returns>
+        public static double CalculateTotalMessagesDurations(float defaultSpeed = 1f, params string[] messages)
         {
-            float totalDuration = 0f;
-
-            foreach (string message in messages)
-            {
-                totalDuration += CalculateCassieMessageDuration(message, defaultSpeed);
-            }
-
-            return totalDuration;
+            return CalculateTotalMessagesDurations((IEnumerable<string>)messages, defaultSpeed);
         }
 
-        /// <summary>
-        /// Calculates the total duration of a list of messages with a default speed.
-        /// </summary>
-        /// <param name="messages">The list of messages to calculate duration for.</param>
-        /// <param name="defaultSpeed">The default speed for all messages (default is 1).</param>
-        /// <returns>The total duration of all messages in seconds.</returns>
-        public static float CalculateTotalMessagesDurations(List<string> messages, float defaultSpeed = 1f)
-        {
-            float totalDuration = 0f;
-
-            foreach (string message in messages)
-            {
-                totalDuration += CalculateCassieMessageDuration(message, defaultSpeed);
-            }
-
-            return totalDuration;
-        }
         #endregion
 
         #region Notification Message Generation

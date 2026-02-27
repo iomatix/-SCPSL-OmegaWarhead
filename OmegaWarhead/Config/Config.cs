@@ -73,7 +73,7 @@
         /// Recommended range: 0.65 to 1.25.
         /// </summary>
         [Description("Multiplier for calculating estimated Cassie duration during countdown notifications (does not control actual speech speed).")]
-        public float CassieNotifySpeed { get; set; } = 0.85f;
+        public double CassieNotifySpeed { get; set; } = 0.85;
 
         /// <summary>
         /// Estimation multiplier for the final Omega Warhead detonation Cassie message.
@@ -81,7 +81,7 @@
         /// Recommended range: 0.35 to 0.65.
         /// </summary>
         [Description("Multiplier for estimating Cassie duration of final detonation message (does not affect actual voice speed).")]
-        public float CassieDetonationSpeed { get; set; } = 0.45f;
+        public double CassieDetonationSpeed { get; set; } = 0.45;
 
         /// <summary>
         /// Extra buffer time (in seconds) added to each Cassie announcement to prevent overlapping or skipped messages.
