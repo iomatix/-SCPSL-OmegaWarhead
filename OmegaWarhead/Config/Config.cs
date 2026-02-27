@@ -372,7 +372,7 @@
                 if (!isSorted)
                 {
                     LogHelper.Warning("[Config] NotifyTimes list is not sorted in descending order. Sorting automatically.");
-                    NotifyTimes.Sort((a, b) => b.CompareTo(a)); // Wymuszenie poprawnego sortowania malejącego
+                    NotifyTimes.Sort((a, b) => b.CompareTo(a)); // Make descending sort
                 }
             }
 
