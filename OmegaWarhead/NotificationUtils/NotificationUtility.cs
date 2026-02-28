@@ -1,15 +1,8 @@
 namespace OmegaWarhead.NotificationUtils
 {
-    using AudioManagerAPI.Defaults;
-    using AudioManagerAPI.Features.Speakers;
-    using AudioManagerAPI.Features.Static;
     using Cassie;
-    using Exiled.API.Interfaces;
     using LabApi.Features.Wrappers;
-    using OmegaWarhead.Core.AudioUtils;
-    using System;
     using System.Collections.Generic;
-    using UnityEngine;
 
     /// <summary>
     /// Provides extension methods for dictionary operations.
@@ -86,8 +79,7 @@ namespace OmegaWarhead.NotificationUtils
             if (string.IsNullOrEmpty(message))
                 return;
 
-            if (shouldClear)
-                Exiled.API.Features.Cassie.Clear();
+            if (shouldClear) Announcer.Clear();
 
             string processedSubtitles = string.Empty;
             if (!string.IsNullOrEmpty(customSubtitles) && !Plugin.Singleton.Config.DisableCassieMessages)
