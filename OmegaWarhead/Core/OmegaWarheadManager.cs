@@ -9,7 +9,6 @@
     using OmegaWarhead.NotificationUtils;
     using System.Collections.Generic;
     using System.Linq;
-    using Waits;
 
 
     /// <summary>
@@ -265,8 +264,8 @@
                 // Dim lights and extend the dramatic finale
                 if (notifyTime <= 5)
                 {
-                    yield return Timing.WaitForSeconds(0.75f);
                     Map.TurnOffLights(0.75f);
+                    yield return Timing.WaitForSeconds(0.75f);
                 }
 
                 // Crucial Step: We wait for the ENTIRE message duration, unconditionally stretching the timeline
@@ -277,7 +276,7 @@
             // Final Detonation Siren
             if (!IsOmegaActive) yield break;
 
-            message = "Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
+            message = ".G5 Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
             msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
             buffer = _plugin.Config.CassieTimingBuffer;
 
