@@ -203,7 +203,8 @@
 
         /// <summary>
         /// Manages the countdown sequence for the Omega Warhead, including notifications and light effects.
-        /// Early notifications sync strictly to the clock, while the final sequence stretches time to build dramatic tension.
+        /// Early notifications sync strictly to the clock, while the final sequence guarantees playback,
+        /// artificially stretching the detonation time to build dramatic tension if necessary.
         /// </summary>
         /// <param name="timeToDetonation">The total time in seconds until detonation.</param>
         /// <returns>An enumerator for coroutine execution.</returns>
@@ -221,7 +222,7 @@
 
                 message = NotificationUtility.GetCassieCounterNotifyMessage(notifyTime);
 
-                // Skip completely empty messages (e.g. 4, 3, 2, 1 if configured that way)
+                // Skip completely empty messages (e.g., 4, 3, 2, 1 if configured that way)
                 if (string.IsNullOrEmpty(message)) continue;
 
                 msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
@@ -233,7 +234,7 @@
                     double targetStart = warheadStartTime - notifyTime - msgDuration - buffer;
                     double now = Timing.LocalTime;
 
-                    // Skip if we are severely behind schedule
+                    // Skip this early announcement ONLY if we are severely behind schedule to maintain sync
                     if (now > targetStart) continue;
 
                     double wait = targetStart - now;
@@ -243,7 +244,8 @@
                 else
                 {
                     // Phase 2: Dramatic Finale (for <= 5 seconds)
-                    // Wait until exactly 'notifyTime' is left on the original clock to start the sequence
+                    // We NEVER skip the final countdown. If we are behind schedule, 
+                    // 'wait' will be <= 0 and it will play immediately, pushing the explosion further into the future.
                     double targetStart = warheadStartTime - notifyTime;
                     double now = Timing.LocalTime;
                     double wait = targetStart - now;
@@ -263,8 +265,8 @@
                 if (notifyTime <= 5)
                     Map.TurnOffLights(0.75f);
 
-                // Crucial Step: We wait for the ENTIRE message duration, stretching the actual detonation time
-                // If the 5-second message takes 20 seconds, the coroutine will patiently wait 20 seconds.
+                // Crucial Step: We wait for the ENTIRE message duration, unconditionally stretching the timeline
+                // If the 5-second message takes 15 seconds, the coroutine patiently waits 15 seconds.
                 yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
             }
 
@@ -280,7 +282,7 @@
 
             NotificationUtility.SendCassieMessage(message, $"Warhead...");
 
-            // Wait for the final siren to finish its sound
+            // Wait for the final siren to completely finish its sound before triggering the blast
             yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
 
             // Execute actual detonation
