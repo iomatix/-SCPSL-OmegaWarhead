@@ -9,6 +9,7 @@
     using OmegaWarhead.NotificationUtils;
     using System.Collections.Generic;
     using System.Linq;
+    using Waits;
 
 
     /// <summary>
@@ -261,9 +262,12 @@
 
                 NotificationUtility.SendCassieMessage(message, $"Warhead -> {notifyTime}...");
 
-                // Dim lights for the dramatic finale
+                // Dim lights and extend the dramatic finale
                 if (notifyTime <= 5)
+                {
+                    yield return Timing.WaitForSeconds(0.75f);
                     Map.TurnOffLights(0.75f);
+                }
 
                 // Crucial Step: We wait for the ENTIRE message duration, unconditionally stretching the timeline
                 // If the 5-second message takes 15 seconds, the coroutine patiently waits 15 seconds.
