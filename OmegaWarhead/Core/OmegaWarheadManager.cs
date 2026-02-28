@@ -346,8 +346,8 @@
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             _omegaActivated = false;
             _omegaDetonated = true;
-            _plugin.AudioManager.PlayEndingMusic();
             _plugin.RoundController.ExecuteScenario(_plugin.RoundController.GetScenario<DetonationEndingScenario>());
+            _plugin.AudioManager.PlayEndingMusic();
 
             // Active jammer for post-detonation messages
             while (true)
