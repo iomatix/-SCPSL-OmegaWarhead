@@ -55,13 +55,33 @@ is_stop_allowed: false
 # Should Omega countdown be reset on stop?
 reset_omega_on_warhead_stop: false
 # Time until Omega detonation (in seconds).
-time_to_detonation: 320
+time_to_detonation: 321
+# Notification times (in seconds), descending order (e.g. 300,240,...,1).
+notify_times:
+- 260
+- 180
+- 120
+- 60
+- 25
+- 15
+- 10
+- 5
+- 4
+- 3
+- 2
+- 1
+# Multiplier for calculating estimated Cassie duration during countdown notifications (does not control actual speech speed).
+cassie_notify_speed: 0.75
+# Multiplier for estimating Cassie duration of final detonation message (does not affect actual voice speed).
+cassie_detonation_speed: 0.34899999999999998
+# Buffer time (in seconds) added to each Cassie message to avoid skips during countdown.
+cassie_timing_buffer: 0.649999976
 # Delay before checkpoint doors open and lock (in seconds).
 open_and_lock_checkpoint_doors_delay: 225
 # Delay before the helicopter broadcast begins (in seconds).
 helicopter_broadcast_delay: 250
 # Delay before Omega sequence starts (in seconds).
-delay_before_omega_sequence: 5
+delay_before_omega_sequence: 0.150000006
 # Size of the escape zone.
 escape_zone_size: 7.75
 # Size of the breach shelter zone.
@@ -72,6 +92,10 @@ lights_color_r: 0.0500000007
 lights_color_g: 0.850000024
 # Blue channel of Omega room lighting (0.0 - 1.0).
 lights_color_b: 0.349999994
+# Priority for Cassie messages.
+cassie_message_priority: 7.51000023
+# Priority for important Cassie messages.
+cassie_message_important_priority: 10.1000004
 # Hint message displayed when the evacuation helicopter is inbound to the landing zone.
 helicopter_incoming_message: 'Incoming evacuation helicopter!'
 # Hint message shown when helicopter escape is successful.
@@ -137,7 +161,6 @@ cassie_message_clear_before_warhead_message: false
 permissions: 'omegawarhead'
 # Enable debug logging.
 debug: true
-
 ```
 
 
