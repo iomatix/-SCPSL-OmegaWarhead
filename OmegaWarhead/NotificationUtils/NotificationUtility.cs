@@ -97,7 +97,7 @@ namespace OmegaWarhead.NotificationUtils
 
             string fullMessage = $"{pitchModifier} {message}";
 
-            Announcer.Message(fullMessage, customSubtitles: processedSubtitles, priority: priority);
+            Announcer.Message(fullMessage, customSubtitles: processedSubtitles, priority: priority, playBackground: false);
         }
 
         #endregion
