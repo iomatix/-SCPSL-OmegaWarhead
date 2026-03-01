@@ -238,7 +238,7 @@
         /// Gets or sets the Cassie message during Omega Warhead detonation.
         /// </summary>
         [Description("Cassie message during detonation.")]
-        public string DetonatingOmegaCassie { get; set; } = "pitch_0.65 Detonating pitch_0.5 Warhead";
+        public string DetonatingOmegaCassie { get; set; } = "pitch_0.65 Detonating OMEGA pitch_0.5 Warhead";
 
         /// <summary>
         /// Gets or sets the Cassie message announcing the incoming helicopter.
