@@ -336,12 +336,12 @@
         {
             string detonationMessage = _plugin.Config.DetonatingOmegaCassie;
             double detonationMessageDuration = NotificationUtility.CalculateCassieMessageDuration(detonationMessage, Plugin.Singleton.Config.CassieDetonationSpeed);
-
+            float buffor = _plugin.Config.CassieTimingBuffer;
             LogHelper.Debug($"Detonation Cassie message '{detonationMessage}' duration: {detonationMessageDuration}s");
 
             NotificationUtility.SendCassieMessage(detonationMessage, _plugin.Config.DetonatingOmegaMessage);
-
-            yield return Timing.WaitForSeconds((float)detonationMessageDuration);
+            
+            yield return Timing.WaitForSeconds((float)detonationMessageDuration + buffor);
 
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             _omegaActivated = false;
