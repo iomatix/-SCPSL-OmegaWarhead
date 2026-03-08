@@ -33,24 +33,48 @@
             RegisterAudioResources();
         }
 
+        /// <summary>
+        /// Registers Omega Warhead audio resources from embedded assembly streams.
+        /// </summary>
         private void RegisterAudioResources()
         {
             var assembly = Assembly.GetExecutingAssembly();
+
             foreach (var pair in audioConfig)
             {
-                string resourceName = pair.Value.resourceName;
-                var stream = assembly.GetManifestResourceStream(resourceName);
-                if (stream == null || stream.Length == 0)
+                string key = pair.Value.key;
+                string resourcePath = pair.Value.resourceName;
+
+                // Pre-validation check to ensure the resource actually exists in the assembly
+                using (var testStream = assembly.GetManifestResourceStream(resourcePath))
                 {
-                    Log.Error($"[OmegaAudioManager][RegisterAudioResources] Failed to load audio resource: {resourceName}. Stream is null or empty.");
-                }
-                else
-                {
-                    Log.Debug($"[OmegaAudioManager][RegisterAudioResources] Loaded audio resource: {resourceName}, size: {stream.Length} bytes");
+                    if (testStream == null)
+                    {
+                        Log.Error($"[OmegaAudioManager] RESOURCE NOT FOUND: {resourcePath}. Ensure the file build action is set to 'Embedded Resource'.");
+                        continue;
+                    }
+
+                    if (testStream.Length == 0)
+                    {
+                        Log.Error($"[OmegaAudioManager] EMPTY RESOURCE: {resourcePath}. The embedded file has 0 bytes.");
+                        continue;
+                    }
+
+                    Log.Debug($"[OmegaAudioManager] Verified resource: {resourcePath} ({testStream.Length} bytes)");
                 }
 
-                sharedAudioManager.RegisterAudio(pair.Value.key, () => assembly.GetManifestResourceStream(resourceName));
-                Log.Debug($"[OmegaAudioManager][RegisterAudioResources] Registered audio key: {pair.Value.key}");
+                // Register the provider with the Global Audio Manager
+                sharedAudioManager.RegisterAudio(key, () =>
+                {
+                    var stream = assembly.GetManifestResourceStream(resourcePath);
+                    if (stream == null)
+                    {
+                        Log.Error($"[OmegaAudioManager] Lazy-load failed for resource: {resourcePath}. Key: {key}");
+                    }
+                    return stream;
+                });
+
+                Log.Info($"[OmegaAudioManager] Registered audio key: {key}");
             }
         }
 

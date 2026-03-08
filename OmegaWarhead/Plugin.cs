@@ -57,7 +57,7 @@
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version { get; } = new Version(7, 7, 0);
+        public override Version Version { get; } = new Version(7, 7, 2);
 
         /// <summary>
         /// Gets the minimum required version of Exiled for the plugin.
