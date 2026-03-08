@@ -57,7 +57,7 @@
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version { get; } = new Version(7, 8, 0);
+        public override Version Version { get; } = new Version(7, 8, 1);
 
         /// <summary>
         /// Gets the minimum required version of Exiled for the plugin.
@@ -156,14 +156,10 @@
             #endregion
 
             #region Cleanup Coroutines
-            LogHelper.Debug("Killing coroutines.");
-            foreach (CoroutineHandle handle in EventHandler.Coroutines)
-            {
-                Timing.KillCoroutines(handle);
-                LogHelper.Debug($"Killed coroutine: {handle}");
-            }
-            EventHandler.Coroutines.Clear();
-            LogHelper.Debug("Cleared coroutine list.");
+            LogHelper.Debug("Killing MEC tag coroutines.");
+            Timing.KillCoroutines("Omega-Core");
+            Timing.KillCoroutines("Omega-Escape");
+            Timing.KillCoroutines("Omega-Scenario");
             #endregion
 
             #region Unregister Events

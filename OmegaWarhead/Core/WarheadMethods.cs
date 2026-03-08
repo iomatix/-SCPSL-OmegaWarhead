@@ -59,11 +59,16 @@ namespace OmegaWarhead
             #region Light Configuration
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
             LogHelper.Debug($"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
-            _plugin.EventHandler.Coroutines.Add(Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () => { if (_plugin.OmegaManager.IsOmegaActive) Map.SetColorOfLights(lightColor); }));
+
+            var coroutine_light = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
+            {
+                if (_plugin.OmegaManager.IsOmegaActive) Map.SetColorOfLights(lightColor);
+            });
+            coroutine_light.Tag = "Omega-Lights";
             #endregion
 
             #region Notifications
-            _plugin.EventHandler.Coroutines.Add(Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
+            var coroutine_core = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
             {
                 if (_plugin.OmegaManager.IsOmegaActive)
                 {
@@ -71,7 +76,8 @@ namespace OmegaWarhead
                     NotificationUtility.BroadcastOmegaActivation();
                     _plugin.AudioManager.PlayOmegaSiren();
                 }
-            }));
+            });
+            coroutine_core.Tag = "Omega-Core";
             #endregion
 
             #region Coroutine Setup
@@ -81,11 +87,9 @@ namespace OmegaWarhead
 
             double adjustedTime = timeToDetonation + messageDurationAdjustment;
 
-            Plugin.Singleton.OmegaManager.AddCoroutines(
-                    Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCountdown((float)adjustedTime), "OmegaCountdown"),
-                    Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleHelicopter(), "OmegaHeli"),
-                    Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCheckpointDoors(), "OmegaCheckpoints")
-                );
+            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCountdown((float)adjustedTime), "Omega-Core");
+            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleHelicopter(), "Omega-Escape");
+            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCheckpointDoors(), "Omega-Core");
             #endregion
         }
         /// <summary>

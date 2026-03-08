@@ -16,11 +16,6 @@
     {
         #region Fields
         private readonly Plugin _plugin;
-
-        /// <summary>
-        /// Gets the list of active coroutine handles managed by the event handler.
-        /// </summary>
-        public readonly List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
         #endregion
 
         #region Constructor
@@ -66,7 +61,7 @@
             LogHelper.Debug("Unregistering event handlers.");
 
             // Server Events
-            ServerHandler.RoundStarting -= OnRoundStart; 
+            ServerHandler.RoundStarting -= OnRoundStart;
             ServerHandler.RoundEnded -= OnRoundEnd;
             ServerHandler.WaveRespawning -= OnWaveRespawning;
 
@@ -84,16 +79,14 @@
 
         #region Coroutine Management
         /// <summary>
-        /// Safely kills all coroutines tracked by the event handler and clears the list.
+        /// Safely kills all coroutines mapped to Omega tags.
         /// </summary>
         private void KillTrackedCoroutines()
         {
-            if (Coroutines.Count > 0)
-            {
-                Timing.KillCoroutines(Coroutines.ToArray());
-                LogHelper.Debug($"Killed {Coroutines.Count} tracked coroutines in EventHandler.");
-                Coroutines.Clear();
-            }
+            Timing.KillCoroutines("Omega-Core");
+            Timing.KillCoroutines("Omega-Escape");
+            Timing.KillCoroutines("Omega-Scenario");
+            LogHelper.Debug("Killed all OmegaWarhead MEC tag coroutines.");
         }
         #endregion
 

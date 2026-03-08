@@ -58,29 +58,33 @@
             for (float t = 0f; t < 20f; t += 2f)
             {
                 float delay = t;
-                Plugin.Singleton.EventHandler.Coroutines.Add(Timing.CallDelayed(delay, () =>
+                var coroutine = Timing.CallDelayed(delay, () =>
                 {
                     Map.SetColorOfLights(UnityEngine.Color.red);
 
-                    Plugin.Singleton.EventHandler.Coroutines.Add(Timing.CallDelayed(0.5f, () => Map.TurnOffLights()));
+                    var coroutine_d1 = Timing.CallDelayed(0.5f, () => Map.TurnOffLights());
+                    coroutine_d1.Tag = "Omega-Scenario";
 
-                    Plugin.Singleton.EventHandler.Coroutines.Add(Timing.CallDelayed(1.27f, () =>
+                    var couroutine_d2 = Timing.CallDelayed(1.27f, () =>
                     {
                         Map.TurnOnLights();
                         Map.SetColorOfLights(UnityEngine.Color.black);
-                    }));
-                }));
+                    });
+                    couroutine_d2.Tag = "Omega-Scenario";
+                });
+                coroutine.Tag = "Omega-Scenario";
             }
         }
 
         private void ScheduleRoundEnd()
         {
-            Plugin.Singleton.EventHandler.Coroutines.Add(Timing.CallDelayed(30f, () =>
+            var coroutine = Timing.CallDelayed(30f, () =>
             {
                 Map.TurnOnLights();
                 Map.SetColorOfLights(UnityEngine.Color.gray);
                 Plugin.Singleton.PlayerMethods.HandleEndingByFate();
-            }));
+            });
+            coroutine.Tag = "Omega-Scenario";
 
             _roundController.EndRoundGracefully(60f);
         }

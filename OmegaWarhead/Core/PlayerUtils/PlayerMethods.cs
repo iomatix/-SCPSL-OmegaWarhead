@@ -113,11 +113,12 @@ namespace OmegaWarhead.Core.PlayerUtils
 
             ApplyEscapeEffects(player, scenario);
 
-            _plugin.EventHandler.Coroutines.Add(Timing.CallDelayed(scenario.FinalDelay, () =>
+            var coroutine = Timing.CallDelayed(scenario.FinalDelay, () =>
             {
                 player.SetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
                 LogHelper.Debug($"Player {player.Nickname} has escaped by {scenario.Name.ToLower()}.");
-            }));
+            });
+            coroutine.Tag = "Omega-Escape";
             #endregion
         }
 
@@ -207,7 +208,7 @@ namespace OmegaWarhead.Core.PlayerUtils
                 case PlayerFate.SurvivedShelter:
                 case PlayerFate.EvacuatedByHelicopter:
                     LogHelper.Debug($"Saving {player.Nickname}. Fate: {fate}");
-                    _plugin.EventHandler.Coroutines.Add(Timing.RunCoroutine(HandleSavePlayer(player)));
+                    Timing.RunCoroutine(HandleSavePlayer(player), "Omega-Escape");
                     break;
 
                 case PlayerFate.KilledByWarhead:
@@ -301,13 +302,14 @@ namespace OmegaWarhead.Core.PlayerUtils
                 .Replace("{code}", endingCode);
 
 
-            _plugin.EventHandler.Coroutines.Add(Timing.CallDelayed(10f, () =>
+            var coroutine = Timing.CallDelayed(10f, () =>
             {
                 foreach (Player player in Player.ReadyList)
                 {
                     player.SendHint(formattedBroadcast, duration: 15f);
                 }
-            }));
+            });
+            coroutine.Tag = "Omega-Scenario";
         }
         #endregion
         #region PlayerFate Enum

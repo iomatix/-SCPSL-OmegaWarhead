@@ -10,7 +10,6 @@
     using System.Collections.Generic;
     using System.Linq;
 
-
     /// <summary>
     /// Manages the Omega Warhead functionality, including activation, countdown, and detonation sequences.
     /// </summary>
@@ -19,7 +18,6 @@
     {
         #region Fields
         private readonly Plugin _plugin;
-        private readonly List<CoroutineHandle> _coroutines = new List<CoroutineHandle>();
         private bool _omegaActivated, _omegaDetonated;
         public static List<int> GetNotifyTimes() => Plugin.Singleton.Config.NotifyTimes;
         #endregion
@@ -72,32 +70,15 @@
         /// </summary>
         public void Cleanup()
         {
-            LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}, Coroutines: {_coroutines.Count}.");
+            LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}.");
             Warhead.Scenario = default; // Should trigger the reset logic that automatically resets the warhead to its initial scenario 
             _omegaActivated = false;
             _omegaDetonated = false;
             _plugin.AudioManager.StopOmegaSiren();
             Map.ResetColorOfLights();
 
-            if (_coroutines.Count > 0)
-            {
-                Timing.KillCoroutines(_coroutines.ToArray());
-                _coroutines.Clear();
-            }
-        }
-        #endregion
-
-        #region Coroutine Management
-        /// <summary>
-        /// Adds one or more coroutine handles to the manager's coroutine list.
-        /// </summary>
-        /// <param name="handles">The coroutine handles to add.</param>
-        public void AddCoroutines(params CoroutineHandle[] handles)
-        {
-            foreach (CoroutineHandle handle in handles)
-            {
-                _coroutines.Add(handle);
-            }
+            // Kill core coroutines related to Omega Warhead
+            Timing.KillCoroutines("Omega-Core");
         }
         #endregion
 
@@ -142,9 +123,7 @@
             #region Omega Activation
             LogHelper.Debug("WarheadStart triggered. Initiating Omega sequence...");
 
-
             _plugin.WarheadMethods.StartSequence(_plugin.Config.TimeToDetonation);
-
 
             LogHelper.Debug("HandleWarheadStart called.");
 
@@ -182,7 +161,7 @@
                 _plugin.WarheadMethods.StopSequence();
             }
 
-            ev.IsAllowed = false; // Blokujemy domyślne zachowanie Alpha Warhead
+            ev.IsAllowed = false; // Block default warhead stop behavior
         }
 
         /// <summary>
@@ -291,7 +270,7 @@
             // Execute actual detonation
             if (_plugin.OmegaManager.IsOmegaActive)
             {
-                AddCoroutines(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
+                Timing.RunCoroutine(HandleDetonation(), "Omega-Core");
             }
         }
 
@@ -304,7 +283,7 @@
             yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
             if (!IsOmegaActive) yield break;
             NotificationUtility.BroadcastHelicopterCountdown();
-            _coroutines.Add(Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(), "OmegaHeliEvacuation"));
+            Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(), "Omega-Core");
         }
 
         /// <summary>
@@ -340,7 +319,7 @@
             LogHelper.Debug($"Detonation Cassie message '{detonationMessage}' duration: {detonationMessageDuration}s");
 
             NotificationUtility.SendCassieMessage(detonationMessage, _plugin.Config.DetonatingOmegaMessage);
-            
+
             yield return Timing.WaitForSeconds((float)detonationMessageDuration + buffor);
 
             _plugin.PlayerMethods.HandlePlayersOnNuke();
