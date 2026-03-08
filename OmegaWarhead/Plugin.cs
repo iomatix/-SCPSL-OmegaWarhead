@@ -57,7 +57,7 @@
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version { get; } = new Version(7, 8, 2);
+        public override Version Version { get; } = new Version(7, 8, 3);
 
         /// <summary>
         /// Gets the minimum required version of Exiled for the plugin.
@@ -135,7 +135,6 @@
             #region Register Events
             LogHelper.Debug("Registering events.");
             EventHandler.RegisterEvents();
-            OmegaManager.Init();
             #endregion
 
             base.OnEnabled();

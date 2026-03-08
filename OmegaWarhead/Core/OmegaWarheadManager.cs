@@ -54,6 +54,7 @@
         public void Init()
         {
             LogHelper.Debug("Initializing OmegaWarheadManager.");
+            Cleanup();
         }
 
         /// <summary>

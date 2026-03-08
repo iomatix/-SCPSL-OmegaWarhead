@@ -110,7 +110,6 @@ namespace OmegaWarhead
         public void ResetSequence()
         {
             LogHelper.Debug("Resetting Omega Warhead state.");
-            Plugin.Singleton.OmegaManager.Cleanup();
             Plugin.Singleton.OmegaManager.Init();
         }
         #endregion
