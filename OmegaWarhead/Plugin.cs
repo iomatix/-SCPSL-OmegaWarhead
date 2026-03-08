@@ -62,7 +62,7 @@
         /// <summary>
         /// Gets the minimum required version of Exiled for the plugin.
         /// </summary>
-        public override Version RequiredExiledVersion { get; } = new Version(9, 9, 2);
+        public override Version RequiredExiledVersion { get; } = new Version(9, 9, 3);
         #endregion
 
         #region Handler Properties
