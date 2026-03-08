@@ -50,9 +50,8 @@
                 LogHelper.Warning($"Execute command arguments can not be parsed this time. Stack: {ex}");
             }
 
+            response = $"Omega Warhead starting activation with detonation in {detonationTime}s.";
             Plugin.Singleton.WarheadMethods.StartSequence(detonationTime);
-
-            response = $"Omega Warhead activated with detonation in {detonationTime}s.";
             return false;
         }
     };
