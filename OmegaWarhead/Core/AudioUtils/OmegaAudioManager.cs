@@ -1,10 +1,8 @@
 ﻿namespace OmegaWarhead.Core.Audio
 {
-
     using AudioManagerAPI.Defaults;
     using AudioManagerAPI.Features.Enums;
     using AudioManagerAPI.Features.Management;
-    using AudioManagerAPI.Features.Static;
     using OmegaWarhead.Core.AudioUtils;
     using System;
     using System.Collections.Generic;
@@ -16,8 +14,10 @@
     {
         private readonly Plugin _plugin;
         private static IAudioManager sharedAudioManager;
-        private byte _sirenControllerId;
-        private byte _endingMusicControllerId;
+
+        // byte -> int (Session ID - API 2.0 change)
+        private int _sirenSessionId;
+        private int _endingMusicSessionId;
 
         private readonly Dictionary<OmegaWarheadAudio, (string key, string resourceName)> audioConfig = new Dictionary<OmegaWarheadAudio, (string key, string resourceName)>()
         {
@@ -54,13 +54,14 @@
             }
         }
 
-        public byte PlayOmegaSiren()
+        public int PlayOmegaSiren()
         {
-            if (_sirenControllerId != 0)
+            if (_sirenSessionId != 0)
             {
-                sharedAudioManager.FadeOutAudio(_sirenControllerId, 2f);
-                StaticSpeakerFactory.RemoveSpeaker(_sirenControllerId);
-                Log.Debug($"[OmegaAudioManager] Stopped existing siren with controller ID {_sirenControllerId}.");
+                // API will clean up the session after FadeOut.
+                sharedAudioManager.FadeOutAudio(_sirenSessionId, 2f);
+                Log.Debug($"[OmegaAudioManager] Stopped existing siren with session ID {_sirenSessionId}.");
+                _sirenSessionId = 0;
             }
 
             if (sharedAudioManager == null)
@@ -78,16 +79,16 @@
 
             try
             {
-                _sirenControllerId = sharedAudioManager.PlayGlobalAudioWithFilter(
+                _sirenSessionId = sharedAudioManager.PlayGlobalAudio(
                     key: audioKey,
                     loop: true,
                     volume: 0.8f,
                     priority: AudioPriority.High,
-                    configureSpeaker: null,
+                    validPlayersFilter: null, // null means all valid players
                     queue: false,
                     fadeInDuration: 1.5f,
                     persistent: true,
-                    lifespan: 0f,
+                    lifespan: null, // null means it will play indefinitely until stopped
                     autoCleanup: false
                 );
             }
@@ -97,53 +98,39 @@
                 return 0;
             }
 
-            if (_sirenControllerId == 0)
+            if (_sirenSessionId == 0)
             {
-                Log.Warn("[OmegaAudioManager] Failed to play Omega siren audio (invalid controller ID).");
+                Log.Warn("[OmegaAudioManager] Failed to play Omega siren audio (invalid session ID).");
                 return 0;
             }
 
-            Log.Info($"[OmegaAudioManager] Playing looping Omega siren with controller ID {_sirenControllerId}.");
-            return _sirenControllerId;
+            Log.Info($"[OmegaAudioManager] Playing looping Omega siren with session ID {_sirenSessionId}.");
+            return _sirenSessionId;
         }
 
         public void StopOmegaSiren()
         {
-            if (_sirenControllerId != 0)
+            if (_sirenSessionId != 0)
             {
-                sharedAudioManager.FadeOutAudio(_sirenControllerId, 2f);
-                try
-                {
-                    StaticSpeakerFactory.RemoveSpeaker(_sirenControllerId);
-                }
-                catch (NullReferenceException)
-                {
-                    // Speaker already destroyed, ignore  
-                }
-                Log.Info($"[OmegaAudioManager] Stopped Omega siren with controller ID {_sirenControllerId}.");
-                _sirenControllerId = 0;
+                // Direct use of fade out with cleanup (without invoking physical factory)
+                sharedAudioManager.FadeOutAudio(_sirenSessionId, 2f);
+                Log.Info($"[OmegaAudioManager] Fading out and stopping Omega siren with session ID {_sirenSessionId}.");
+                _sirenSessionId = 0;
             }
         }
 
-        public byte PlayEndingMusic(float lifespan = 109f)
+        public int PlayEndingMusic(float lifespan = 109f)
         {
-            if (_endingMusicControllerId != 0)
+            if (_endingMusicSessionId != 0)
             {
-                sharedAudioManager.FadeOutAudio(_endingMusicControllerId, 2f);
-                try
-                {
-                    StaticSpeakerFactory.RemoveSpeaker(_endingMusicControllerId);
-                }
-                catch (NullReferenceException)
-                {
-                    // Speaker already destroyed, ignore  
-                }
-                Log.Debug($"[OmegaAudioManager] Stopped existing ending music with controller ID {_endingMusicControllerId}.");
+                sharedAudioManager.FadeOutAudio(_endingMusicSessionId, 2f);
+                Log.Debug($"[OmegaAudioManager] Stopped existing ending music with session ID {_endingMusicSessionId}.");
+                _endingMusicSessionId = 0;
             }
 
             if (sharedAudioManager == null)
             {
-                Log.Warn("[OmegaAudioManager] sharedAudioManager is null. Cannot play siren.");
+                Log.Warn("[OmegaAudioManager] sharedAudioManager is null. Cannot play ending music.");
                 return 0;
             }
 
@@ -156,12 +143,12 @@
 
             try
             {
-                _endingMusicControllerId = sharedAudioManager.PlayGlobalAudioWithFilter(
+                _endingMusicSessionId = sharedAudioManager.PlayGlobalAudio(
                     key: audioKey,
                     loop: false,
                     volume: 0.9f,
                     priority: AudioPriority.High,
-                    configureSpeaker: null,
+                    validPlayersFilter: null,
                     queue: false,
                     fadeInDuration: 2f,
                     persistent: false,
@@ -175,25 +162,27 @@
                 return 0;
             }
 
-            if (_endingMusicControllerId == 0)
+            if (_endingMusicSessionId == 0)
             {
-                Log.Warn("[OmegaAudioManager] Failed to play Omega ending music (invalid controller ID).");
+                Log.Warn("[OmegaAudioManager] Failed to play Omega ending music (invalid session ID).");
                 return 0;
             }
 
-            Log.Info($"[OmegaAudioManager] Playing Omega ending music with controller ID {_endingMusicControllerId}.");
-            return _endingMusicControllerId;
+            Log.Info($"[OmegaAudioManager] Playing Omega ending music with session ID {_endingMusicSessionId}.");
+            return _endingMusicSessionId;
         }
 
         public void Cleanup()
         {
             StopOmegaSiren();
-            if (_endingMusicControllerId != 0)
+            if (_endingMusicSessionId != 0)
             {
-                sharedAudioManager.FadeOutAudio(_endingMusicControllerId, 2f);
-                StaticSpeakerFactory.RemoveSpeaker(_endingMusicControllerId);
-                Log.Debug($"[OmegaAudioManager] Cleaned up ending music with controller ID {_endingMusicControllerId}.");
-                _endingMusicControllerId = 0;
+                // For instant cleanup, you could use DestroySession if you don't want to wait for the 2-second fade out:
+                // sharedAudioManager.DestroySession(_endingMusicSessionId);
+                // Leaving FadeOut for a smooth cut-off at the end of the round.
+                sharedAudioManager.FadeOutAudio(_endingMusicSessionId, 2f);
+                Log.Debug($"[OmegaAudioManager] Cleaned up ending music with session ID {_endingMusicSessionId}.");
+                _endingMusicSessionId = 0;
             }
         }
     }
