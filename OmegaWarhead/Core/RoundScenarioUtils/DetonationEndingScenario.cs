@@ -58,29 +58,29 @@
             for (float t = 0f; t < 20f; t += 2f)
             {
                 float delay = t;
-                Timing.CallDelayed(delay, () =>
+                Plugin.Singleton.EventHandler.Coroutines.Add(Timing.CallDelayed(delay, () =>
                 {
                     Map.SetColorOfLights(UnityEngine.Color.red);
 
-                    Timing.CallDelayed(0.5f, () => Map.TurnOffLights());
+                    Plugin.Singleton.EventHandler.Coroutines.Add(Timing.CallDelayed(0.5f, () => Map.TurnOffLights()));
 
-                    Timing.CallDelayed(1.27f, () =>
+                    Plugin.Singleton.EventHandler.Coroutines.Add(Timing.CallDelayed(1.27f, () =>
                     {
                         Map.TurnOnLights();
                         Map.SetColorOfLights(UnityEngine.Color.black);
-                    });
-                });
+                    }));
+                }));
             }
         }
 
         private void ScheduleRoundEnd()
         {
-            Timing.CallDelayed(30f, () =>
+            Plugin.Singleton.EventHandler.Coroutines.Add(Timing.CallDelayed(30f, () =>
             {
                 Map.TurnOnLights();
                 Map.SetColorOfLights(UnityEngine.Color.gray);
                 Plugin.Singleton.PlayerMethods.HandleEndingByFate();
-            });
+            }));
 
             _roundController.EndRoundGracefully(60f);
         }

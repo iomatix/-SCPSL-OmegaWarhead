@@ -59,11 +59,11 @@ namespace OmegaWarhead
             #region Light Configuration
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
             LogHelper.Debug($"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
-            Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () => { if (_plugin.OmegaManager.IsOmegaActive) Map.SetColorOfLights(lightColor); });
+            _plugin.EventHandler.Coroutines.Add(Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () => { if (_plugin.OmegaManager.IsOmegaActive) Map.SetColorOfLights(lightColor); }));
             #endregion
 
             #region Notifications
-            Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
+            _plugin.EventHandler.Coroutines.Add(Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
             {
                 if (_plugin.OmegaManager.IsOmegaActive)
                 {
@@ -71,7 +71,7 @@ namespace OmegaWarhead
                     NotificationUtility.BroadcastOmegaActivation();
                     _plugin.AudioManager.PlayOmegaSiren();
                 }
-            });
+            }));
             #endregion
 
             #region Coroutine Setup

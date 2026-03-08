@@ -60,11 +60,11 @@
         /// </summary>  
         public void EndRoundGracefully(float delay = 0f)
         {
-            Timing.CallDelayed(delay, () =>
+            _plugin.EventHandler.Coroutines.Add(Timing.CallDelayed(delay, () =>
             {
                 SetAutoRoundEndLock(false);
                 Round.End(force: true);
-            });
+            }));
         }
 
         public T GetScenario<T>() where T : RoundScenario

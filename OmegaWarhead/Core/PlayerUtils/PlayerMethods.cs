@@ -113,11 +113,11 @@ namespace OmegaWarhead.Core.PlayerUtils
 
             ApplyEscapeEffects(player, scenario);
 
-            Timing.CallDelayed(scenario.FinalDelay, () =>
+            _plugin.EventHandler.Coroutines.Add(Timing.CallDelayed(scenario.FinalDelay, () =>
             {
                 player.SetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
                 LogHelper.Debug($"Player {player.Nickname} has escaped by {scenario.Name.ToLower()}.");
-            });
+            }));
             #endregion
         }
 
@@ -300,13 +300,14 @@ namespace OmegaWarhead.Core.PlayerUtils
                 .Replace("{dead}", dead.ToString())
                 .Replace("{code}", endingCode);
 
-            Timing.CallDelayed(10f, () =>
+
+            _plugin.EventHandler.Coroutines.Add(Timing.CallDelayed(10f, () =>
             {
                 foreach (Player player in Player.ReadyList)
                 {
                     player.SendHint(formattedBroadcast, duration: 15f);
                 }
-            });
+            }));
         }
         #endregion
         #region PlayerFate Enum
