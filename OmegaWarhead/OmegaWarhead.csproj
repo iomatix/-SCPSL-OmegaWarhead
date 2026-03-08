@@ -51,8 +51,8 @@
       <HintPath>..\packages\ExMod.Exiled.9.13.1\lib\net48\Assembly-CSharp-Publicized.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="AudioManagerAPI, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SCPSL-AudioManagerAPI.2.0.0\lib\net48\AudioManagerAPI.dll</HintPath>
+    <Reference Include="AudioManagerAPI, Version=2.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SCPSL-AudioManagerAPI.2.0.1\lib\net48\AudioManagerAPI.dll</HintPath>
     </Reference>
     <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ExMod.Exiled.9.13.1\lib\net48\CommandSystem.Core.dll</HintPath>
