@@ -3,7 +3,6 @@
     using LabApi.Features.Wrappers;
     using MapGeneration;
     using System.Collections.Generic;
-    using System.Linq;
     using UnityEngine;
 
     /// <summary>
@@ -43,9 +42,16 @@
             }
             else
             {
-                // Slow-path: custom rooms provided
-                if (player.Room != null && roomNames.Contains(player.Room.Name))
-                    return true;
+                // Slow-path: custom rooms provided, optimized zero-allocation loop
+                if (player.Room != null)
+                {
+                    RoomName currentRoomName = player.Room.Name;
+                    for (int i = 0; i < roomNames.Length; i++)
+                    {
+                        if (roomNames[i] == currentRoomName)
+                            return true;
+                    }
+                }
             }
             #endregion
 

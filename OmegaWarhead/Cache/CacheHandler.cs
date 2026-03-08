@@ -24,7 +24,6 @@
         private HashSet<Faction> _cachedDisabledFactions;
         private Dictionary<Player, PlayerFate> _cachedPlayerFates;
 
-
         #endregion
 
         #region Constructor
@@ -56,14 +55,13 @@
         /// </returns>
         public HashSet<Vector3> CacheShelterLocations()
         {
-            LogHelper.Debug("CacheShelterLocations called, scanning for EzShelter rooms.");
+            LogHelper.Debug("Scanning for EzShelter rooms and caching locations.");
             var shelterLocations = new HashSet<Vector3>();
             foreach (Room room in Room.List)
             {
                 if (room.Name == RoomName.EzEvacShelter)
                 {
                     shelterLocations.Add(room.Position);
-                    LogHelper.Debug($"Added shelter location: {room.Position}");
                 }
             }
             LogHelper.Debug($"Cached {shelterLocations.Count} shelter locations.");
@@ -76,10 +74,8 @@
             {
                 if (_cachedShelterLocations == null)
                 {
-                    LogHelper.Debug("Initializing CachedShelterLocations via CacheShelterLocations.");
                     _cachedShelterLocations = CacheShelterLocations();
                 }
-                LogHelper.Debug($"Returning CachedShelterLocations with {_cachedShelterLocations.Count} locations.");
                 return _cachedShelterLocations;
             }
         }
@@ -95,9 +91,8 @@
         /// <param name="evacuatedPlayer">The <see cref="Player"/> instance to cache.</param>
         public void CachePlayerEvacuatedByHelicopter(Player evacuatedPlayer)
         {
-            LogHelper.Debug($"Caching player {evacuatedPlayer.Nickname} as evacuated by helicopter.");
             CachedHeliSurvivors.Add(evacuatedPlayer);
-            LogHelper.Debug($"CachedHeliSurvivors now contains {CachedHeliSurvivors.Count} players.");
+            LogHelper.Debug($"Cached player {evacuatedPlayer.Nickname} as evacuated by helicopter.");
         }
 
         /// <summary>
@@ -106,11 +101,7 @@
         /// <returns>
         /// A <see cref="HashSet{Player}"/> of helicopter-evacuated players.
         /// </returns>
-        public HashSet<Player> GetCachedPlayersEvacuatedByHelicopters()
-        {
-            LogHelper.Debug($"GetCachedPlayersEvacuatedByHelicopters called, returning {CachedHeliSurvivors.Count} players.");
-            return CachedHeliSurvivors;
-        }
+        public HashSet<Player> GetCachedPlayersEvacuatedByHelicopters() => CachedHeliSurvivors;
 
         /// <summary>
         /// Checks if a specific player is marked as having evacuated via helicopter.
@@ -119,9 +110,7 @@
         /// <returns><c>true</c> if the player is cached as evacuated; otherwise, <c>false</c>.</returns>
         public bool IsPlayerEvacuatedByHelicopters(Player player)
         {
-            bool isEvacuated = CachedHeliSurvivors.Contains(player);
-            LogHelper.Debug($"Checking if {player.Nickname} is evacuated by helicopter: {isEvacuated}");
-            return isEvacuated;
+            return CachedHeliSurvivors.Contains(player);
         }
 
         private HashSet<Player> CachedHeliSurvivors
@@ -133,7 +122,6 @@
                     LogHelper.Debug("Initializing CachedHeliSurvivors as empty set.");
                     _cachedHeliSurvivors = new HashSet<Player>();
                 }
-                LogHelper.Debug($"Returning CachedHeliSurvivors with {_cachedHeliSurvivors.Count} players.");
                 return _cachedHeliSurvivors;
             }
         }
@@ -148,11 +136,7 @@
         /// <returns>
         /// A <see cref="HashSet{Faction}"/> representing disabled factions.
         /// </returns>
-        public HashSet<Faction> GetCachedDisabledFactions()
-        {
-            LogHelper.Debug($"GetCachedDisabledFactions called, returning {CachedDisabledFactions.Count} factions.");
-            return CachedDisabledFactions;
-        }
+        public HashSet<Faction> GetCachedDisabledFactions() => CachedDisabledFactions;
 
         /// <summary>
         /// Checks if the specified faction has been cached as disabled.
@@ -161,9 +145,7 @@
         /// <returns><c>true</c> if the faction is disabled; otherwise, <c>false</c>.</returns>
         public bool IsFactionDisabled(Faction faction)
         {
-            bool isDisabled = CachedDisabledFactions.Contains(faction);
-            LogHelper.Debug($"Checking if faction {faction} is disabled: {isDisabled}");
-            return isDisabled;
+            return CachedDisabledFactions.Contains(faction);
         }
 
         /// <summary>
@@ -173,6 +155,7 @@
         public void CacheDisabledFaction(Faction faction)
         {
             CachedDisabledFactions.Add(faction);
+            LogHelper.Debug($"Cached faction {faction} as disabled.");
         }
 
         private HashSet<Faction> CachedDisabledFactions
@@ -184,7 +167,6 @@
                     LogHelper.Debug("Initializing CachedDisabledFactions as empty set.");
                     _cachedDisabledFactions = new HashSet<Faction>();
                 }
-                LogHelper.Debug($"Returning CachedDisabledFactions with {_cachedDisabledFactions.Count} factions.");
                 return _cachedDisabledFactions;
             }
         }
@@ -227,24 +209,20 @@
             if (CachedPlayerFates.TryGetValue(player, out PlayerFate fate))
                 return fate;
 
-            LogHelper.Debug($"No cached fate found for {player.Nickname}, defaulting to Unknown.");
             return PlayerFate.Unknown;
         }
 
         /// <summary>
-        /// Retrieves a collection of players who have a cached fate assigned during the current round.
+        /// Retrieves an enumeration of players who have a cached fate assigned during the current round.
+        /// Avoiding HashSet reallocation for memory safety.
         /// </summary>
         /// <returns>
-        /// A <see cref="HashSet{Player}"/> containing all players with a known fate.
+        /// An <see cref="IEnumerable{Player}"/> containing all players with a known fate.
         /// </returns>
-        public HashSet<Player> GetPlayersWithCachedFate()
+        public IEnumerable<Player> GetPlayersWithCachedFate()
         {
-            HashSet<Player> playersWithFate = new HashSet<Player>(CachedPlayerFates.Keys);
-            LogHelper.Debug($"Retrieved {playersWithFate.Count} players with cached fate.");
-            return playersWithFate;
+            return CachedPlayerFates.Keys;
         }
-
-
 
         private Dictionary<Player, PlayerFate> CachedPlayerFates
         {
@@ -272,20 +250,16 @@
             LogHelper.Debug("ResetCache called, clearing all caches.");
 
             _cachedShelterLocations = null;
-            LogHelper.Debug("Cleared _cachedShelterLocations.");
 
             if (_cachedHeliSurvivors != null)
             {
-                LogHelper.Debug($"Disabling god mode for {_cachedHeliSurvivors.Count} evacuated players.");
                 foreach (Player player in _cachedHeliSurvivors)
                 {
-
                     if (player != null && player.IsReady)
                     {
                         try
                         {
                             player.IsGodModeEnabled = false;
-                            LogHelper.Debug($"Disabled god mode for {player.Nickname}.");
                         }
                         catch (Exception ex)
                         {
@@ -295,20 +269,16 @@
                 }
                 _cachedHeliSurvivors.Clear();
                 _cachedHeliSurvivors = null;
-                LogHelper.Debug("Cleared _cachedHeliSurvivors.");
             }
 
             if (_cachedDisabledFactions != null)
             {
-                LogHelper.Debug($"Clearing {_cachedDisabledFactions.Count} disabled factions.");
                 _cachedDisabledFactions.Clear();
                 _cachedDisabledFactions = null;
-                LogHelper.Debug("Cleared _cachedDisabledFactions.");
             }
 
             if (_cachedPlayerFates != null)
             {
-                LogHelper.Debug("Clearing cached player fates.");
                 _cachedPlayerFates.Clear();
                 _cachedPlayerFates = null;
             }
