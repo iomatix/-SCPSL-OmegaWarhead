@@ -116,6 +116,9 @@
             catch (Exception ex)
             {
                 LogHelper.Error($"Failed to validate config: {ex.Message}\nStackTrace: {ex.StackTrace}");
+                LogHelper.Error("OmegaWarhead initialization aborted due to invalid configuration.");
+                // Stopping further execution of OnEnabled
+                return;
             }
 
 
@@ -148,41 +151,54 @@
         {
             LogHelper.Debug("Disabling OmegaWarhead plugin.");
 
-            #region Disable Omega Manager
-            LogHelper.Debug("Disabling OmegaWarheadManager.");
-            OmegaManager?.Disable();
-            #endregion
-
-            #region Cleanup Coroutines
-            LogHelper.Debug("Killing coroutines.");
-
-            foreach (string tag in Shared.CoroutineTags.AllStaticTags)
+            try
             {
-                Timing.KillCoroutines(tag);
+                LogHelper.Debug("Disabling OmegaWarheadManager.");
+                OmegaManager?.Disable();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error($"Error while disabling OmegaManager: {ex}");
             }
 
-            LogHelper.Debug("Cleared coroutines via tags.");
+            try
+            {
+                LogHelper.Debug("Killing coroutines.");
+                foreach (string tag in Shared.CoroutineTags.AllStaticTags)
+                {
+                    Timing.KillCoroutines(tag);
+                }
+                LogHelper.Debug("Cleared coroutines via tags.");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error($"Error while killing coroutines: {ex}");
+            }
 
-            #endregion
+            try
+            {
+                LogHelper.Debug("Unregistering events.");
+                EventHandler?.UnregisterEvents();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error($"Error while unregistering events: {ex}");
+            }
 
-            #region Unregister Events
-            LogHelper.Debug("Unregistering events.");
-            EventHandler.UnregisterEvents();
-            #endregion
-
-            #region Nullify Handlers
             LogHelper.Debug("Nullifying handlers and singleton.");
             RoundController = null;
-            Singleton = null;
             EventHandler = null;
             PlayerMethods = null;
             WarheadMethods = null;
             OmegaManager = null;
-            #endregion
+            CacheHandler = null;
+            AudioManager = null;
+            Singleton = null;
 
             LogHelper.Debug("OmegaWarhead plugin disabled.");
             base.OnDisabled();
         }
+
         #endregion
     }
     #endregion
