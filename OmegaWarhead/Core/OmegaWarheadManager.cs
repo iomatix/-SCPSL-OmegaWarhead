@@ -84,6 +84,8 @@
                 Timing.KillCoroutines(tag);
             }
             LogHelper.Debug("Killed all static OmegaWarhead coroutines via tags.");
+            
+            _plugin.PlayerMethods?.Clean();
         }
         #endregion
 
