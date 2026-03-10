@@ -72,7 +72,7 @@ namespace OmegaWarhead.Core.PlayerUtils
         /// Handles the helicopter escape sequence using the generic escape system.
         /// </summary>
         /// <returns>An enumerator for coroutine execution.</returns>
-        public IEnumerator<float> HandleHelicopterEscape()
+        public IEnumerator<float> HandleHelicopterEvacuation()
         {
             #region Helicopter Scenario Setup
             var helicopterScenario = new EscapeScenario
@@ -207,7 +207,9 @@ namespace OmegaWarhead.Core.PlayerUtils
                 case PlayerFate.SurvivedShelter:
                 case PlayerFate.EvacuatedByHelicopter:
                     LogHelper.Debug($"Saving {player.Nickname}. Fate: {fate}");
-                    _plugin.EventHandler.Coroutines.Add(Timing.RunCoroutine(HandleSavePlayer(player)));
+                    string saveTag = $"{Shared.CoroutineTags.SavePlayerPrefix}{player.UserId}";
+                    Timing.KillCoroutines(saveTag); // Safety measure to prevent overlapping effects
+                    Timing.RunCoroutine(HandleSavePlayer(player), saveTag);
                     break;
 
                 case PlayerFate.KilledByWarhead:

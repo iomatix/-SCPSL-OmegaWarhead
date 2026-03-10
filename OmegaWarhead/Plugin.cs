@@ -157,13 +157,13 @@
 
             #region Cleanup Coroutines
             LogHelper.Debug("Killing coroutines.");
-            foreach (CoroutineHandle handle in EventHandler.Coroutines)
+
+            foreach (string tag in Shared.CoroutineTags.AllStaticTags)
             {
-                Timing.KillCoroutines(handle);
-                LogHelper.Debug($"Killed coroutine: {handle}");
+                Timing.KillCoroutines(tag);
             }
-            EventHandler.Coroutines.Clear();
-            LogHelper.Debug("Cleared coroutine list.");
+
+            LogHelper.Debug("Cleared coroutines via tags.");
             #endregion
 
             #region Unregister Events

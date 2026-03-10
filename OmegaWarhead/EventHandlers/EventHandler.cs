@@ -17,10 +17,6 @@
         #region Fields
         private readonly Plugin _plugin;
 
-        /// <summary>
-        /// Gets the list of active coroutine handles managed by the event handler.
-        /// </summary>
-        public readonly List<CoroutineHandle> Coroutines = new List<CoroutineHandle>();
         #endregion
 
         #region Constructor
@@ -84,16 +80,15 @@
 
         #region Coroutine Management
         /// <summary>
-        /// Safely kills all coroutines tracked by the event handler and clears the list.
+        /// Safely kills all coroutines tracked by the event handler.
         /// </summary>
         private void KillTrackedCoroutines()
         {
-            if (Coroutines.Count > 0)
+            foreach (string tag in Shared.CoroutineTags.AllStaticTags)
             {
-                Timing.KillCoroutines(Coroutines.ToArray());
-                LogHelper.Debug($"Killed {Coroutines.Count} tracked coroutines in EventHandler.");
-                Coroutines.Clear();
+                Timing.KillCoroutines(tag);
             }
+            LogHelper.Debug("Killed all tracked coroutines in EventHandler via tags.");
         }
         #endregion
 

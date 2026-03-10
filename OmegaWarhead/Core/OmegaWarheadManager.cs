@@ -7,6 +7,7 @@
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Core.RoundScenarioUtils;
     using OmegaWarhead.NotificationUtils;
+    using OmegaWarhead.Shared;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -19,7 +20,6 @@
     {
         #region Fields
         private readonly Plugin _plugin;
-        private readonly List<CoroutineHandle> _coroutines = new List<CoroutineHandle>();
         private bool _omegaActivated, _omegaDetonated;
         public static List<int> GetNotifyTimes() => Plugin.Singleton.Config.NotifyTimes;
         #endregion
@@ -72,32 +72,18 @@
         /// </summary>
         public void Cleanup()
         {
-            LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}, Coroutines: {_coroutines.Count}.");
+            LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}");
             Warhead.Scenario = default; // Should trigger the reset logic that automatically resets the warhead to its initial scenario 
             _omegaActivated = false;
             _omegaDetonated = false;
             _plugin.AudioManager.StopOmegaSiren();
             Map.ResetColorOfLights();
 
-            if (_coroutines.Count > 0)
+            foreach (string tag in CoroutineTags.AllStaticTags)
             {
-                Timing.KillCoroutines(_coroutines.ToArray());
-                _coroutines.Clear();
+                Timing.KillCoroutines(tag);
             }
-        }
-        #endregion
-
-        #region Coroutine Management
-        /// <summary>
-        /// Adds one or more coroutine handles to the manager's coroutine list.
-        /// </summary>
-        /// <param name="handles">The coroutine handles to add.</param>
-        public void AddCoroutines(params CoroutineHandle[] handles)
-        {
-            foreach (CoroutineHandle handle in handles)
-            {
-                _coroutines.Add(handle);
-            }
+            LogHelper.Debug("Killed all static OmegaWarhead coroutines via tags.");
         }
         #endregion
 
@@ -257,7 +243,7 @@
             yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
             if (_plugin.OmegaManager.IsOmegaActive)
             {
-                AddCoroutines(Timing.RunCoroutine(HandleDetonation(), "OmegaDetonation"));
+                Timing.RunCoroutine(HandleDetonation(), CoroutineTags.Detonation);
             }
         }
 
@@ -270,7 +256,7 @@
             yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
             if (!IsOmegaActive) yield break;
             NotificationUtility.BroadcastHelicopterCountdown();
-            _coroutines.Add(Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(), "OmegaHeliEvacuation"));
+            Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEvacuation(), CoroutineTags.HeliEvacuation);
         }
 
         /// <summary>
