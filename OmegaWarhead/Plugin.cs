@@ -1,6 +1,5 @@
 ﻿namespace OmegaWarhead
 {
-    using AudioManagerAPI.Defaults;
     using Exiled.API.Features;
     using MEC;
     using OmegaWarhead.Core.Audio;
@@ -57,12 +56,12 @@
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version { get; } = new Version(7, 6, 0);
+        public override Version Version { get; } = new Version(7, 8, 3);
 
         /// <summary>
         /// Gets the minimum required version of Exiled for the plugin.
         /// </summary>
-        public override Version RequiredExiledVersion { get; } = new Version(9, 9, 2);
+        public override Version RequiredExiledVersion { get; } = new Version(9, 9, 3);
         #endregion
 
         #region Handler Properties
@@ -135,7 +134,6 @@
             #region Register Events
             LogHelper.Debug("Registering events.");
             EventHandler.RegisterEvents();
-            OmegaManager.Init();
             #endregion
 
             base.OnEnabled();
@@ -164,6 +162,7 @@
             }
 
             LogHelper.Debug("Cleared coroutines via tags.");
+
             #endregion
 
             #region Unregister Events

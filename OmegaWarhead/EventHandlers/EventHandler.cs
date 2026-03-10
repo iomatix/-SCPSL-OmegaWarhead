@@ -62,7 +62,7 @@
             LogHelper.Debug("Unregistering event handlers.");
 
             // Server Events
-            ServerHandler.RoundStarting -= OnRoundStart; 
+            ServerHandler.RoundStarting -= OnRoundStart;
             ServerHandler.RoundEnded -= OnRoundEnd;
             ServerHandler.WaveRespawning -= OnWaveRespawning;
 

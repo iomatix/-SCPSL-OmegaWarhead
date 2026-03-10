@@ -1,15 +1,8 @@
 namespace OmegaWarhead.NotificationUtils
 {
-    using AudioManagerAPI.Defaults;
-    using AudioManagerAPI.Features.Speakers;
-    using AudioManagerAPI.Features.Static;
     using Cassie;
-    using Exiled.API.Interfaces;
     using LabApi.Features.Wrappers;
-    using OmegaWarhead.Core.AudioUtils;
-    using System;
     using System.Collections.Generic;
-    using UnityEngine;
 
     /// <summary>
     /// Provides extension methods for dictionary operations.
@@ -86,8 +79,7 @@ namespace OmegaWarhead.NotificationUtils
             if (string.IsNullOrEmpty(message))
                 return;
 
-            if (shouldClear)
-                Exiled.API.Features.Cassie.Clear();
+            if (shouldClear) Announcer.Clear();
 
             string processedSubtitles = string.Empty;
             if (!string.IsNullOrEmpty(customSubtitles) && !Plugin.Singleton.Config.DisableCassieMessages)
@@ -97,7 +89,7 @@ namespace OmegaWarhead.NotificationUtils
 
             string fullMessage = $"{pitchModifier} {message}";
 
-            Announcer.Message(fullMessage, customSubtitles: processedSubtitles, priority: priority);
+            Announcer.Message(fullMessage, customSubtitles: processedSubtitles, priority: priority, playBackground: false);
         }
 
         #endregion
@@ -172,7 +164,7 @@ namespace OmegaWarhead.NotificationUtils
         /// <returns>A formatted Cassie message for the countdown.</returns>
         public static string GetCassieCounterNotifyMessage(int notifyTime)
         {
-            if (notifyTime < 5) return $"";
+            if (notifyTime < 5) return $".G3 {notifyTime} .G5";
             if (notifyTime >= 5 && notifyTime <= 20) return $".G3 {notifyTime.ToString()} Seconds .G5";
             return $".G3 {notifyTime.ToString()} Seconds until Omega Warhead Detonation .G5";
         }

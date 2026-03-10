@@ -60,11 +60,16 @@ namespace OmegaWarhead
             #region Light Configuration
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
             LogHelper.Debug($"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
-            Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () => { if (_plugin.OmegaManager.IsOmegaActive) Map.SetColorOfLights(lightColor); });
+
+            var coroutine_light = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
+            {
+                if (_plugin.OmegaManager.IsOmegaActive) Map.SetColorOfLights(lightColor);
+            });
+            coroutine_light.Tag = "Omega-Lights";
             #endregion
 
             #region Notifications
-            Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
+            var coroutine_core = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
             {
                 if (_plugin.OmegaManager.IsOmegaActive)
                 {
@@ -73,11 +78,12 @@ namespace OmegaWarhead
                     _plugin.AudioManager.PlayOmegaSiren();
                 }
             });
+            coroutine_core.Tag = "Omega-Core";
             #endregion
 
             #region Coroutine Setup
             string[] countdownMessages = OmegaWarheadManager.GetNotifyTimes().Select(notifyTime => NotificationUtility.GetCassieCounterNotifyMessage(notifyTime)).ToArray();
-            double messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations(1f, countdownMessages);
+            double messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations((float)_plugin.Config.CassieNotifySpeed, countdownMessages);
             LogHelper.Debug($"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.");
 
             double adjustedTime = timeToDetonation + messageDurationAdjustment;
@@ -85,9 +91,10 @@ namespace OmegaWarhead
             Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCountdown((float)adjustedTime), CoroutineTags.Countdown);
             Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleHelicopter(), CoroutineTags.Helicopter);
             Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCheckpointDoors(), CoroutineTags.Checkpoints);
-                
+
             #endregion
         }
+
         /// <summary>
         /// Stops the Omega Warhead sequence and performs cleanup.
         /// </summary>
@@ -106,7 +113,6 @@ namespace OmegaWarhead
         public void ResetSequence()
         {
             LogHelper.Debug("Resetting Omega Warhead state.");
-            Plugin.Singleton.OmegaManager.Cleanup();
             Plugin.Singleton.OmegaManager.Init();
         }
         #endregion

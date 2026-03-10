@@ -11,7 +11,6 @@
     using System.Collections.Generic;
     using System.Linq;
 
-
     /// <summary>
     /// Manages the Omega Warhead functionality, including activation, countdown, and detonation sequences.
     /// </summary>
@@ -56,6 +55,7 @@
         public void Init()
         {
             LogHelper.Debug("Initializing OmegaWarheadManager.");
+            Cleanup();
         }
 
         /// <summary>
@@ -128,9 +128,7 @@
             #region Omega Activation
             LogHelper.Debug("WarheadStart triggered. Initiating Omega sequence...");
 
-
             _plugin.WarheadMethods.StartSequence(_plugin.Config.TimeToDetonation);
-
 
             LogHelper.Debug("HandleWarheadStart called.");
 
@@ -168,7 +166,7 @@
                 _plugin.WarheadMethods.StopSequence();
             }
 
-            ev.IsAllowed = false; // Blokujemy domyślne zachowanie Alpha Warhead
+            ev.IsAllowed = false; // Block default warhead stop behavior
         }
 
         /// <summary>
@@ -186,9 +184,11 @@
         #endregion
 
         #region Coroutine Handlers
+
         /// <summary>
         /// Manages the countdown sequence for the Omega Warhead, including notifications and light effects.
-        /// Each Cassie message will finish exactly at its notifyTime mark.
+        /// Early notifications sync strictly to the clock, while the final sequence guarantees playback,
+        /// artificially stretching the detonation time to build dramatic tension if necessary.
         /// </summary>
         /// <param name="timeToDetonation">The total time in seconds until detonation.</param>
         /// <returns>An enumerator for coroutine execution.</returns>
@@ -199,48 +199,80 @@
 
             string message;
             double msgDuration, buffer;
+
             foreach (int notifyTime in validNotifyTimes)
             {
+                if (!IsOmegaActive) yield break;
+
                 message = NotificationUtility.GetCassieCounterNotifyMessage(notifyTime);
+
+                // Skip completely empty messages (e.g., 4, 3, 2, 1 if configured that way)
+                if (string.IsNullOrEmpty(message)) continue;
+
                 msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
                 buffer = _plugin.Config.CassieTimingBuffer;
 
-                // Compute when to *start* this announcement
-                double targetStart = warheadStartTime - notifyTime - msgDuration - buffer;
-                double now = Timing.LocalTime;
-
-                // Skip if we can't start the message on time
-                if (now > targetStart) continue;
-
-                double wait = targetStart - now;
-                if (wait > 0)
-                    yield return Timing.WaitForSeconds((float)wait);
-
-                if (!IsOmegaActive)
-                    break;
-
-                // Only send Cassie messages for notifyTime >= 5
-                if (notifyTime >= 5)
+                if (notifyTime > 5)
                 {
-                    if (_plugin.Config.CassieMessageClearBeforeImportant) Exiled.API.Features.Cassie.Clear();
+                    // Phase 1: Absolute Time Synchronization (for > 5 seconds)
+                    double targetStart = warheadStartTime - notifyTime - msgDuration - buffer;
+                    double now = Timing.LocalTime;
 
-                    NotificationUtility.SendCassieMessage(message, $"Warhead -> {notifyTime}...");
+                    // Skip this early announcement ONLY if we are severely behind schedule to maintain sync
+                    if (now > targetStart) continue;
+
+                    double wait = targetStart - now;
+                    if (wait > 0)
+                        yield return Timing.WaitForSeconds((float)wait);
+                }
+                else
+                {
+                    // Phase 2: Dramatic Finale (for <= 5 seconds)
+                    // We NEVER skip the final countdown. If we are behind schedule, 
+                    // 'wait' will be <= 0 and it will play immediately, pushing the explosion further into the future.
+                    double targetStart = warheadStartTime - notifyTime;
+                    double now = Timing.LocalTime;
+                    double wait = targetStart - now;
+
+                    if (wait > 0)
+                        yield return Timing.WaitForSeconds((float)wait);
                 }
 
-                // Dim lights for notifyTime <= 5
-                if (notifyTime <= 5)
-                    Map.TurnOffLights(0.75f);
+                if (!IsOmegaActive) yield break;
 
-                // Let it finish (with buffer)
+                if (_plugin.Config.CassieMessageClearBeforeImportant)
+                    Exiled.API.Features.Cassie.Clear();
+
+                NotificationUtility.SendCassieMessage(message, $"Warhead -> {notifyTime}...");
+
+                // Dim lights and extend the dramatic finale
+                if (notifyTime <= 5)
+                {
+                    Map.TurnOffLights(0.75f);
+                    yield return Timing.WaitForSeconds(0.75f);
+                }
+
+                // Crucial Step: We wait for the ENTIRE message duration, unconditionally stretching the timeline
+                // If the 5-second message takes 15 seconds, the coroutine patiently waits 15 seconds.
                 yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
             }
 
-            message = "Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
+            // Final Detonation Siren
+            if (!IsOmegaActive) yield break;
+
+            message = ".G5 Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
             msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
             buffer = _plugin.Config.CassieTimingBuffer;
 
+            if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
+                Exiled.API.Features.Cassie.Clear();
+
             NotificationUtility.SendCassieMessage(message, $"Warhead...");
+
+            // Wait for the final siren to completely finish its sound before triggering the blast
             yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
+
+            // Execute actual detonation
             if (_plugin.OmegaManager.IsOmegaActive)
             {
                 Timing.RunCoroutine(HandleDetonation(), CoroutineTags.Detonation);
@@ -256,6 +288,7 @@
             yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
             if (!IsOmegaActive) yield break;
             NotificationUtility.BroadcastHelicopterCountdown();
+
             Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEvacuation(), CoroutineTags.HeliEvacuation);
         }
 
@@ -288,18 +321,18 @@
         {
             string detonationMessage = _plugin.Config.DetonatingOmegaCassie;
             double detonationMessageDuration = NotificationUtility.CalculateCassieMessageDuration(detonationMessage, Plugin.Singleton.Config.CassieDetonationSpeed);
-
+            float buffor = _plugin.Config.CassieTimingBuffer;
             LogHelper.Debug($"Detonation Cassie message '{detonationMessage}' duration: {detonationMessageDuration}s");
 
             NotificationUtility.SendCassieMessage(detonationMessage, _plugin.Config.DetonatingOmegaMessage);
 
-            yield return Timing.WaitForSeconds((float)detonationMessageDuration);
+            yield return Timing.WaitForSeconds((float)detonationMessageDuration + buffor);
 
             _plugin.PlayerMethods.HandlePlayersOnNuke();
             _omegaActivated = false;
             _omegaDetonated = true;
-            _plugin.AudioManager.PlayEndingMusic();
             _plugin.RoundController.ExecuteScenario(_plugin.RoundController.GetScenario<DetonationEndingScenario>());
+            _plugin.AudioManager.PlayEndingMusic();
 
             // Active jammer for post-detonation messages
             while (true)

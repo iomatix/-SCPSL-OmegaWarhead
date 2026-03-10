@@ -60,11 +60,12 @@
         /// </summary>  
         public void EndRoundGracefully(float delay = 0f)
         {
-            Timing.CallDelayed(delay, () =>
+            var coroutine = Timing.CallDelayed(delay, () =>
             {
                 SetAutoRoundEndLock(false);
                 Round.End(force: true);
             });
+            coroutine.Tag = "Omega-Scenario";
         }
 
         public T GetScenario<T>() where T : RoundScenario
