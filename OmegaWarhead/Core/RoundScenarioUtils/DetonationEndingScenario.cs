@@ -9,6 +9,7 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using OmegaWarhead.Shared;
 
     public class DetonationEndingScenario : RoundScenario
     {
@@ -72,7 +73,7 @@
                     });
                     couroutine_d2.Tag = "Omega-Scenario";
                 });
-                coroutine.Tag = "Omega-Scenario";
+                coroutine.Tag = CoroutineTags.Scenario;
             }
         }
 
@@ -84,7 +85,7 @@
                 Map.SetColorOfLights(UnityEngine.Color.gray);
                 Plugin.Singleton.PlayerMethods.HandleEndingByFate();
             });
-            coroutine.Tag = "Omega-Scenario";
+            coroutine.Tag = CoroutineTags.Scenario;
 
             _roundController.EndRoundGracefully(60f);
         }

@@ -1,16 +1,18 @@
 namespace OmegaWarhead.Core.PlayerUtils
 {
     #region Usings
-    using OmegaWarhead.Core.EscapeScenarioUtils;
-    using OmegaWarhead.Core.LoggingUtils;
     using CustomPlayerEffects;
     using LabApi.Features.Extensions;
     using LabApi.Features.Wrappers;
     using MEC;
+    using OmegaWarhead.Core.EscapeScenarioUtils;
+    using OmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Shared;
     using PlayerRoles;
     using Respawning;
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
     using static OmegaWarhead.Core.PlayerUtils.PlayerUtility;
     #endregion
@@ -23,6 +25,7 @@ namespace OmegaWarhead.Core.PlayerUtils
     {
         #region Fields & Constructor
         private readonly Plugin _plugin;
+        private readonly HashSet<string> _activeSaveCoroutines = new HashSet<string>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PlayerMethods"/> class.
@@ -118,7 +121,7 @@ namespace OmegaWarhead.Core.PlayerUtils
                 player.SetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
                 LogHelper.Debug($"Player {player.Nickname} has escaped by {scenario.Name.ToLower()}.");
             });
-            coroutine.Tag = "Omega-Escape";
+            coroutine.Tag = CoroutineTags.Escape;
             #endregion
         }
 
@@ -247,19 +250,35 @@ namespace OmegaWarhead.Core.PlayerUtils
         /// <returns>An enumerator for coroutine execution.</returns>
         private IEnumerator<float> HandleSavePlayer(Player player)
         {
-            LogHelper.Debug($"HandleSavePlayer coroutine started for {player.Nickname}.");
+            if (player == null || string.IsNullOrEmpty(player.UserId)) yield break;
 
-            player.IsGodModeEnabled = true;
-            player.EnableEffect<Flashed>(duration: 0.75f);
+            string userId = player.UserId;
+            _activeSaveCoroutines.Add(userId);
 
-            yield return Timing.WaitForSeconds(0.75f);
+            try
+            {
+                LogHelper.Debug($"HandleSavePlayer coroutine started for {player.Nickname}.");
 
-            player.IsGodModeEnabled = false;
-            player.EnableEffect<Blindness>(duration: 2.75f);
-            player.EnableEffect<Blurred>(duration: 5.75f);
-            player.EnableEffect<Deafened>(duration: 15.75f);
+                player.IsGodModeEnabled = true;
+                player.EnableEffect<Flashed>(duration: 0.75f);
 
-            LogHelper.Debug($"HandleSavePlayer coroutine completed for {player.Nickname}.");
+                yield return Timing.WaitForSeconds(0.75f);
+
+                // Safety Measure: Ensure player is still valid and alive after the delay
+                if (player != null && player.IsAlive)
+                {
+                    player.IsGodModeEnabled = false;
+                    player.EnableEffect<Blindness>(duration: 2.75f);
+                    player.EnableEffect<Blurred>(duration: 5.75f);
+                    player.EnableEffect<Deafened>(duration: 15.75f);
+                }
+
+                LogHelper.Debug($"HandleSavePlayer coroutine completed for {player.Nickname}.");
+            }
+            finally
+            {
+                _activeSaveCoroutines.Remove(userId);
+            }
         }
         #endregion
         #region Player Fate Ending
@@ -312,7 +331,7 @@ namespace OmegaWarhead.Core.PlayerUtils
                     player.SendHint(formattedBroadcast, duration: 15f);
                 }
             });
-            coroutine.Tag = "Omega-Scenario";
+            coroutine.Tag = CoroutineTags.Scenario;
         }
         #endregion
         #region PlayerFate Enum
@@ -325,6 +344,22 @@ namespace OmegaWarhead.Core.PlayerUtils
             SurvivedShelter,
             KilledByWarhead,
             Unknown
+        }
+        #endregion
+
+        #region Cleanup
+        
+        /// <summary>
+        /// Cleans up all dynamic player-related coroutines.
+        /// </summary>
+        public void Clean()
+        {
+            foreach (var userId in _activeSaveCoroutines.ToList())
+            {
+                Timing.KillCoroutines($"{Shared.CoroutineTags.SavePlayerPrefix}{userId}");
+            }
+            _activeSaveCoroutines.Clear();
+            LogHelper.Debug("Cleaned up PlayerMethods dynamic coroutines.");
         }
         #endregion
     }

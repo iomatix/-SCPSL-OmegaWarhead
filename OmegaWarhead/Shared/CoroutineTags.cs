@@ -9,6 +9,8 @@
         public const string Helicopter = "Omega-Heli";
         public const string Checkpoints = "Omega-Checkpoints";
         public const string HeliEvacuation = "Omega-HeliEvacuation";
+        public const string Escape = "Omega-Escape";
+        public const string Scenario = "Omega-Scenario";
 
         // Prefixes for dynamic processes
 
@@ -27,7 +29,7 @@
         /// </summary>
         public static readonly string[] AllStaticTags =
         {
-           Core, Detonation, Countdown, Helicopter, Checkpoints, HeliEvacuation, Temp
+           Core, Detonation, Countdown, Helicopter, Checkpoints, HeliEvacuation, Escape, Scenario, Temp
         };
     }
 }

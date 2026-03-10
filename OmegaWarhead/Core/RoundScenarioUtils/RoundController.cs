@@ -8,6 +8,8 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using OmegaWarhead.Shared;
+
     public class RoundController
     {
         private bool _autoRoundEndLocked = false;
@@ -65,7 +67,7 @@
                 SetAutoRoundEndLock(false);
                 Round.End(force: true);
             });
-            coroutine.Tag = "Omega-Scenario";
+            coroutine.Tag = CoroutineTags.Scenario;
         }
 
         public T GetScenario<T>() where T : RoundScenario
