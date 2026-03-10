@@ -3,6 +3,7 @@
     public static class CoroutineTags
     {
         // Core tags for static processes (not directly tied to a player)
+        public const string Core = "Omega-Core";
         public const string Detonation = "Omega-Detonation";
         public const string Countdown = "Omega-Countdown";
         public const string Helicopter = "Omega-Heli";
@@ -26,7 +27,7 @@
         /// </summary>
         public static readonly string[] AllStaticTags =
         {
-            Detonation, Countdown, Helicopter, Checkpoints, HeliEvacuation, Temp
+           Core, Detonation, Countdown, Helicopter, Checkpoints, HeliEvacuation, Temp
         };
     }
 }
