@@ -3,17 +3,10 @@
     using Exiled.API.Features;
     using MEC;
     using OmegaWarhead.Core.Audio;
-    using OmegaWarhead.Core.AudioUtils;
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Core.PlayerUtils;
     using OmegaWarhead.Core.RoundScenarioUtils;
     using System;
-    using DoorUtility = OmegaWarhead.Core.DoorUtils;
-    using EscapeUtility = OmegaWarhead.Core.PlayerUtils;
-    using PlayerUtility = OmegaWarhead.Core.PlayerUtils;
-    using RoomUtility = OmegaWarhead.Core.RoomUtils;
-    using RoundUtility = OmegaWarhead.Core.RoundScenarioUtils;
-
 
     /// <summary>
     /// The main plugin class for the OmegaWarhead system, managing initialization, handlers, and lifecycle events.
@@ -56,7 +49,7 @@
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version { get; } = new Version(7, 8, 3);
+        public override Version Version { get; } = new Version(7, 9, 0);
 
         /// <summary>
         /// Gets the minimum required version of Exiled for the plugin.
