@@ -1,11 +1,13 @@
 ﻿namespace OmegaWarhead
 {
+    using LabApi.Features.Wrappers;
     using MEC;
     using OmegaWarhead.Core.LoggingUtils;
     using PlayerRoles;
     using System.Collections.Generic;
-    using ServerHandler = LabApi.Events.Handlers.ServerEvents;
+    using System.Linq;
     using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
+    using ServerHandler = LabApi.Events.Handlers.ServerEvents;
     using WarheadHandler = LabApi.Events.Handlers.WarheadEvents;
 
     /// <summary>
@@ -42,6 +44,7 @@
             ServerHandler.RoundStarting += OnRoundStart;
             ServerHandler.RoundEnded += OnRoundEnd;
             ServerHandler.WaveRespawning += OnWaveRespawning;
+            ServerHandler.DeadmanSequenceActivating += OnWarheadDeadManSwitch;
 
             // Warhead Events
             WarheadHandler.Starting += OnWarheadStart;
@@ -65,6 +68,7 @@
             ServerHandler.RoundStarting -= OnRoundStart;
             ServerHandler.RoundEnded -= OnRoundEnd;
             ServerHandler.WaveRespawning -= OnWaveRespawning;
+            ServerHandler.DeadmanSequenceActivating -= OnWarheadDeadManSwitch;
 
             // Warhead Events
             WarheadHandler.Starting -= OnWarheadStart;
@@ -114,6 +118,81 @@
             KillTrackedCoroutines();
             _plugin.CacheHandler.ResetCache();
             _plugin.OmegaManager.Disable();
+        }
+
+        /// <summary>  
+        /// Handles the Deadman Sequence activating event, allowing cancellation based on plugin configuration.  
+        /// </summary>  
+        /// <param name="ev">Event arguments containing the Deadman Sequence activation data and cancellation flag.</param>  
+        public void OnWarheadDeadManSwitch(LabApi.Events.Arguments.ServerEvents.DeadmanSequenceActivatingEventArgs ev)
+        {
+            LogHelper.Debug("OnWarheadDeadManSwitch triggered.");
+            LogHelper.Debug($"Config value of DisableDeadManSwitch is {_plugin.Config.DisableDeadManSwitch.ToString()}.");
+            if (_plugin.Config.DisableDeadManSwitch)
+            {
+                LogHelper.Debug("Cancelling event.");
+                ev.IsAllowed = false;
+
+                // trigger a mini-wave for immediate action  
+                if (_plugin.Config.TriggerMiniWaveOnDmsCancel && !_plugin.OmegaManager.IsOmegaActive && !_plugin.OmegaManager.IsOmegaDetonated)
+                {
+                    LogHelper.Debug("Triggering mini-wave due to Deadman Switch cancellation.");
+                    // Add respawn tokens to both factions to prolong the match  
+                    RespawnWave mtfWave = RespawnWaves.PrimaryMtfWave;
+                    if (mtfWave != null)
+                    {
+                        mtfWave.RespawnTokens += _plugin.Config.TokensAddedOnDmsCancel;
+                        mtfWave.Influence += _plugin.Config.InfluenceBoostOnDmsCancel;
+                    }
+
+                    RespawnWave chaosWave = RespawnWaves.PrimaryChaosWave;
+                    if (chaosWave != null)
+                    {
+                        chaosWave.RespawnTokens += _plugin.Config.TokensAddedOnDmsCancel;
+                        chaosWave.Influence += _plugin.Config.InfluenceBoostOnDmsCancel;
+                    }
+
+
+                    NotificationUtils.NotificationUtility.SendCassieMessage(_plugin.Config.CassieMessageMiniWaveOnDmsCancel); 
+                    if (_plugin.Config.OpenBlastDoorsOnDmsCancel) Warhead.OpenBlastDoors();
+
+
+                    // Get the faction with fewer players to balance  
+                    int ntfCount = Player.List.Count(p =>
+                    p.Role == RoleTypeId.NtfPrivate ||
+                    p.Role == RoleTypeId.NtfSergeant ||
+                    p.Role == RoleTypeId.NtfCaptain ||
+                    p.Role == RoleTypeId.NtfSpecialist ||
+                    p.Role == RoleTypeId.Scientist
+                    );
+                    int ciCount = Player.List.Count(p =>
+                    p.Role == RoleTypeId.ChaosRepressor ||
+                    p.Role == RoleTypeId.ChaosMarauder ||
+                    p.Role == RoleTypeId.ChaosRifleman ||
+                    p.Role == RoleTypeId.ChaosConscript ||
+                    p.Role == RoleTypeId.ClassD);
+
+                    Faction targetFaction = ntfCount < ciCount ? Faction.FoundationStaff : Faction.FoundationEnemy;
+                    LogHelper.Debug($"Target faction for mini-wave: {targetFaction}. NTF count: {ntfCount}, Chaos count: {ciCount}.");
+
+                    // Trigger mini-wave for the disadvantaged faction  
+                    MiniRespawnWave miniWave = null;
+                    if (targetFaction == Faction.FoundationStaff)
+                    {
+                        miniWave = RespawnWaves.MiniMtfWave;
+                    }
+                    else
+                    {
+                        miniWave = RespawnWaves.MiniChaosWave;
+                    }
+
+                    if (miniWave != null)
+                    {
+                        miniWave.InitiateRespawn();
+                        LogHelper.Debug($"Mini-wave initiated for {targetFaction}.");
+                    }
+                }
+            }
         }
         #endregion
 

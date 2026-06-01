@@ -301,6 +301,45 @@
         public bool CassieMessageClearBeforeWarheadMessage { get; set; } = false;
         #endregion
 
+        #region Dead Man Switch
+        /// <summary>
+        /// Gets or sets a value indicating whether the Dead Man Sequence is disabled.
+        /// </summary>
+        [Description("Disables Dead Man Sequence if set to true.")]
+        public bool DisableDeadManSwitch { get; set; } = false;
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to trigger a mini wave when the Dead Man Switch is canceled.
+        /// </summary>
+        [Description("Trigger a mini wave when the Dead Man Switch is canceled?")]
+        public bool TriggerMiniWaveOnDmsCancel { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the Cassie message played when the Dead Man Switch is disabled.
+        /// </summary>
+        [Description("Cassie message played when the Dead Man Switch is disabled.")]
+        public string CassieMessageMiniWaveOnDmsCancel { get; set; } = "Deadman switch disabled. Substantial threat to safety remains within the facility. Exercise caution";
+
+        /// <summary>
+        /// Gets or sets a value indicating whether blast doors should open when the Dead Man Switch is canceled.
+        /// </summary>
+        [Description("Open blast doors when the Dead Man Switch is canceled?")]
+        public bool OpenBlastDoorsOnDmsCancel { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets the number of tokens added when the Dead Man Switch is canceled.
+        /// </summary>
+        [Description("Number of respawn tokens added when the Dead Man Switch is canceled.")]
+        public int TokensAddedOnDmsCancel { get; set; } = 3;
+
+        /// <summary>
+        /// Gets or sets the influence boost applied to team when the Dead Man Switch is canceled.
+        /// </summary>
+        [Description("Influence boost applied to team when the Dead Man Switch is canceled (Influence gives additional respawn tokens).")]
+        public float InfluenceBoostOnDmsCancel { get; set; } = 15.95f;
+
+        #endregion
+
         #region Permissions & Debug
         /// <summary>
         /// Gets or sets the permission string required to use Omega Warhead commands.
@@ -398,6 +437,7 @@
                 LogHelper.Warning($"[Config] Light color RGB values should be between 0.0 and 1.0. Current: R={LightsColorR}, G={LightsColorG}, B={LightsColorB}");
 
             // Messages & Strings (DRY optimization)
+            ValidateString(CassieMessageMiniWaveOnDmsCancel, nameof(CassieMessageMiniWaveOnDmsCancel));
             ValidateString(HelicopterIncomingMessage, nameof(HelicopterIncomingMessage));
             ValidateString(HelicopterEscapeMessage, nameof(HelicopterEscapeMessage));
             ValidateString(ActivatedMessage, nameof(ActivatedMessage));
