@@ -335,7 +335,7 @@
         /// <summary>
         /// Gets or sets the influence boost applied to team when the Dead Man Switch is canceled.
         /// </summary>
-        [Description("Influence boost applied to team when the Dead Man Switch is canceled (Influence gives additional respawn tokens).")]
+        [Description("Influence boost applied to team when the Dead Man Switch is canceled.")]
         public float InfluenceBoostOnDmsCancel { get; set; } = 12.69f;
 
         #endregion
