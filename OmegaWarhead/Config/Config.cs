@@ -330,13 +330,13 @@
         /// Gets or sets the number of tokens added when the Dead Man Switch is canceled.
         /// </summary>
         [Description("Number of respawn tokens added when the Dead Man Switch is canceled.")]
-        public int TokensAddedOnDmsCancel { get; set; } = 3;
+        public int TokensAddedOnDmsCancel { get; set; } = 1;
 
         /// <summary>
         /// Gets or sets the influence boost applied to team when the Dead Man Switch is canceled.
         /// </summary>
         [Description("Influence boost applied to team when the Dead Man Switch is canceled (Influence gives additional respawn tokens).")]
-        public float InfluenceBoostOnDmsCancel { get; set; } = 15.95f;
+        public float InfluenceBoostOnDmsCancel { get; set; } = 12.69f;
 
         #endregion
 
@@ -388,7 +388,7 @@
             if (CassieTimingBuffer < 0f || CassieTimingBuffer > 5f)
             {
                 LogHelper.Warning($"[Config] CassieTimingBuffer ({CassieTimingBuffer}s) is extreme. Hard limit is 0 to 5 seconds. Resetting to default (0.65s).");
-                CassieTimingBuffer = 0.65f; // Automatyczna korekta wartości krytycznej
+                CassieTimingBuffer = 0.65f;
             }
             else if (CassieTimingBuffer < 0.45f || CassieTimingBuffer > 1.5f)
             {
@@ -435,6 +435,10 @@
             // Visuals
             if (LightsColorR < 0f || LightsColorR > 1f || LightsColorG < 0f || LightsColorG > 1f || LightsColorB < 0f || LightsColorB > 1f)
                 LogHelper.Warning($"[Config] Light color RGB values should be between 0.0 and 1.0. Current: R={LightsColorR}, G={LightsColorG}, B={LightsColorB}");
+
+            // OnDmsCancel
+            if (TokensAddedOnDmsCancel < 0)
+                LogHelper.Warning($"[Config] TokensAddedOnDmsCancel should not be negative. Current: {TokensAddedOnDmsCancel}");
 
             // Messages & Strings (DRY optimization)
             ValidateString(CassieMessageMiniWaveOnDmsCancel, nameof(CassieMessageMiniWaveOnDmsCancel));
