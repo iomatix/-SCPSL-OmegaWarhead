@@ -1,20 +1,12 @@
 ﻿namespace OmegaWarhead
 {
-    using AudioManagerAPI.Defaults;
     using Exiled.API.Features;
     using MEC;
     using OmegaWarhead.Core.Audio;
-    using OmegaWarhead.Core.AudioUtils;
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Core.PlayerUtils;
     using OmegaWarhead.Core.RoundScenarioUtils;
     using System;
-    using DoorUtility = OmegaWarhead.Core.DoorUtils;
-    using EscapeUtility = OmegaWarhead.Core.PlayerUtils;
-    using PlayerUtility = OmegaWarhead.Core.PlayerUtils;
-    using RoomUtility = OmegaWarhead.Core.RoomUtils;
-    using RoundUtility = OmegaWarhead.Core.RoundScenarioUtils;
-
 
     /// <summary>
     /// The main plugin class for the OmegaWarhead system, managing initialization, handlers, and lifecycle events.
@@ -57,7 +49,7 @@
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version { get; } = new Version(7, 8, 4);
+        public override Version Version { get; } = new Version(7, 8, 3);
 
         /// <summary>
         /// Gets the minimum required version of Exiled for the plugin.
@@ -117,6 +109,9 @@
             catch (Exception ex)
             {
                 LogHelper.Error($"Failed to validate config: {ex.Message}\nStackTrace: {ex.StackTrace}");
+                LogHelper.Error("OmegaWarhead initialization aborted due to invalid configuration.");
+                // Stopping further execution of OnEnabled
+                return;
             }
 
 
@@ -149,36 +144,54 @@
         {
             LogHelper.Debug("Disabling OmegaWarhead plugin.");
 
-            #region Disable Omega Manager
-            LogHelper.Debug("Disabling OmegaWarheadManager.");
-            OmegaManager?.Disable();
-            #endregion
+            try
+            {
+                LogHelper.Debug("Disabling OmegaWarheadManager.");
+                OmegaManager?.Disable();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error($"Error while disabling OmegaManager: {ex}");
+            }
 
-            #region Cleanup Coroutines
-            LogHelper.Debug("Killing MEC tag coroutines.");
-            Timing.KillCoroutines("Omega-Core");
-            Timing.KillCoroutines("Omega-Escape");
-            Timing.KillCoroutines("Omega-Scenario");
-            #endregion
+            try
+            {
+                LogHelper.Debug("Killing coroutines.");
+                foreach (string tag in Shared.CoroutineTags.AllStaticTags)
+                {
+                    Timing.KillCoroutines(tag);
+                }
+                LogHelper.Debug("Cleared coroutines via tags.");
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error($"Error while killing coroutines: {ex}");
+            }
 
-            #region Unregister Events
-            LogHelper.Debug("Unregistering events.");
-            EventHandler.UnregisterEvents();
-            #endregion
+            try
+            {
+                LogHelper.Debug("Unregistering events.");
+                EventHandler?.UnregisterEvents();
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error($"Error while unregistering events: {ex}");
+            }
 
-            #region Nullify Handlers
             LogHelper.Debug("Nullifying handlers and singleton.");
             RoundController = null;
-            Singleton = null;
             EventHandler = null;
             PlayerMethods = null;
             WarheadMethods = null;
             OmegaManager = null;
-            #endregion
+            CacheHandler = null;
+            AudioManager = null;
+            Singleton = null;
 
             LogHelper.Debug("OmegaWarhead plugin disabled.");
             base.OnDisabled();
         }
+
         #endregion
     }
     #endregion

@@ -7,6 +7,7 @@
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Core.RoundScenarioUtils;
     using OmegaWarhead.NotificationUtils;
+    using OmegaWarhead.Shared;
     using System.Collections.Generic;
     using System.Linq;
 
@@ -71,15 +72,21 @@
         /// </summary>
         public void Cleanup()
         {
-            LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}.");
+            LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}");
             Warhead.Scenario = default; // Should trigger the reset logic that automatically resets the warhead to its initial scenario 
             _omegaActivated = false;
             _omegaDetonated = false;
             _plugin.AudioManager.StopOmegaSiren();
             Map.ResetColorOfLights();
 
-            // Kill core coroutines related to Omega Warhead
-            Timing.KillCoroutines("Omega-Core");
+            foreach (string tag in CoroutineTags.AllStaticTags)
+            {
+                Timing.KillCoroutines(tag);
+            }
+
+            LogHelper.Debug("Killed all static OmegaWarhead coroutines via tags.");
+
+            _plugin.PlayerMethods?.Clean();
         }
         #endregion
 
@@ -271,7 +278,7 @@
             // Execute actual detonation
             if (_plugin.OmegaManager.IsOmegaActive)
             {
-                Timing.RunCoroutine(HandleDetonation(), "Omega-Core");
+                Timing.RunCoroutine(HandleDetonation(), CoroutineTags.Detonation);
             }
         }
 
@@ -284,7 +291,8 @@
             yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
             if (!IsOmegaActive) yield break;
             NotificationUtility.BroadcastHelicopterCountdown();
-            Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEscape(), "Omega-Core");
+
+            Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEvacuation(), CoroutineTags.HeliEvacuation);
         }
 
         /// <summary>

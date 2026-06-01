@@ -7,6 +7,7 @@ namespace OmegaWarhead
     using OmegaWarhead.Core.AudioUtils;
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.NotificationUtils;
+    using OmegaWarhead.Shared;
     using System;
     using System.Linq;
     using UnityEngine;
@@ -87,11 +88,13 @@ namespace OmegaWarhead
 
             double adjustedTime = timeToDetonation + messageDurationAdjustment;
 
-            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCountdown((float)adjustedTime), "Omega-Core");
-            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleHelicopter(), "Omega-Escape");
-            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCheckpointDoors(), "Omega-Core");
+            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCountdown((float)adjustedTime), CoroutineTags.Countdown);
+            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleHelicopter(), CoroutineTags.Helicopter);
+            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCheckpointDoors(), CoroutineTags.Checkpoints);
+
             #endregion
         }
+
         /// <summary>
         /// Stops the Omega Warhead sequence and performs cleanup.
         /// </summary>

@@ -16,6 +16,7 @@
     {
         #region Fields
         private readonly Plugin _plugin;
+
         #endregion
 
         #region Constructor
@@ -79,14 +80,15 @@
 
         #region Coroutine Management
         /// <summary>
-        /// Safely kills all coroutines mapped to Omega tags.
+        /// Safely kills all coroutines tracked by the event handler.
         /// </summary>
         private void KillTrackedCoroutines()
         {
-            Timing.KillCoroutines("Omega-Core");
-            Timing.KillCoroutines("Omega-Escape");
-            Timing.KillCoroutines("Omega-Scenario");
-            LogHelper.Debug("Killed all OmegaWarhead MEC tag coroutines.");
+            foreach (string tag in Shared.CoroutineTags.AllStaticTags)
+            {
+                Timing.KillCoroutines(tag);
+            }
+            LogHelper.Debug("Killed all tracked coroutines in EventHandler via tags.");
         }
         #endregion
 
