@@ -44,12 +44,11 @@ namespace OmegaWarhead
         }
 
         /// <summary>
-        /// Activates the Omega Warhead, setting up lights, notifications, and coroutines.
+        /// Initiates the core structural sequence for the alternative alternative nuclear detonation protocol.
         /// </summary>
-        /// <param name="timeToDetonation">The time in seconds until detonation.</param>
         public void Activate(float timeToDetonation)
         {
-            LogHelper.Debug($"Activating Omega Warhead with detonation time: {timeToDetonation}s.");
+            LogHelper.Debug(nameof(WarheadMethods), $"Activating Omega Warhead with detonation time: {timeToDetonation}s.");
 
             #region Round Configuration
             // Lock round immediately to prevent automatic ending  
@@ -58,7 +57,7 @@ namespace OmegaWarhead
 
             #region Light Configuration
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
-            LogHelper.Debug($"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
+            LogHelper.Debug(nameof(WarheadMethods), $"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
 
             var coroutine_light = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
             {
@@ -81,16 +80,20 @@ namespace OmegaWarhead
             #endregion
 
             #region Coroutine Setup
-            string[] countdownMessages = OmegaWarheadManager.GetNotifyTimes().Select(notifyTime => NotificationUtility.GetCassieCounterNotifyMessage(notifyTime)).ToArray();
+            // FIX: Replaced obsolete static method call with clean instance-based property pipeline access
+            string[] countdownMessages = _plugin.OmegaManager.NotifyTimes
+                .Select(notifyTime => NotificationUtility.GetCassieCounterNotifyMessage(notifyTime))
+                .ToArray();
+
             double messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations((float)_plugin.Config.CassieNotifySpeed, countdownMessages);
-            LogHelper.Debug($"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.");
+            LogHelper.Debug(nameof(WarheadMethods), $"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.");
 
             double adjustedTime = timeToDetonation + messageDurationAdjustment;
 
-            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCountdown((float)adjustedTime), CoroutineTags.Countdown);
-            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleHelicopter(), CoroutineTags.Helicopter);
-            Timing.RunCoroutine(Plugin.Singleton.OmegaManager.HandleCheckpointDoors(), CoroutineTags.Checkpoints);
-
+            // Bound runtime coroutines directly to the explicit instance context mappings
+            Timing.RunCoroutine(_plugin.OmegaManager.HandleCountdown((float)adjustedTime), CoroutineTags.Countdown);
+            Timing.RunCoroutine(_plugin.OmegaManager.HandleHelicopter(), CoroutineTags.Helicopter);
+            Timing.RunCoroutine(_plugin.OmegaManager.HandleCheckpointDoors(), CoroutineTags.Checkpoints);
             #endregion
         }
 

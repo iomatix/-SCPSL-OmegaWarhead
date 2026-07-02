@@ -1,39 +1,40 @@
 ﻿namespace OmegaWarhead
 {
-    using LabApi.Events.Arguments.WarheadEvents;
-    using LabApi.Features.Enums;
-    using LabApi.Features.Wrappers;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UnityEngine;
     using MEC;
+    using LabApi.Events.Arguments.WarheadEvents;
+    using LabApi.Features.Wrappers;
+    using LabApi.Features.Enums;
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Core.RoundScenarioUtils;
     using OmegaWarhead.NotificationUtils;
     using OmegaWarhead.Shared;
-    using System.Collections.Generic;
-    using System.Linq;
 
     /// <summary>
-    /// Manages the Omega Warhead functionality, including activation, countdown, and detonation sequences.
+    /// Core operational controller managing the alternative Omega Warhead sequence, countdown execution timelines, 
+    /// and facility environmental lockouts inside the LabAPI framework.
     /// </summary>
-    #region OmegaWarheadManager Class
     public class OmegaWarheadManager
     {
-        #region Fields
+        #region Private Repositories & States
         private readonly Plugin _plugin;
-        private bool _omegaActivated, _omegaDetonated;
-        public static List<int> GetNotifyTimes() => Plugin.Singleton.Config.NotifyTimes;
+        private bool _omegaActivated;
+        private bool _omegaDetonated;
         #endregion
 
-        #region Constructor
+        #region Initialization
         /// <summary>
-        /// Initializes a new instance of the <see cref="OmegaWarheadManager"/> class.
+        /// Initializes a new instance of the <see cref="OmegaWarheadManager"/> class linked to a parent lifecycle scope.
         /// </summary>
-        /// <param name="plugin">Reference to the core plugin instance.</param>
         public OmegaWarheadManager(Plugin plugin) => _plugin = plugin;
         #endregion
 
-        #region Properties
+        #region Operational Properties
         /// <summary>  
-        /// Gets or sets a value indicating whether the Omega Warhead is currently active.  
+        /// Gets or sets a value indicating whether the alternative Omega Warhead sequence is currently active.  
         /// </summary>  
         public bool IsOmegaActive
         {
@@ -42,59 +43,66 @@
         }
 
         /// <summary>  
-        /// Gets  a value indicating whether the Omega Warhead is already detonated.  
+        /// Gets a value indicating whether the facility has been successfully erased by the nuclear blast.  
         /// </summary>  
         public bool IsOmegaDetonated => _omegaDetonated;
 
+        /// <summary>
+        /// Resolves the collection of active structural notification timestamps from the configuration layer.
+        /// </summary>
+        public List<int> NotifyTimes => _plugin.Config.NotifyTimes;
         #endregion
 
-        #region Initialization and Cleanup
+        #region Subsystem Lifecycle Management
         /// <summary>
-        /// Initializes the Omega Warhead manager and logs the initialization process.
+        /// Establishes early hardware operational states and clears leftover round artifacts.
         /// </summary>
         public void Init()
         {
-            LogHelper.Debug("Initializing OmegaWarheadManager.");
+            LogHelper.Debug(nameof(OmegaWarheadManager), "Initializing subsystem state components.");
             Cleanup();
         }
 
         /// <summary>
-        /// Disables the Omega Warhead manager and performs cleanup operations.
+        /// Safely detaches the manager layer and executes an absolute resource reclamation sequence.
         /// </summary>
         public void Disable()
         {
-            LogHelper.Debug("Disabling OmegaWarheadManager. Cleaning up...");
+            LogHelper.Debug(nameof(OmegaWarheadManager), "Disabling subsystem engine. Initiating cascade cleanup...");
             Cleanup();
         }
 
         /// <summary>
-        /// Cleans up all active coroutines and resets the Omega Warhead state.
+        /// Terminates running execution threads, releases lighting spectrum channels, and purges state variables.
         /// </summary>
         public void Cleanup()
         {
-            LogHelper.Debug($"Cleaning up OmegaWarheadManager. OmegaActivated: {_omegaActivated}");
-            Warhead.Scenario = default; // Should trigger the reset logic that automatically resets the warhead to its initial scenario 
+            LogHelper.Debug(nameof(OmegaWarheadManager), $"Executing operational purge. Current activation state: {_omegaActivated}");
+
+            // Revert default warhead state behavior tracking
+            Warhead.Scenario = default;
+
             _omegaActivated = false;
             _omegaDetonated = false;
-            _plugin.AudioManager.StopOmegaSiren();
+
+            _plugin.AudioManager?.StopOmegaSiren();
             Map.ResetColorOfLights();
 
+            // Prevent thread leaking by systematically killing background operations
             foreach (string tag in CoroutineTags.AllStaticTags)
             {
                 Timing.KillCoroutines(tag);
             }
 
-            LogHelper.Debug("Killed all static OmegaWarhead coroutines via tags.");
-
+            LogHelper.Debug(nameof(OmegaWarheadManager), "All background coroutines bound to static tags have been structurally terminated.");
             _plugin.PlayerMethods?.Clean();
         }
         #endregion
 
-        #region Warhead Event Handlers
+        #region LabAPI Core Event Interceptors
         /// <summary>
-        /// Handles the warhead start event, initiating the Omega Warhead sequence if conditions are met.
+        /// Evaluates active round parameters during Alpha activation and dynamically decides whether to swap payloads with Omega.
         /// </summary>
-        /// <param name="ev">The warhead starting event arguments.</param>
         public void HandleWarheadStart(WarheadStartingEventArgs ev)
         {
             if (!ev.IsAllowed) return;
@@ -105,124 +113,103 @@
                 return;
             }
 
-            #region Generator Check
+            // Evaluate alpha-to-omega conversion constraints via active automation grids
             int activeGenerators = Generator.List.Count(g => g.Engaged);
-            LogHelper.Debug($"Active Generators: {activeGenerators} (Required: {_plugin.Config.GeneratorsNumGuaranteeOmega})");
+            LogHelper.Debug(nameof(OmegaWarheadManager), $"Current online generator grid load: {activeGenerators}/{_plugin.Config.GeneratorsNumGuaranteeOmega}");
 
             if (activeGenerators < _plugin.Config.GeneratorsNumGuaranteeOmega)
             {
                 float chance = _plugin.Config.ReplaceAlphaChance;
-                float roll = UnityEngine.Random.Range(0, 100);
+                float roll = UnityEngine.Random.Range(0f, 100f);
                 float bonus = activeGenerators * _plugin.Config.GeneratorsIncreaseChanceBy;
 
-                float final = roll + bonus;
-                if (chance < 100 && roll >= chance)
+                if (chance < 100f && roll >= (chance + bonus))
                 {
-                    LogHelper.Debug($"Omega replacement skipped due to random chance roll. (Chance: {chance}%, Roll: {roll} + {bonus} (Activated Generators: {activeGenerators}))");
+                    LogHelper.Debug(nameof(OmegaWarheadManager), $"Alternative payload swap skipped due to probability matrix logic. Target Chance: {chance}%, Roll Result: {roll} (Bonus: +{bonus}%)");
                     return;
                 }
             }
             else
             {
-                LogHelper.Debug("Omega forced by generator threshold.");
+                LogHelper.Debug(nameof(OmegaWarheadManager), "Alternative payload injection forced by generator threshold completion.");
             }
-            #endregion
 
-            #region Omega Activation
-            LogHelper.Debug("WarheadStart triggered. Initiating Omega sequence...");
-
+            LogHelper.Debug(nameof(OmegaWarheadManager), "Alpha Warhead successfully intercepted. Swapping command pipelines to Omega payload matrix...");
             _plugin.WarheadMethods.StartSequence(_plugin.Config.TimeToDetonation);
 
-            LogHelper.Debug("HandleWarheadStart called.");
-
-            LogHelper.Debug("Omega is being activated during warhead start, blocking default warhead.");
-            ev.IsAllowed = false; // Prevent default warhead from triggering
-            #endregion
+            // Cancel the standard base-game detonation sequence loop
+            ev.IsAllowed = false;
         }
 
         /// <summary>
-        /// Handles the warhead stop event, stopping the Omega Warhead sequence if allowed by configuration.
+        /// Intercepts abort commands and verifies authorization parameters to decide if the sequence can be vented.
         /// </summary>
-        /// <param name="ev">The warhead stopping event arguments.</param>
         public void HandleWarheadStop(WarheadStoppingEventArgs ev)
         {
             if (!ev.IsAllowed) return;
 
-            LogHelper.Debug("HandleWarheadStop called.");
+            LogHelper.Debug(nameof(OmegaWarheadManager), "Intercepted sequence abort request tracking loop.");
             if (!IsOmegaActive) return;
 
             if (!_plugin.Config.IsStopAllowed)
             {
-                LogHelper.Debug("Omega stop not allowed by config.");
+                LogHelper.Debug(nameof(OmegaWarheadManager), "Sequence abort canceled: Configuration constraints deny player manual cancellation.");
                 ev.IsAllowed = false;
                 return;
             }
 
             if (_plugin.Config.ResetOmegaOnWarheadStop)
             {
-                LogHelper.Debug("WarheadStop triggered. Resetting Omega sequence...");
+                LogHelper.Debug(nameof(OmegaWarheadManager), "Abort accepted. Full chronological timeline normalization triggered.");
                 _plugin.WarheadMethods.ResetSequence();
             }
             else
             {
-                LogHelper.Debug("Omega is active during warhead stop, stopping Omega...");
+                LogHelper.Debug(nameof(OmegaWarheadManager), "Abort accepted. Pausing sequence timeline at current coordinates.");
                 _plugin.WarheadMethods.StopSequence();
             }
 
-            ev.IsAllowed = false; // Block default warhead stop behavior
+            ev.IsAllowed = false;
         }
 
         /// <summary>
-        /// Handles the warhead detonation event, blocking default detonation if Omega Warhead is active.
+        /// Prevents standard engine internal detonation code from overriding custom ending scenarios.
         /// </summary>
-        /// <param name="ev">The warhead detonating event arguments.</param>
         public void HandleWarheadDetonate(WarheadDetonatingEventArgs ev)
         {
-            LogHelper.Debug("HandleWarheadDetonate called.");
             if (!IsOmegaActive) return;
 
-            LogHelper.Debug("Omega is active during detonation, attempting to block default warhead detonation.");
+            LogHelper.Debug(nameof(OmegaWarheadManager), "Base engine detonation code blocked successfully to hand over execution to alternative script matrix.");
             ev.IsAllowed = false;
         }
         #endregion
 
-        #region Coroutine Handlers
-
+        #region High-Performance Execution Coroutines
         /// <summary>
-        /// Manages the countdown sequence for the Omega Warhead, including notifications and light effects.
-        /// Early notifications sync strictly to the clock, while the final sequence guarantees playback,
-        /// artificially stretching the detonation time to build dramatic tension if necessary.
+        /// Controls the chronological counting loop, handles early multi-threading sync, and processes the final dramatic timeline stretch.
         /// </summary>
-        /// <param name="timeToDetonation">The total time in seconds until detonation.</param>
-        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleCountdown(float timeToDetonation)
         {
             double warheadStartTime = Timing.LocalTime + timeToDetonation;
-            var validNotifyTimes = GetNotifyTimes().Where(t => t <= timeToDetonation).OrderByDescending(t => t);
-
-            string message;
-            double msgDuration, buffer;
+            var validNotifyTimes = NotifyTimes.Where(t => t <= timeToDetonation).OrderByDescending(t => t);
 
             foreach (int notifyTime in validNotifyTimes)
             {
                 if (!IsOmegaActive) yield break;
 
-                message = NotificationUtility.GetCassieCounterNotifyMessage(notifyTime);
-
-                // Skip completely empty messages (e.g., 4, 3, 2, 1 if configured that way)
+                string message = NotificationUtility.GetCassieCounterNotifyMessage(notifyTime);
                 if (string.IsNullOrEmpty(message)) continue;
 
-                msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
-                buffer = _plugin.Config.CassieTimingBuffer;
+                double msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, _plugin.Config.CassieNotifySpeed);
+                double buffer = _plugin.Config.CassieTimingBuffer;
 
                 if (notifyTime > 5)
                 {
-                    // Phase 1: Absolute Time Synchronization (for > 5 seconds)
+                    // Phase 1: High-Precision Synchronous Timing
                     double targetStart = warheadStartTime - notifyTime - msgDuration - buffer;
                     double now = Timing.LocalTime;
 
-                    // Skip this early announcement ONLY if we are severely behind schedule to maintain sync
-                    if (now > targetStart) continue;
+                    if (now > targetStart) continue; // Skip announcement if processing frame drop detected to avoid queue overlap
 
                     double wait = targetStart - now;
                     if (wait > 0)
@@ -230,12 +217,9 @@
                 }
                 else
                 {
-                    // Phase 2: Dramatic Finale (for <= 5 seconds)
-                    // We NEVER skip the final countdown. If we are behind schedule, 
-                    // 'wait' will be <= 0 and it will play immediately, pushing the explosion further into the future.
+                    // Phase 2: Cinematic Tension Stretcher (Unconditional Finale Playback)
                     double targetStart = warheadStartTime - notifyTime;
-                    double now = Timing.LocalTime;
-                    double wait = targetStart - now;
+                    double wait = targetStart - Timing.LocalTime;
 
                     if (wait > 0)
                         yield return Timing.WaitForSeconds((float)wait);
@@ -245,63 +229,64 @@
 
                 NotificationUtility.SendCassieMessage(message, $"Warhead -> {notifyTime}...");
 
-                // Dim lights and extend the dramatic finale
+                // Dim environmental illumination maps during the final crucial steps
                 if (notifyTime <= 5)
                 {
                     Map.TurnOffLights(0.75f);
                     yield return Timing.WaitForSeconds(0.75f);
                 }
 
-                // Crucial Step: We wait for the ENTIRE message duration, unconditionally stretching the timeline
-                // If the 5-second message takes 15 seconds, the coroutine patiently waits 15 seconds.
+                // Intentionally stall execution loop for full voice clip duration to build claustrophobic anxiety
                 yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
             }
 
-            // Final Detonation Siren
             if (!IsOmegaActive) yield break;
 
-            message = ".G5 Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
-            msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
-            buffer = _plugin.Config.CassieTimingBuffer;
+            // Trigger the absolute final electronic alarm system
+            string finalSirenMessage = ".G5 Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
+            double sirenDuration = NotificationUtility.CalculateCassieMessageDuration(finalSirenMessage, _plugin.Config.CassieNotifySpeed);
+            double finalBuffer = _plugin.Config.CassieTimingBuffer;
 
-            NotificationUtility.SendCassieMessage(message, $"Warhead...");
+            NotificationUtility.SendCassieMessage(finalSirenMessage, "Warhead...");
+            yield return Timing.WaitForSeconds((float)(sirenDuration + finalBuffer));
 
-            // Wait for the final siren to completely finish its sound before triggering the blast
-            yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
-
-            // Execute actual detonation
-            if (_plugin.OmegaManager.IsOmegaActive)
+            if (IsOmegaActive)
             {
                 Timing.RunCoroutine(HandleDetonation(), CoroutineTags.Detonation);
             }
         }
 
         /// <summary>
-        /// Manages the helicopter evacuation sequence, including broadcast and coroutine initiation.
+        /// Tracks chronological thresholds to automatically dispatch tactical extraction waves to the surface zone.
         /// </summary>
-        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleHelicopter()
         {
             yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
             if (!IsOmegaActive) yield break;
-            NotificationUtility.BroadcastHelicopterCountdown();
 
+            NotificationUtility.BroadcastHelicopterCountdown();
             Timing.RunCoroutine(_plugin.PlayerMethods.HandleHelicopterEvacuation(), CoroutineTags.HeliEvacuation);
         }
 
         /// <summary>
-        /// Manages the unlocking and locking of checkpoint doors during the Omega Warhead sequence.
+        /// Processes facility structural breaches, automatically dropping magnetic containment seals on core checkpoint gates.
         /// </summary>
-        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleCheckpointDoors()
         {
             yield return Timing.WaitForSeconds(_plugin.Config.OpenAndLockCheckpointDoorsDelay);
-            if (!_plugin.OmegaManager.IsOmegaActive) yield break;
+            if (!IsOmegaActive) yield break;
 
             NotificationUtility.SendImportantCassieMessage(_plugin.Config.CheckpointUnlockCassie, _plugin.Config.CheckpointUnlockMessage);
+
             foreach (Door door in Door.List)
             {
-                if (door.DoorName is DoorName.LczCheckpointA || door.DoorName is DoorName.LczCheckpointB || door.DoorName is DoorName.HczCheckpoint || door.DoorName is DoorName.EzGateA || door.DoorName is DoorName.EzGateB || door.DoorName is DoorName.SurfaceGate)
+                // Modern C# 9.0 logical pattern matching syntax implementation
+                if (door.DoorName is DoorName.LczCheckpointA
+                                 or DoorName.LczCheckpointB
+                                 or DoorName.HczCheckpoint
+                                 or DoorName.EzGateA
+                                 or DoorName.EzGateB
+                                 or DoorName.SurfaceGate)
                 {
                     door.IsOpened = true;
                     door.PlayLockBypassDeniedSound();
@@ -311,34 +296,38 @@
         }
 
         /// <summary>
-        /// Manages the detonation sequence for the Omega Warhead, including final notifications and player effects.
+        /// Executes the termination sequence, calculating casualties, shifting post-apocalyptic audio tracks, and jamming regular comms.
         /// </summary>
-        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleDetonation()
         {
             string detonationMessage = _plugin.Config.DetonatingOmegaCassie;
-            double detonationMessageDuration = NotificationUtility.CalculateCassieMessageDuration(detonationMessage, Plugin.Singleton.Config.CassieDetonationSpeed);
-            float buffor = _plugin.Config.CassieTimingBuffer;
-            LogHelper.Debug($"Detonation Cassie message '{detonationMessage}' duration: {detonationMessageDuration}s");
+            double messageDuration = NotificationUtility.CalculateCassieMessageDuration(detonationMessage, _plugin.Config.CassieDetonationSpeed);
+            float buffer = _plugin.Config.CassieTimingBuffer;
 
+            LogHelper.Debug(nameof(OmegaWarheadManager), $"Broadcasting final detonation transmission. Calculated execution block width: {messageDuration}s");
             NotificationUtility.SendCassieMessage(detonationMessage, _plugin.Config.DetonatingOmegaMessage);
 
-            yield return Timing.WaitForSeconds((float)detonationMessageDuration + buffor);
+            yield return Timing.WaitForSeconds((float)messageDuration + buffer);
 
+            // Vaporize unshielded entities on the surface and facility grid layers
             _plugin.PlayerMethods.HandlePlayersOnNuke();
+
             _omegaActivated = false;
             _omegaDetonated = true;
+
             _plugin.RoundController.ExecuteScenario(_plugin.RoundController.GetScenario<DetonationEndingScenario>());
             _plugin.AudioManager.PlayEndingMusic();
 
-            // Active jammer for post-detonation messages
+            // Permanent terminal jamming loop to block base game radio or broadcast interventions
             while (true)
             {
-                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Announcer.Clear();
+                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
+                {
+                    Announcer.Clear();
+                }
                 yield return Timing.WaitForSeconds(0.175f);
             }
         }
         #endregion
     }
-    #endregion
 }

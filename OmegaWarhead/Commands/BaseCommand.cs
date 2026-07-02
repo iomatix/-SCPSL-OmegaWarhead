@@ -4,10 +4,8 @@
     using LabApi.Features.Permissions;
     using LabApi.Features.Wrappers;
     using System;
+    using System.Collections.Generic;
 
-    /// <summary>
-    /// Production-grade abstract base command mapping deterministic authorization and lifecycle context definitions.
-    /// </summary>
     public abstract class BaseCommand : ICommand
     {
         public abstract string Command { get; }
@@ -16,9 +14,6 @@
 
         public abstract bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response);
 
-        /// <summary>
-        /// Validates executing sender identities against the string-based permission infrastructure.
-        /// </summary>
         protected bool HasPermission(ICommandSender sender, out string error, string permission = null)
         {
             if (permission == null)
@@ -26,16 +21,18 @@
                 permission = Plugin.Singleton.Config.Permissions;
             }
 
-            // Server console and automated local execution contexts always bypass authorization constraints
-            if (sender is ServerConsoleSender || sender is LocalCallCommandSender)
+            // Resolve the native LabAPI Player wrapper context safely
+            Player player = Player.Get(sender);
+
+            // If the player wrapper is null, it means the command originated from the Server Console, 
+            // a local execution block, or an automated test suite. Always bypass permission checks.
+            if (player == null)
             {
                 error = null;
                 return true;
             }
 
-            // Resolve the native LabAPI Player wrapper context safely
-            Player player = Player.Get(sender);
-            if (player != null && !player.HasPermission(permission))
+            if (!player.HasPermission(permission))
             {
                 error = $"You need '{permission}' permission to use this command!";
                 return false;

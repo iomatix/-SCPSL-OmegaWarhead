@@ -1,90 +1,87 @@
 ﻿namespace OmegaWarhead
 {
-    using LabApi.Features.Wrappers;
-    using MEC;
-    using OmegaWarhead.Core.LoggingUtils;
-    using PlayerRoles;
-    using System.Collections.Generic;
+    using System;
     using System.Linq;
+    using System.Collections.Generic;
+    using MEC;
+    using PlayerRoles;
+    using LabApi.Features.Wrappers;
+    using LabApi.Features.Enums;
     using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
     using ServerHandler = LabApi.Events.Handlers.ServerEvents;
     using WarheadHandler = LabApi.Events.Handlers.WarheadEvents;
+    using OmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.NotificationUtils;
 
     /// <summary>
-    /// Manages event handling for the Omega Warhead plugin, including server, player, and warhead events.
+    /// Centralized event interceptor matrix routing native LabAPI game lifecycle events into the OmegaWarhead core engine.
     /// </summary>
-    #region EventHandler Class
     public class EventHandler
     {
-        #region Fields
+        #region Private Repositories
         private readonly Plugin _plugin;
-
         #endregion
 
-        #region Constructor
+        #region Initialization
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventHandler"/> class.
+        /// Initializes a new instance of the <see cref="EventHandler"/> class bound to the root plugin token.
         /// </summary>
-        /// <param name="plugin">Reference to the core plugin instance.</param>
-        public EventHandler(Plugin plugin)
-        {
-            _plugin = plugin;
-        }
+        public EventHandler(Plugin plugin) => _plugin = plugin;
         #endregion
 
-        #region Event Registration
+        #region Operational Hook Registration
         /// <summary>
-        /// Registers event handlers for server, player, and warhead events.
+        /// Binds subsystem listeners against the global LabAPI multi-threaded event hub.
         /// </summary>
         public void RegisterEvents()
         {
-            LogHelper.Debug("Registering event handlers.");
+            LogHelper.Debug(nameof(EventHandler), "Initializing global event pipeline subscription matrix...");
 
-            // Server Events
+            // Core Server Infrastructure Hooks
             ServerHandler.RoundStarting += OnRoundStart;
             ServerHandler.RoundEnded += OnRoundEnd;
             ServerHandler.WaveRespawning += OnWaveRespawning;
             ServerHandler.DeadmanSequenceActivating += OnWarheadDeadManSwitch;
 
-            // Warhead Events
+            // Dedicated Warhead Engine Hooks
             WarheadHandler.Starting += OnWarheadStart;
             WarheadHandler.Stopping += OnWarheadStop;
             WarheadHandler.Detonating += OnWarheadDetonate;
 
-            // Player Events
+            // Active Entity Profiler Hooks
             PlayerHandler.ChangingRole += OnChangingRole;
 
-            LogHelper.Debug("Event handlers registered.");
+            LogHelper.Debug(nameof(EventHandler), "All core architectural event pathways securely attached.");
         }
 
         /// <summary>
-        /// Unregisters all event handlers to clean up resources.
+        /// Detaches subsystem listeners to prevent permanent domain assembly holding during hot-reloads.
         /// </summary>
         public void UnregisterEvents()
         {
-            LogHelper.Debug("Unregistering event handlers.");
+            LogHelper.Debug(nameof(EventHandler), "Dismantling event pipeline subscription matrix...");
 
-            // Server Events
+            // Core Server Infrastructure Hooks
             ServerHandler.RoundStarting -= OnRoundStart;
             ServerHandler.RoundEnded -= OnRoundEnd;
             ServerHandler.WaveRespawning -= OnWaveRespawning;
             ServerHandler.DeadmanSequenceActivating -= OnWarheadDeadManSwitch;
 
-            // Warhead Events
+            // Dedicated Warhead Engine Hooks
             WarheadHandler.Starting -= OnWarheadStart;
             WarheadHandler.Stopping -= OnWarheadStop;
             WarheadHandler.Detonating -= OnWarheadDetonate;
 
-            // Player Events
+            // Active Entity Profiler Hooks
             PlayerHandler.ChangingRole -= OnChangingRole;
 
-            LogHelper.Debug("Event handlers unregistered.");
+            LogHelper.Debug(nameof(EventHandler), "Global event pathways unlinked successfully.");
         }
         #endregion
 
-        #region Coroutine Management
+        #region Multi-Threaded Process Interceptors
         /// <summary>
-        /// Safely kills all coroutines tracked by the event handler.
+        /// Cascades thread termination tags across active coroutine blocks.
         /// </summary>
         private void KillTrackedCoroutines()
         {
@@ -92,175 +89,143 @@
             {
                 Timing.KillCoroutines(tag);
             }
-            LogHelper.Debug("Killed all tracked coroutines in EventHandler via tags.");
+            LogHelper.Debug(nameof(EventHandler), "All active background coroutines flushed from execution queues via structural tags.");
         }
         #endregion
 
-        #region Server Event Handlers
+        #region Core Server Interceptors
         /// <summary>
-        /// Handles the RoundStart event, resetting the cache and initializing the Omega Warhead manager.
+        /// Resets temporary databases and maps hardware parameters for a new round instantiation.
         /// </summary>
         public void OnRoundStart(LabApi.Events.Arguments.ServerEvents.RoundStartingEventArgs ev)
         {
-            LogHelper.Debug("OnRoundStart triggered: resetting cache and initializing OmegaWarheadManager.");
+            LogHelper.Debug(nameof(EventHandler), "RoundStarting sequence captured. Refreshing operational databases...");
             KillTrackedCoroutines();
             _plugin.CacheHandler.ResetCache();
             _plugin.OmegaManager.Init();
         }
 
         /// <summary>
-        /// Handles the RoundEnd event, resetting the cache and disabling the Omega Warhead manager.
+        /// Clears tracking graphs and isolates resources upon round completion state transition.
         /// </summary>
-        /// <param name="ev">The round ended event arguments, including the leading team.</param>
         public void OnRoundEnd(LabApi.Events.Arguments.ServerEvents.RoundEndedEventArgs ev)
         {
-            LogHelper.Debug($"OnRoundEnd triggered, leading team: {ev.LeadingTeam}. Disabling OmegaWarheadManager.");
+            LogHelper.Debug(nameof(EventHandler), $"RoundEnded sequence captured. Leading Team: {ev.LeadingTeam}. Shutting down sub-engines...");
             KillTrackedCoroutines();
             _plugin.CacheHandler.ResetCache();
             _plugin.OmegaManager.Disable();
         }
 
         /// <summary>  
-        /// Handles the Deadman Sequence activating event, allowing cancellation based on plugin configuration.  
+        /// Intercepts base-game emergency Dead Man Switch sequences and injects strategic mini-wave mechanics.  
         /// </summary>  
-        /// <param name="ev">Event arguments containing the Deadman Sequence activation data and cancellation flag.</param>  
         public void OnWarheadDeadManSwitch(LabApi.Events.Arguments.ServerEvents.DeadmanSequenceActivatingEventArgs ev)
         {
-            LogHelper.Debug("OnWarheadDeadManSwitch triggered.");
-            LogHelper.Debug($"Config value of DisableDeadManSwitch is {_plugin.Config.DisableDeadManSwitch.ToString()}.");
-            if (_plugin.Config.DisableDeadManSwitch)
+            LogHelper.Debug(nameof(EventHandler), $"DeadmanSequenceActivating interceptor triggered. Configuration Constraint Status: {_plugin.Config.DisableDeadManSwitch}");
+
+            if (!_plugin.Config.DisableDeadManSwitch) return;
+
+            LogHelper.Debug(nameof(EventHandler), "Intercepted base Dead Man sequence. Revoking default engine authorization...");
+            ev.IsAllowed = false;
+
+            // Evaluate constraints before initializing combat reinforcing mini-waves
+            if (_plugin.Config.TriggerMiniWaveOnDmsCancel && !_plugin.OmegaManager.IsOmegaActive && !_plugin.OmegaManager.IsOmegaDetonated)
             {
-                LogHelper.Debug("Cancelling event.");
-                ev.IsAllowed = false;
+                LogHelper.Debug(nameof(EventHandler), "Dead Man failure recovery initiated. Constructing dynamic rescue payload parameters...");
 
-                // trigger a mini-wave for immediate action  
-                if (_plugin.Config.TriggerMiniWaveOnDmsCancel && !_plugin.OmegaManager.IsOmegaActive && !_plugin.OmegaManager.IsOmegaDetonated)
+                // Inject strategic reinforcement points directly into active mobile strike forces
+                RespawnWave mtfWave = RespawnWaves.PrimaryMtfWave;
+                if (mtfWave != null)
                 {
-                    LogHelper.Debug("Triggering mini-wave due to Deadman Switch cancellation.");
-                    // Add respawn tokens to both factions to prolong the match  
-                    RespawnWave mtfWave = RespawnWaves.PrimaryMtfWave;
-                    if (mtfWave != null)
-                    {
-                        mtfWave.RespawnTokens += _plugin.Config.TokensAddedOnDmsCancel;
-                        mtfWave.Influence += _plugin.Config.InfluenceBoostOnDmsCancel;
-                    }
+                    mtfWave.RespawnTokens += _plugin.Config.TokensAddedOnDmsCancel;
+                    mtfWave.Influence += _plugin.Config.InfluenceBoostOnDmsCancel;
+                }
 
-                    RespawnWave chaosWave = RespawnWaves.PrimaryChaosWave;
-                    if (chaosWave != null)
-                    {
-                        chaosWave.RespawnTokens += _plugin.Config.TokensAddedOnDmsCancel;
-                        chaosWave.Influence += _plugin.Config.InfluenceBoostOnDmsCancel;
-                    }
+                RespawnWave chaosWave = RespawnWaves.PrimaryChaosWave;
+                if (chaosWave != null)
+                {
+                    chaosWave.RespawnTokens += _plugin.Config.TokensAddedOnDmsCancel;
+                    chaosWave.Influence += _plugin.Config.InfluenceBoostOnDmsCancel;
+                }
 
+                NotificationUtility.SendCassieMessage(_plugin.Config.CassieMessageMiniWaveOnDmsCancel);
 
-                    NotificationUtils.NotificationUtility.SendCassieMessage(_plugin.Config.CassieMessageMiniWaveOnDmsCancel); 
-                    if (_plugin.Config.OpenBlastDoorsOnDmsCancel) Warhead.OpenBlastDoors();
+                if (_plugin.Config.OpenBlastDoorsOnDmsCancel)
+                {
+                    Warhead.OpenBlastDoors();
+                }
 
+                // High-Performance LINQ Faction Extraction Mapping (Replaced extreme procedural text walls)
+                int ntfCount = Player.List.Count(p => p.Role.GetFaction() is Faction.FoundationStaff);
+                int ciCount = Player.List.Count(p => p.Role.GetFaction() is Faction.FoundationEnemy);
 
-                    // Get the faction with fewer players to balance  
-                    int ntfCount = Player.List.Count(p =>
-                    p.Role == RoleTypeId.NtfPrivate ||
-                    p.Role == RoleTypeId.NtfSergeant ||
-                    p.Role == RoleTypeId.NtfCaptain ||
-                    p.Role == RoleTypeId.NtfSpecialist ||
-                    p.Role == RoleTypeId.Scientist
-                    );
-                    int ciCount = Player.List.Count(p =>
-                    p.Role == RoleTypeId.ChaosRepressor ||
-                    p.Role == RoleTypeId.ChaosMarauder ||
-                    p.Role == RoleTypeId.ChaosRifleman ||
-                    p.Role == RoleTypeId.ChaosConscript ||
-                    p.Role == RoleTypeId.ClassD);
+                Faction targetFaction = ntfCount < ciCount ? Faction.FoundationStaff : Faction.FoundationEnemy;
+                LogHelper.Debug(nameof(EventHandler), $"Strategic tactical evaluation complete. Target Balance Vector: {targetFaction} (Staff Load: {ntfCount} vs Enemy Load: {ciCount})");
 
-                    Faction targetFaction = ntfCount < ciCount ? Faction.FoundationStaff : Faction.FoundationEnemy;
-                    LogHelper.Debug($"Target faction for mini-wave: {targetFaction}. NTF count: {ntfCount}, Chaos count: {ciCount}.");
+                // Route deployment requests through optimized reinforcement sub-channels
+                MiniRespawnWave miniWave = targetFaction is Faction.FoundationStaff ? RespawnWaves.MiniMtfWave : RespawnWaves.MiniChaosWave;
 
-                    // Trigger mini-wave for the disadvantaged faction  
-                    MiniRespawnWave miniWave = null;
-                    if (targetFaction == Faction.FoundationStaff)
-                    {
-                        miniWave = RespawnWaves.MiniMtfWave;
-                    }
-                    else
-                    {
-                        miniWave = RespawnWaves.MiniChaosWave;
-                    }
-
-                    if (miniWave != null)
-                    {
-                        miniWave.InitiateRespawn();
-                        LogHelper.Debug($"Mini-wave initiated for {targetFaction}.");
-                    }
+                if (miniWave != null)
+                {
+                    miniWave.InitiateRespawn();
+                    LogHelper.Debug(nameof(EventHandler), $"Tactical vanguard reinforcement deployment wave authorized for faction context: {targetFaction}");
                 }
             }
         }
         #endregion
 
-        #region Warhead Event Handlers
-        /// <summary>
-        /// Handles the WarheadStarting event, triggering the Omega Warhead start logic.
-        /// </summary>
-        /// <param name="ev">The warhead starting event arguments.</param>
+        #region Dedicated Warhead Interceptors
         public void OnWarheadStart(LabApi.Events.Arguments.WarheadEvents.WarheadStartingEventArgs ev)
         {
-            LogHelper.Debug("OnWarheadStart triggered.");
+            LogHelper.Debug(nameof(EventHandler), "Warhead Starting signal hooked. Delegating verification logic to core manager...");
             _plugin.OmegaManager.HandleWarheadStart(ev);
         }
 
-        /// <summary>
-        /// Handles the WarheadStopping event, triggering the Omega Warhead stop logic.
-        /// </summary>
-        /// <param name="ev">The warhead stopping event arguments.</param>
         public void OnWarheadStop(LabApi.Events.Arguments.WarheadEvents.WarheadStoppingEventArgs ev)
         {
-            LogHelper.Debug("OnWarheadStop triggered.");
+            LogHelper.Debug(nameof(EventHandler), "Warhead Stopping signal hooked. Delegating safety abort routing to core manager...");
             _plugin.OmegaManager.HandleWarheadStop(ev);
         }
 
-        /// <summary>
-        /// Handles the WarheadDetonating event, triggering the Omega Warhead detonation logic.
-        /// </summary>
-        /// <param name="ev">The warhead detonating event arguments.</param>
         public void OnWarheadDetonate(LabApi.Events.Arguments.WarheadEvents.WarheadDetonatingEventArgs ev)
         {
-            LogHelper.Debug("OnWarheadDetonate triggered.");
+            LogHelper.Debug(nameof(EventHandler), "Warhead Detonating critical threshold reached. Passing priority control to manager matrix...");
             _plugin.OmegaManager.HandleWarheadDetonate(ev);
         }
         #endregion
 
-        #region Player and Respawn Event Handlers
+        #region Spatial Entity Interceptors
         /// <summary>
-        /// Handles the WaveRespawning event, blocking faction spawns if disabled.
+        /// Filters global deployment pipelines and dynamically vectors spawn allowances for restricted teams.
         /// </summary>
-        /// <param name="ev">The wave respawning event arguments, including the faction.</param>
         public void OnWaveRespawning(LabApi.Events.Arguments.ServerEvents.WaveRespawningEventArgs ev)
         {
             Faction faction = ev.Wave.Faction;
-            LogHelper.Debug($"OnWaveRespawning triggered. Faction: {faction}");
+            LogHelper.Debug(nameof(EventHandler), $"WaveRespawning process trapped. Analyzing target faction deployment footprint: {faction}");
 
             if (_plugin.CacheHandler.IsFactionDisabled(faction))
             {
-                LogHelper.Debug($"Blocked wave. Faction {faction} is disabled.");
+                LogHelper.Debug(nameof(EventHandler), $"Deployment unauthorized: Faction signature '{faction}' is locked out by alternative sequence boundaries.");
                 ev.IsAllowed = false;
             }
         }
 
         /// <summary>
-        /// Handles the PlayerChangingRole event, blocking role assignments for disabled factions.
+        /// Validates runtime mutation updates and dynamically blocks role assignments linking to disabled tactical groupings.
         /// </summary>
-        /// <param name="ev">The player changing role event arguments, including the player and new role.</param>
         public void OnChangingRole(LabApi.Events.Arguments.PlayerEvents.PlayerChangingRoleEventArgs ev)
         {
+            if (ev.Player == null) return;
+
             Faction faction = ev.NewRole.GetFaction();
-            LogHelper.Debug($"OnChangingRole triggered. Player: {ev.Player.Nickname}, NewRole: {ev.NewRole}, Faction: {faction}");
+            LogHelper.Debug(nameof(EventHandler), $"PlayerChangingRole filter executed for '{ev.Player.Nickname}'. Target Role: {ev.NewRole} (Faction Vector: {faction})");
 
             if (_plugin.CacheHandler.IsFactionDisabled(faction))
             {
-                LogHelper.Debug($"Blocked role assignment. Faction {faction} is disabled.");
+                LogHelper.Debug(nameof(EventHandler), $"Mutation blocked: Faction authorization signature '{faction}' denied for active player routing.");
                 ev.IsAllowed = false;
             }
         }
         #endregion
     }
-    #endregion
 }

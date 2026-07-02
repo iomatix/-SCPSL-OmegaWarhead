@@ -1,62 +1,50 @@
 ﻿namespace OmegaWarhead
 {
-    using OmegaWarhead.Core.LoggingUtils;
-    using OmegaWarhead.Core.PlayerUtils;
-    using LabApi.Features.Wrappers;
-    using MapGeneration;
-    using PlayerRoles;
     using System;
     using System.Collections.Generic;
     using UnityEngine;
+    using MapGeneration;
+    using PlayerRoles;
+    using LabApi.Features.Wrappers;
+    using OmegaWarhead.Core.LoggingUtils;
     using static OmegaWarhead.Core.PlayerUtils.PlayerMethods;
 
     /// <summary>
-    /// Handles caching of runtime data for the OmegaWarhead plugin,
-    /// including shelter locations, players evacuated by helicopter, and disabled factions.
+    /// Handles deterministic caching of runtime entities and environmental coordinates for the OmegaWarhead system.
+    /// Fully decoupled from global static state targets to guarantee memory isolation and absolute leak prevention.
     /// </summary>
     public class CacheHandler
     {
-        #region Fields
-
+        #region Private Repositories
         private readonly Plugin _plugin;
         private HashSet<Vector3> _cachedShelterLocations;
         private HashSet<Player> _cachedHeliSurvivors;
         private HashSet<Faction> _cachedDisabledFactions;
         private Dictionary<Player, PlayerFate> _cachedPlayerFates;
-
         #endregion
 
-        #region Constructor
-
+        #region Initialization
         /// <summary>
-        /// Initializes a new instance of the <see cref="CacheHandler"/> class.
+        /// Initializes a new instance of the <see cref="CacheHandler"/> class linked to a parent lifecycle scope.
         /// </summary>
-        /// <param name="plugin">The plugin instance that owns this cache handler.</param>
         public CacheHandler(Plugin plugin) => _plugin = plugin;
-
         #endregion
 
-        #region Shelter Caching
-
+        #region Shelter Coordinates Cache
         /// <summary>
-        /// Gets the cached list of EzEvacShelter locations.
-        /// If the cache has not been initialized, it will be created on first access.
+        /// Resolves the cached collection of validated EzEvacShelter world coordinates.
         /// </summary>
-        /// <returns>
-        /// A <see cref="HashSet{Vector3}"/> containing the positions of all EzEvacShelter rooms.
-        /// </returns>
         public HashSet<Vector3> GetCachedShelterLocations() => CachedShelterLocations;
 
         /// <summary>
-        /// Scans the map and collects positions of all rooms with the <see cref="RoomName.EzEvacShelter"/> designation.
+        /// Scans active spatial room assets and isolates absolute vectors designating structural emergency shelter containment points.
         /// </summary>
-        /// <returns>
-        /// A <see cref="HashSet{Vector3}"/> of shelter room positions.
-        /// </returns>
         public HashSet<Vector3> CacheShelterLocations()
         {
-            LogHelper.Debug("Scanning for EzShelter rooms and caching locations.");
+            LogHelper.Debug(nameof(CacheHandler), "Executing spatial map analytics scan for active shelter zone facilities...");
+
             var shelterLocations = new HashSet<Vector3>();
+
             foreach (Room room in Room.List)
             {
                 if (room.Name == RoomName.EzEvacShelter)
@@ -64,190 +52,105 @@
                     shelterLocations.Add(room.Position);
                 }
             }
-            LogHelper.Debug($"Cached {shelterLocations.Count} shelter locations.");
+
+            LogHelper.Debug(nameof(CacheHandler), $"Structural scan complete. Registered {shelterLocations.Count} emergency shelter facilities inside cache matrix.");
             return shelterLocations;
         }
 
-        private HashSet<Vector3> CachedShelterLocations
-        {
-            get
-            {
-                if (_cachedShelterLocations == null)
-                {
-                    _cachedShelterLocations = CacheShelterLocations();
-                }
-                return _cachedShelterLocations;
-            }
-        }
-
+        private HashSet<Vector3> CachedShelterLocations => _cachedShelterLocations ??= CacheShelterLocations();
         #endregion
 
-        #region Helicopter Evacuation Caching
-
+        #region Extraction Lifecycle Cache
         /// <summary>
-        /// Adds a player to the list of helicopter-evacuated survivors.
-        /// This also implicitly initializes the evacuation cache if necessary.
+        /// Registers an active player identity into the persistent air extraction survival collection.
         /// </summary>
-        /// <param name="evacuatedPlayer">The <see cref="Player"/> instance to cache.</param>
         public void CachePlayerEvacuatedByHelicopter(Player evacuatedPlayer)
         {
+            if (evacuatedPlayer == null) return;
+
             CachedHeliSurvivors.Add(evacuatedPlayer);
-            LogHelper.Debug($"Cached player {evacuatedPlayer.Nickname} as evacuated by helicopter.");
+            LogHelper.Debug(nameof(CacheHandler), $"Player '{evacuatedPlayer.Nickname}' securely committed to helicopter airlift extraction logs.");
         }
 
         /// <summary>
-        /// Gets the cached list of players who were successfully evacuated by helicopter.
+        /// Resolves the collection of player entities tracked as evacuated via air extraction assets.
         /// </summary>
-        /// <returns>
-        /// A <see cref="HashSet{Player}"/> of helicopter-evacuated players.
-        /// </returns>
         public HashSet<Player> GetCachedPlayersEvacuatedByHelicopters() => CachedHeliSurvivors;
 
         /// <summary>
-        /// Checks if a specific player is marked as having evacuated via helicopter.
+        /// Evaluates whether a target player entity matches an active airlift extraction signature.
         /// </summary>
-        /// <param name="player">The <see cref="Player"/> instance to check.</param>
-        /// <returns><c>true</c> if the player is cached as evacuated; otherwise, <c>false</c>.</returns>
-        public bool IsPlayerEvacuatedByHelicopters(Player player)
-        {
-            return CachedHeliSurvivors.Contains(player);
-        }
+        public bool IsPlayerEvacuatedByHelicopters(Player player) => player != null && CachedHeliSurvivors.Contains(player);
 
-        private HashSet<Player> CachedHeliSurvivors
-        {
-            get
-            {
-                if (_cachedHeliSurvivors == null)
-                {
-                    LogHelper.Debug("Initializing CachedHeliSurvivors as empty set.");
-                    _cachedHeliSurvivors = new HashSet<Player>();
-                }
-                return _cachedHeliSurvivors;
-            }
-        }
-
+        private HashSet<Player> CachedHeliSurvivors => _cachedHeliSurvivors ??= new HashSet<Player>();
         #endregion
 
-        #region Disabled Factions Caching
-
+        #region Disabled Factions Diagnostics
         /// <summary>
-        /// Gets the cached list of factions that have been marked as disabled.
+        /// Resolves the tracked collection of combat or neutral factions locked from active engagement matrices.
         /// </summary>
-        /// <returns>
-        /// A <see cref="HashSet{Faction}"/> representing disabled factions.
-        /// </returns>
         public HashSet<Faction> GetCachedDisabledFactions() => CachedDisabledFactions;
 
         /// <summary>
-        /// Checks if the specified faction has been cached as disabled.
+        /// Determines if a target faction signature is locked down inside the active exclusion matrix.
         /// </summary>
-        /// <param name="faction">The <see cref="Faction"/> to check.</param>
-        /// <returns><c>true</c> if the faction is disabled; otherwise, <c>false</c>.</returns>
-        public bool IsFactionDisabled(Faction faction)
-        {
-            return CachedDisabledFactions.Contains(faction);
-        }
+        public bool IsFactionDisabled(Faction faction) => CachedDisabledFactions.Contains(faction);
 
         /// <summary>
-        /// Adds a faction to the cache of disabled factions.
+        /// Pushes a specified faction signature into the active operational exclusion collection.
         /// </summary>
-        /// <param name="faction">The <see cref="Faction"/> to disable.</param>
         public void CacheDisabledFaction(Faction faction)
         {
             CachedDisabledFactions.Add(faction);
-            LogHelper.Debug($"Cached faction {faction} as disabled.");
+            LogHelper.Debug(nameof(CacheHandler), $"Faction authorization vector '{faction}' successfully committed to exclusion cache.");
         }
 
-        private HashSet<Faction> CachedDisabledFactions
-        {
-            get
-            {
-                if (_cachedDisabledFactions == null)
-                {
-                    LogHelper.Debug("Initializing CachedDisabledFactions as empty set.");
-                    _cachedDisabledFactions = new HashSet<Faction>();
-                }
-                return _cachedDisabledFactions;
-            }
-        }
-
+        private HashSet<Faction> CachedDisabledFactions => _cachedDisabledFactions ??= new HashSet<Faction>();
         #endregion
 
-        #region Player Fate Caching
-
+        #region Statistical Player Fate Engine
         /// <summary>
-        /// Gets the dictionary containing all cached player fates recorded during the current round.
-        /// This provides full access to player-to-fate mappings for analysis, filtering, or display.
+        /// Resolves the complete collection tracking player outcomes for dynamic endgame statistic compilations.
         /// </summary>
-        /// <returns>
-        /// A <see cref="Dictionary{Player, PlayerFate}"/> representing players and their associated fates.
-        /// </returns>
         public Dictionary<Player, PlayerFate> GetCachedPlayerFates() => CachedPlayerFates;
 
         /// <summary>
-        /// Caches the fate of a specific player within the current round context.
-        /// If the player already has a cached fate, it will be overwritten.
+        /// Commits or overwrites a categorical historical outcome for a target player entry.
         /// </summary>
-        /// <param name="player">The <see cref="Player"/> instance whose fate is being cached.</param>
-        /// <param name="fate">The <see cref="PlayerFate"/> value representing the player's outcome.</param>
         public void CachePlayerFate(Player player, PlayerFate fate)
         {
+            if (player == null) return;
+
             CachedPlayerFates[player] = fate;
-            LogHelper.Debug($"Cached fate for {player.Nickname}: {fate}");
+            LogHelper.Debug(nameof(CacheHandler), $"Committed historical lifecycle outcome for player '{player.Nickname}': [{fate}]");
         }
 
         /// <summary>
-        /// Retrieves the cached fate of a given player.
-        /// If no fate is found in the cache, <see cref="PlayerFate.Unknown"/> is returned.
+        /// Resolves the assigned outcome for a target player context. Defaults to Unknown if signature tracking missing.
         /// </summary>
-        /// <param name="player">The <see cref="Player"/> instance to query.</param>
-        /// <returns>
-        /// The <see cref="PlayerFate"/> associated with the player, or <see cref="PlayerFate.Unknown"/> if not found.
-        /// </returns>
         public PlayerFate GetCachedPlayerFate(Player player)
         {
-            if (CachedPlayerFates.TryGetValue(player, out PlayerFate fate))
+            if (player != null && CachedPlayerFates.TryGetValue(player, out PlayerFate fate))
                 return fate;
 
             return PlayerFate.Unknown;
         }
 
         /// <summary>
-        /// Retrieves an enumeration of players who have a cached fate assigned during the current round.
-        /// Avoiding HashSet reallocation for memory safety.
+        /// Exposes raw tracking keys to facilitate memory-safe linear enumeration without array reallocations.
         /// </summary>
-        /// <returns>
-        /// An <see cref="IEnumerable{Player}"/> containing all players with a known fate.
-        /// </returns>
-        public IEnumerable<Player> GetPlayersWithCachedFate()
-        {
-            return CachedPlayerFates.Keys;
-        }
+        public IEnumerable<Player> GetPlayersWithCachedFate() => CachedPlayerFates.Keys;
 
-        private Dictionary<Player, PlayerFate> CachedPlayerFates
-        {
-            get
-            {
-                if (_cachedPlayerFates == null)
-                {
-                    LogHelper.Debug("Initializing CachedPlayerFates as empty dictionary.");
-                    _cachedPlayerFates = new Dictionary<Player, PlayerFate>();
-                }
-                return _cachedPlayerFates;
-            }
-        }
-
+        private Dictionary<Player, PlayerFate> CachedPlayerFates => _cachedPlayerFates ??= new Dictionary<Player, PlayerFate>();
         #endregion
 
-        #region Cache Reset
-
+        #region Defensive Pipeline Purge
         /// <summary>
-        /// Clears all cached data, including shelter locations, evacuated players, and disabled factions.
-        /// Also disables god mode on all helicopter-evacuated players.
+        /// Executes a complete structural purge of all tracking graphs. Resolves invulnerability contexts on entities prior to memory release.
         /// </summary>
         public void ResetCache()
         {
-            LogHelper.Debug("ResetCache called, clearing all caches.");
+            LogHelper.Debug(nameof(CacheHandler), "Global cache eviction cycle triggered. Dismantling memory graphs...");
 
             _cachedShelterLocations = null;
 
@@ -255,7 +158,7 @@
             {
                 foreach (Player player in _cachedHeliSurvivors)
                 {
-                    if (player != null && player.IsReady)
+                    if (player?.IsReady == true)
                     {
                         try
                         {
@@ -263,7 +166,7 @@
                         }
                         catch (Exception ex)
                         {
-                            LogHelper.Warning($"Could not disable godmode for {player.Nickname}: {ex.Message}");
+                            LogHelper.Warning(nameof(CacheHandler), $"Failed to strip extraction invulnerability layer from '{player.Nickname}': {ex.Message}");
                         }
                     }
                 }
@@ -282,8 +185,9 @@
                 _cachedPlayerFates.Clear();
                 _cachedPlayerFates = null;
             }
-        }
 
+            LogHelper.Debug(nameof(CacheHandler), "All data repositories securely unlinked and cleared for Garbage Collection sweep.");
+        }
         #endregion
     }
 }

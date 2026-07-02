@@ -1,6 +1,7 @@
 ﻿namespace OmegaWarhead.Commands
 {
     using System;
+    using System.Collections.Generic;
     using CommandSystem;
     using OmegaWarhead.Core.LoggingUtils;
 
@@ -29,12 +30,14 @@
 
             try
             {
-                // Replaced legacy framework .At() with native .NET ArraySegment IList indexer
-                if (arguments.Count >= 1)
+                // Cast to IList<string> to enable native indexing support under .NET Framework 4.8
+                IList<string> args = arguments;
+
+                if (args.Count >= 1)
                 {
-                    if (!float.TryParse(arguments[0], out float parsed))
+                    if (!float.TryParse(args[0], out float parsed))
                     {
-                        response = $"Unable to parse custom detonation time '{arguments[0]}'. Please provide a valid numerical value.";
+                        response = $"Unable to parse custom detonation time '{args[0]}'. Please provide a valid numerical value.";
                         return true;
                     }
 
