@@ -92,7 +92,7 @@ namespace OmegaWarhead.Core.PlayerUtils
                 OnEscapeTriggered = () =>
                 {
                     LogHelper.Debug(nameof(PlayerMethods), "Dispatching target NTF air reinforcement vehicle to surface sector...");
-                    RespawnWaves.PrimaryMtfWave?.InitiateRespawn();
+                    RespawnWaves.PrimaryMtfWave?.PlayRespawnEffect();
                 }
             };
 
