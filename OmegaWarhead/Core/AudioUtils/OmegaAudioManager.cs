@@ -1,173 +1,193 @@
 ﻿namespace OmegaWarhead.Core.Audio
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
     using AudioManagerAPI.Defaults;
     using AudioManagerAPI.Features.Enums;
     using AudioManagerAPI.Features.Management;
     using OmegaWarhead.Core.AudioUtils;
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
+    using OmegaWarhead.Core.LoggingUtils;
 
-    using Log = LabApi.Features.Console.Logger;
-
+    /// <summary>
+    /// Coordinates embedded audio resource deployment pipelines and manages dynamic playback sessions 
+    /// via the external SCPSL-AudioManagerAPI ecosystem.
+    /// </summary>
     public class OmegaAudioManager
     {
+        #region Private Repositories & Session Handlers
         private readonly Plugin _plugin;
-        private static IAudioManager sharedAudioManager;
+        private readonly IAudioManager _audioManager;
 
-        // byte -> int (Session ID - API 2.0 change)
         private int _sirenSessionId;
         private int _endingMusicSessionId;
 
-        private readonly Dictionary<OmegaWarheadAudio, (string key, string resourceName)> audioConfig = new Dictionary<OmegaWarheadAudio, (string key, string resourceName)>()
+        // Simplified configuration matrix mapping utilizing C# 9.0 target-typed expressions
+        private readonly Dictionary<OmegaWarheadAudio, (string key, string resourceName)> _audioConfig = new()
         {
             { OmegaWarheadAudio.Siren, ("siren", "OmegaWarhead.Shared.Audio.Files.omegawarhead.siren.wav") },
             { OmegaWarheadAudio.EndingMusic, ("endingmusic", "OmegaWarhead.Shared.Audio.Files.omegawarhead.endingmusic.wav") }
         };
+        #endregion
 
+        #region Initialization & Resource Registration
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OmegaAudioManager"/> class bound to the plugin lifecycle context.
+        /// </summary>
         public OmegaAudioManager(Plugin plugin)
         {
-            _plugin = plugin ?? throw new ArgumentNullException(nameof(plugin), "Plugin instance cannot be null.");
+            _plugin = plugin ?? throw new ArgumentNullException(nameof(plugin), "Structural runtime allocation failure: Parent plugin context evaluates to null.");
 
-            sharedAudioManager = DefaultAudioManager.Instance;
+            // Established pure instance-bound allocation to guarantee absolute isolation from global static states
+            _audioManager = DefaultAudioManager.Instance;
+
             RegisterAudioResources();
         }
 
         /// <summary>
-        /// Registers Omega Warhead audio resources from embedded assembly streams.
+        /// Scans the compiled assembly layer, validates embedded wave streams, and registers dynamic content delivery blocks.
         /// </summary>
         private void RegisterAudioResources()
         {
             var assembly = Assembly.GetExecutingAssembly();
 
-            foreach (var pair in audioConfig)
+            foreach (var pair in _audioConfig)
             {
                 string key = pair.Value.key;
                 string resourcePath = pair.Value.resourceName;
 
-                // Pre-validation check to ensure the resource actually exists in the assembly
+                // Pre-flight defensive validation block ensuring embedded physical resource maps correctly
                 using (var testStream = assembly.GetManifestResourceStream(resourcePath))
                 {
                     if (testStream == null)
                     {
-                        Log.Error($"[OmegaAudioManager] RESOURCE NOT FOUND: {resourcePath}. Ensure the file build action is set to 'Embedded Resource'.");
+                        LogHelper.Error(nameof(OmegaAudioManager), $"CRITICAL ASSET FAREWELL: Manifest embedded path '{resourcePath}' could not be resolved. Verify compiler build action flags (Must be 'Embedded Resource').");
                         continue;
                     }
 
                     if (testStream.Length == 0)
                     {
-                        Log.Error($"[OmegaAudioManager] EMPTY RESOURCE: {resourcePath}. The embedded file has 0 bytes.");
+                        LogHelper.Error(nameof(OmegaAudioManager), $"CRITICAL ASSET CORRUPTION: Manifest path '{resourcePath}' evaluates to a 0-byte hollow allocation block.");
                         continue;
                     }
 
-                    Log.Debug($"[OmegaAudioManager] Verified resource: {resourcePath} ({testStream.Length} bytes)");
+                    LogHelper.Debug(nameof(OmegaAudioManager), $"Asset tracking footprint verified successfully: {resourcePath} ({testStream.Length} bytes).");
                 }
 
-                // Register the provider with the Global Audio Manager
-                sharedAudioManager.RegisterAudio(key, () =>
+                // Inject lazy-loaded audio factory stream provider directly into the AudioManagerAPI backend
+                _audioManager.RegisterAudio(key, () =>
                 {
                     var stream = assembly.GetManifestResourceStream(resourcePath);
                     if (stream == null)
                     {
-                        Log.Error($"[OmegaAudioManager] Lazy-load failed for resource: {resourcePath}. Key: {key}");
+                        LogHelper.Error(nameof(OmegaAudioManager), $"Lazy-load extraction pipeline broken for asset key '{key}' under path coordinates: {resourcePath}");
                     }
                     return stream;
                 });
 
-                Log.Info($"[OmegaAudioManager] Registered audio key: {key}");
+                LogHelper.Info(nameof(OmegaAudioManager), $"Audio pipeline provider successfully registered for key index: [{key}]");
             }
         }
+        #endregion
 
+        #region Operational Playback Controllers
+        /// <summary>
+        /// Dispatches a looping global audio playback tracking sequence simulating secondary facility alert siren systems.
+        /// </summary>
         public int PlayOmegaSiren()
         {
             if (_sirenSessionId != 0)
             {
-                // API will clean up the session after FadeOut.
-                sharedAudioManager.FadeOutAudio(_sirenSessionId, 2f);
-                Log.Debug($"[OmegaAudioManager] Stopped existing siren with session ID {_sirenSessionId}.");
+                _audioManager.FadeOutAudio(_sirenSessionId, 2f);
+                LogHelper.Debug(nameof(OmegaAudioManager), $"Terminated pre-existing active siren context under session token: {_sirenSessionId}.");
                 _sirenSessionId = 0;
             }
 
-            if (sharedAudioManager == null)
+            if (_audioManager == null)
             {
-                Log.Warn("[OmegaAudioManager] sharedAudioManager is null. Cannot play siren.");
+                LogHelper.Warn(nameof(OmegaAudioManager), "Audio dispatch canceled: Native IAudioManager endpoint context references null.");
                 return 0;
             }
 
             var audioKey = OmegaWarheadAudio.Siren.GetAudioKey();
             if (string.IsNullOrEmpty(audioKey))
             {
-                Log.Warn("[OmegaAudioManager] Audio key for siren is null or empty.");
+                LogHelper.Warn(nameof(OmegaAudioManager), "Audio dispatch canceled: Resolved enum asset key dictionary mapping returns empty.");
                 return 0;
             }
 
             try
             {
-                _sirenSessionId = sharedAudioManager.PlayGlobalAudio(
+                _sirenSessionId = _audioManager.PlayGlobalAudio(
                     key: audioKey,
                     loop: true,
                     volume: 0.8f,
                     priority: AudioPriority.High,
-                    validPlayersFilter: null, // null means all valid players
+                    validPlayersFilter: null, // Broadcast structural waves globally to all connected endpoints
                     queue: false,
                     fadeInDuration: 1.5f,
                     persistent: true,
-                    lifespan: null, // null means it will play indefinitely until stopped
+                    lifespan: null,          // Persistent continuous looping execution block until explicit manual termination
                     autoCleanup: false
                 );
             }
             catch (Exception ex)
             {
-                Log.Warn($"[OmegaAudioManager] Failed to play Omega siren audio: {ex.Message}");
+                LogHelper.Warn(nameof(OmegaAudioManager), $"Exception captured inside native audio engine framework binding: {ex.Message}");
                 return 0;
             }
 
             if (_sirenSessionId == 0)
             {
-                Log.Warn("[OmegaAudioManager] Failed to play Omega siren audio (invalid session ID).");
+                LogHelper.Warn(nameof(OmegaAudioManager), "Audio engine allocation rejected: Playback engine returns empty tracking token.");
                 return 0;
             }
 
-            Log.Info($"[OmegaAudioManager] Playing looping Omega siren with session ID {_sirenSessionId}.");
+            LogHelper.Info(nameof(OmegaAudioManager), $"Looping facility alternative evacuation siren engaged. Active Session ID: {_sirenSessionId}");
             return _sirenSessionId;
         }
 
+        /// <summary>
+        /// Fades out and releases the active evacuation siren tracking handle.
+        /// </summary>
         public void StopOmegaSiren()
         {
             if (_sirenSessionId != 0)
             {
-                // Direct use of fade out with cleanup (without invoking physical factory)
-                sharedAudioManager.FadeOutAudio(_sirenSessionId, 2f);
-                Log.Info($"[OmegaAudioManager] Fading out and stopping Omega siren with session ID {_sirenSessionId}.");
+                _audioManager.FadeOutAudio(_sirenSessionId, 2f);
+                LogHelper.Info(nameof(OmegaAudioManager), $"Fading out alternative evacuation siren system layer. Retiring Session ID: {_sirenSessionId}");
                 _sirenSessionId = 0;
             }
         }
 
+        /// <summary>
+        /// Dispatches the final atmospheric closing audio arrangement track across global server audio outputs.
+        /// </summary>
         public int PlayEndingMusic(float lifespan = 109f)
         {
             if (_endingMusicSessionId != 0)
             {
-                sharedAudioManager.FadeOutAudio(_endingMusicSessionId, 2f);
-                Log.Debug($"[OmegaAudioManager] Stopped existing ending music with session ID {_endingMusicSessionId}.");
+                _audioManager.FadeOutAudio(_endingMusicSessionId, 2f);
+                LogHelper.Debug(nameof(OmegaAudioManager), $"Terminated pre-existing active ending musical track under session token: {_endingMusicSessionId}.");
                 _endingMusicSessionId = 0;
             }
 
-            if (sharedAudioManager == null)
+            if (_audioManager == null)
             {
-                Log.Warn("[OmegaAudioManager] sharedAudioManager is null. Cannot play ending music.");
+                LogHelper.Warn(nameof(OmegaAudioManager), "Audio dispatch canceled: Native IAudioManager endpoint context references null.");
                 return 0;
             }
 
             var audioKey = OmegaWarheadAudio.EndingMusic.GetAudioKey();
             if (string.IsNullOrEmpty(audioKey))
             {
-                Log.Warn("[OmegaAudioManager] Audio key for Ending Music is null or empty.");
+                LogHelper.Warn(nameof(OmegaAudioManager), "Audio dispatch canceled: Resolved enum asset key dictionary mapping returns empty.");
                 return 0;
             }
 
             try
             {
-                _endingMusicSessionId = sharedAudioManager.PlayGlobalAudio(
+                _endingMusicSessionId = _audioManager.PlayGlobalAudio(
                     key: audioKey,
                     loop: false,
                     volume: 0.9f,
@@ -182,32 +202,37 @@
             }
             catch (Exception ex)
             {
-                Log.Warn($"[OmegaAudioManager] Failed to play Omega ending music: {ex.Message}");
+                LogHelper.Warn(nameof(OmegaAudioManager), $"Exception captured inside native ending music engine binding: {ex.Message}");
                 return 0;
             }
 
             if (_endingMusicSessionId == 0)
             {
-                Log.Warn("[OmegaAudioManager] Failed to play Omega ending music (invalid session ID).");
+                LogHelper.Warn(nameof(OmegaAudioManager), "Audio engine allocation rejected: Playback engine returns empty tracking token.");
                 return 0;
             }
 
-            Log.Info($"[OmegaAudioManager] Playing Omega ending music with session ID {_endingMusicSessionId}.");
+            LogHelper.Info(nameof(OmegaAudioManager), $"Cinematic post-apocalyptic ending theme engaged successfully. Active Session ID: {_endingMusicSessionId}");
             return _endingMusicSessionId;
         }
+        #endregion
 
+        #region Defensive Resource Purge
+        /// <summary>
+        /// Systematically cuts active playback contexts and resets internal tracker values.
+        /// </summary>
         public void Cleanup()
         {
             StopOmegaSiren();
+
             if (_endingMusicSessionId != 0)
             {
-                // For instant cleanup, you could use DestroySession if you don't want to wait for the 2-second fade out:
-                // sharedAudioManager.DestroySession(_endingMusicSessionId);
-                // Leaving FadeOut for a smooth cut-off at the end of the round.
-                sharedAudioManager.FadeOutAudio(_endingMusicSessionId, 2f);
-                Log.Debug($"[OmegaAudioManager] Cleaned up ending music with session ID {_endingMusicSessionId}.");
+                // Smooth linear attenuation decay sweep executed at round boundaries
+                _audioManager.FadeOutAudio(_endingMusicSessionId, 2f);
+                LogHelper.Debug(nameof(OmegaAudioManager), $"Structural session teardown complete for ending music track. Evicting token: {_endingMusicSessionId}");
                 _endingMusicSessionId = 0;
             }
         }
+        #endregion
     }
 }
