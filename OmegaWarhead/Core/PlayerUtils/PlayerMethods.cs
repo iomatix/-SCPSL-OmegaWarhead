@@ -91,7 +91,7 @@ namespace OmegaWarhead.Core.PlayerUtils
                 OnEscapeTriggered = () =>
                 {
                     LogHelper.Debug("Summoning NTF chopper.");
-                    Exiled.API.Features.Respawn.SummonNtfChopper();
+                    RespawnWaves.PrimaryMtfWave?.InitiateRespawn();
                 }
             };
             #endregion

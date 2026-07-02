@@ -2,8 +2,6 @@
 {
     using System;
     using CommandSystem;
-    using Exiled.API.Enums;
-    using Exiled.API.Features;
 
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     [CommandHandler(typeof(GameConsoleCommandHandler))]

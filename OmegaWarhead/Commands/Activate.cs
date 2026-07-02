@@ -2,8 +2,6 @@
 {
     using OmegaWarhead.Core.LoggingUtils;
     using CommandSystem;
-    using Exiled.API.Enums;
-    using Exiled.API.Features;
     using MEC;
     using System;
 

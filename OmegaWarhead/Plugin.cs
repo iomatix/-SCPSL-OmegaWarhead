@@ -1,25 +1,19 @@
 ﻿namespace OmegaWarhead
 {
-    using Exiled.API.Features;
+    using System;
+    using LabApi.Loader.Features.Plugins;
     using MEC;
     using OmegaWarhead.Core.Audio;
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Core.PlayerUtils;
     using OmegaWarhead.Core.RoundScenarioUtils;
-    using System;
 
     /// <summary>
-    /// The main plugin class for the OmegaWarhead system, managing initialization, handlers, and lifecycle events.
+    /// The main plugin class for the OmegaWarhead system, managing initialization, handlers, and lifecycle events inside LabAPI.
     /// </summary>
-    #region Plugin Class
     public class Plugin : Plugin<Config>
     {
-        #region Fields
-        /// <summary>
-        /// Gets the singleton instance of the <see cref="Plugin"/> class.
-        /// </summary>
-        public static Plugin Singleton;
-
+        #region Subsystem Providers
         private RoundController _roundController;
         private WarheadMethods _warheadMethods;
         private PlayerMethods _playerMethods;
@@ -27,34 +21,19 @@
         private CacheHandler _cacheHandler;
         private OmegaWarheadManager _omegaManager;
         private OmegaAudioManager _omegaAudioManager;
-
         #endregion
 
-        #region Plugin Metadata
         /// <summary>
-        /// Gets the author of the plugin.
+        /// Gets the singleton instance of the <see cref="Plugin"/> class.
         /// </summary>
-        public override string Author { get; } = "iomatix";
+        public static Plugin Singleton { get; private set; }
 
-        /// <summary>
-        /// Gets the name of the plugin.
-        /// </summary>
-        public override string Name { get; } = "OmegaWarhead";
-
-        /// <summary>
-        /// Gets the prefix used for the plugin's configuration and logging.
-        /// </summary>
-        public override string Prefix { get; } = "OmegaWarhead";
-
-        /// <summary>
-        /// Gets the version of the plugin.
-        /// </summary>
-        public override Version Version { get; } = new Version(8, 0, 0);
-
-        /// <summary>
-        /// Gets the minimum required version of Exiled for the plugin.
-        /// </summary>
-        public override Version RequiredExiledVersion { get; } = new Version(9, 9, 3);
+        #region LabAPI Mandated Metadata
+        public override string Author => "iomatix";
+        public override string Name => "OmegaWarhead";
+        public override string Description => "Advanced facility alternative detonation and escape sequence control engine.";
+        public override Version Version => new Version(8, 0, 0);
+        public override Version RequiredApiVersion => new Version(1, 0, 0);
         #endregion
 
         #region Handler Properties
@@ -87,6 +66,7 @@
         /// Gets the Omega Warhead manager for handling warhead activation and detonation.
         /// </summary>
         internal OmegaWarheadManager OmegaManager { get => _omegaManager; private set => _omegaManager = value; }
+
         /// <summary>
         /// Gets the Omega Audio for audio management provided by AudioManagerAPI.
         /// </summary>
@@ -94,14 +74,24 @@
         #endregion
 
         #region Lifecycle Methods
+
         /// <summary>
-        /// Called when the plugin is enabled, initializing handlers and registering events.
+        /// Native LabAPI configuration framework hook.
         /// </summary>
-        public override void OnEnabled()
+        public override void LoadConfigs()
+        {
+            base.LoadConfigs();
+            Config.Validate();
+        }
+
+        /// <summary>
+        /// LabAPI structural entry point. Allocates decentralized operational handlers and registers engine hooks.
+        /// </summary>
+        public override void Enable()
         {
             Singleton = this;
 
-            LogHelper.Debug("Enabling OmegaWarhead plugin.");
+            LogHelper.Debug("Enabling OmegaWarhead plugin under LabAPI execution context.");
             try
             {
                 Config.Validate();
@@ -110,13 +100,11 @@
             {
                 LogHelper.Error($"Failed to validate config: {ex.Message}\nStackTrace: {ex.StackTrace}");
                 LogHelper.Error("OmegaWarhead initialization aborted due to invalid configuration.");
-                // Stopping further execution of OnEnabled
                 return;
             }
 
-
             #region Initialize Components
-            LogHelper.Debug("Initializing handlers.");
+            LogHelper.Debug("Allocating decoupled internal handler domains.");
             RoundController = new RoundController(this);
             EventHandler = new EventHandler(this);
             CacheHandler = new CacheHandler(this);
@@ -126,27 +114,25 @@
             AudioManager = new OmegaAudioManager(this);
             #endregion
 
-
             #region Register Events
-            LogHelper.Debug("Registering events.");
+            LogHelper.Debug("Binding event pipeline abstractions.");
             EventHandler.RegisterEvents();
             #endregion
 
-            base.OnEnabled();
-            LogHelper.Info("OmegaWarhead plugin enabled.");
+            LogHelper.Info("OmegaWarhead plugin successfully enabled.");
             OmegaManager.Init();
         }
 
         /// <summary>
-        /// Called when the plugin is disabled, cleaning up resources and unregistering events.
+        /// LabAPI structural teardown layer. Deallocates subsystem contexts, terminates background processes, and releases hooks.
         /// </summary>
-        public override void OnDisabled()
+        public override void Disable()
         {
-            LogHelper.Debug("Disabling OmegaWarhead plugin.");
+            LogHelper.Debug("Disabling OmegaWarhead plugin framework.");
 
             try
             {
-                LogHelper.Debug("Disabling OmegaWarheadManager.");
+                LogHelper.Debug("Deactivating OmegaWarheadManager lifecycle core.");
                 OmegaManager?.Disable();
             }
             catch (Exception ex)
@@ -156,12 +142,12 @@
 
             try
             {
-                LogHelper.Debug("Killing coroutines.");
+                LogHelper.Debug("Terminating active execution threads and coroutines.");
                 foreach (string tag in Shared.CoroutineTags.AllStaticTags)
                 {
                     Timing.KillCoroutines(tag);
                 }
-                LogHelper.Debug("Cleared coroutines via tags.");
+                LogHelper.Debug("Cleared coroutines via structural tags successfully.");
             }
             catch (Exception ex)
             {
@@ -170,7 +156,7 @@
 
             try
             {
-                LogHelper.Debug("Unregistering events.");
+                LogHelper.Debug("Detaching event handler structural bridges.");
                 EventHandler?.UnregisterEvents();
             }
             catch (Exception ex)
@@ -178,7 +164,7 @@
                 LogHelper.Error($"Error while unregistering events: {ex}");
             }
 
-            LogHelper.Debug("Nullifying handlers and singleton.");
+            LogHelper.Debug("Nullifying instance references to permit clean GC sweep.");
             RoundController = null;
             EventHandler = null;
             PlayerMethods = null;
@@ -188,11 +174,8 @@
             AudioManager = null;
             Singleton = null;
 
-            LogHelper.Debug("OmegaWarhead plugin disabled.");
-            base.OnDisabled();
+            LogHelper.Debug("OmegaWarhead plugin successfully offline.");
         }
-
         #endregion
     }
-    #endregion
 }

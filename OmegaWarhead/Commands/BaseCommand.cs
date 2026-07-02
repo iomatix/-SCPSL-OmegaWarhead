@@ -2,8 +2,7 @@
 {
     using System;
     using CommandSystem;
-    using Exiled.API.Features;
-    using Exiled.Permissions.Extensions;
+    using LabApi.Features.Permissions;
 
     public abstract class BaseCommand : ICommand
     {
@@ -20,7 +19,7 @@
                 permission = Plugin.Singleton.Config.Permissions;
             }
 
-            if (!sender.CheckPermission(permission))
+            if (!sender.HasPermission(permission))
             {
                 error = $"You need '{permission}' permission to use this command!";
                 return false;

@@ -1,7 +1,6 @@
 namespace OmegaWarhead
 {
     using CustomPlayerEffects;
-    using Exiled.API.Enums;
     using LabApi.Features.Wrappers;
     using MEC;
     using OmegaWarhead.Core.AudioUtils;

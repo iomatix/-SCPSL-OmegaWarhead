@@ -243,9 +243,6 @@
 
                 if (!IsOmegaActive) yield break;
 
-                if (_plugin.Config.CassieMessageClearBeforeImportant)
-                    Exiled.API.Features.Cassie.Clear();
-
                 NotificationUtility.SendCassieMessage(message, $"Warhead -> {notifyTime}...");
 
                 // Dim lights and extend the dramatic finale
@@ -266,9 +263,6 @@
             message = ".G5 Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
             msgDuration = NotificationUtility.CalculateCassieMessageDuration(message, Plugin.Singleton.Config.CassieNotifySpeed);
             buffer = _plugin.Config.CassieTimingBuffer;
-
-            if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
-                Exiled.API.Features.Cassie.Clear();
 
             NotificationUtility.SendCassieMessage(message, $"Warhead...");
 
@@ -340,7 +334,7 @@
             // Active jammer for post-detonation messages
             while (true)
             {
-                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Exiled.API.Features.Cassie.Clear();
+                if (_plugin.Config.CassieMessageClearBeforeWarheadMessage) Announcer.Clear();
                 yield return Timing.WaitForSeconds(0.175f);
             }
         }
