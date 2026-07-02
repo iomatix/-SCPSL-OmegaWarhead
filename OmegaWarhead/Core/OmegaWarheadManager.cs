@@ -257,11 +257,18 @@
         }
 
         /// <summary>
-        /// Tracks chronological thresholds to automatically dispatch tactical extraction waves to the surface zone.
+        /// Tracks chronological T-Minus thresholds to dynamically dispatch tactical extraction waves to the surface zone.
         /// </summary>
-        public IEnumerator<float> HandleHelicopter()
+        /// <param name="totalDetonationTime">The runtime adjusted total countdown duration.</param>
+        public IEnumerator<float> HandleHelicopter(float totalDetonationTime)
         {
-            yield return Timing.WaitForSeconds(_plugin.Config.HelicopterBroadcastDelay);
+            // Dynamic T-Minus math check
+            float delay = totalDetonationTime - _plugin.Config.HelicopterBroadcastTMinus;
+            if (delay > 0f)
+            {
+                yield return Timing.WaitForSeconds(delay);
+            }
+
             if (!IsOmegaActive) yield break;
 
             NotificationUtility.BroadcastHelicopterCountdown();
@@ -269,18 +276,24 @@
         }
 
         /// <summary>
-        /// Processes facility structural breaches, automatically dropping magnetic containment seals on core checkpoint gates.
+        /// Processes facility structural breaches, dropping magnetic containment seals when the T-Minus threshold is reached.
         /// </summary>
-        public IEnumerator<float> HandleCheckpointDoors()
+        /// <param name="totalDetonationTime">The runtime adjusted total countdown duration.</param>
+        public IEnumerator<float> HandleCheckpointDoors(float totalDetonationTime)
         {
-            yield return Timing.WaitForSeconds(_plugin.Config.OpenAndLockCheckpointDoorsDelay);
+            // Dynamic T-Minus math check
+            float delay = totalDetonationTime - _plugin.Config.OpenAndLockCheckpointDoorsTMinus;
+            if (delay > 0f)
+            {
+                yield return Timing.WaitForSeconds(delay);
+            }
+
             if (!IsOmegaActive) yield break;
 
             NotificationUtility.SendImportantCassieMessage(_plugin.Config.CheckpointUnlockCassie, _plugin.Config.CheckpointUnlockMessage);
 
             foreach (Door door in Door.List)
             {
-                // Modern C# 9.0 logical pattern matching syntax implementation
                 if (door.DoorName is DoorName.LczCheckpointA
                                  or DoorName.LczCheckpointB
                                  or DoorName.HczCheckpoint

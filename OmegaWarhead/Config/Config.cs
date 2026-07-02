@@ -12,127 +12,68 @@
     public sealed class Config
     {
         #region Core Settings
-        /// <summary>
-        /// Gets or sets a value indicating whether the plugin is enabled.
-        /// </summary>
         [Description("Plugin enabled?")]
         public bool IsEnabled { get; set; } = true;
 
-        /// <summary>
-        /// Gets or sets the chance (0-100) that the Alpha Warhead will be replaced with Omega Warhead.
-        /// </summary>
         [Description("Chance that the Alpha Warhead will be replaced with Omega Warhead.")]
         public int ReplaceAlphaChance { get; set; } = 15;
 
-        /// <summary>
-        /// Gets or sets the number of engaged generators that guarantees Omega Warhead launch.
-        /// </summary>
         [Description("Number of engaged generators that guarantees Omega Warhead launch.")]
         public int GeneratorsNumGuaranteeOmega { get; set; } = 3;
 
-        /// <summary>
-        /// Gets or sets the percentage increase in chance per activated generator.
-        /// </summary>
         [Description("How much the chance is increased per each activated generator.")]
         public float GeneratorsIncreaseChanceBy { get; set; } = 15;
 
-        /// <summary>
-        /// Gets or sets a value indicating whether players can stop the Omega Warhead.
-        /// </summary>
         [Description("Whether players can stop the Omega Warhead.")]
         public bool IsStopAllowed { get; set; } = false;
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the Omega countdown should be reset on stop.
-        /// </summary>
         [Description("Should Omega countdown be reset on stop?")]
         public bool ResetOmegaOnWarheadStop { get; set; } = false;
         #endregion
 
-        #region Timing Settings
-        /// <summary>
-        /// Gets or sets the time (in seconds) until Omega Warhead detonation.
-        /// </summary>
-        [Description("Time until Omega detonation (in seconds).")]
+        #region Timing Settings (T-Minus Rework)
+        [Description("Total time until Omega detonation (in seconds) when initiated by default game sequences.")]
         public float TimeToDetonation { get; set; } = 345f;
 
-        /// <summary>
-        /// Notification times (in seconds) at which Cassie announcements are triggered.
-        /// Must be sorted in descending order.
-        /// </summary>
         [Description("Notification times (in seconds), descending order (e.g. 300,240,...,1).")]
         public List<int> NotifyTimes { get; set; } = new List<int>()
         {
             300, 240, 180, 120, 60, 25, 15, 10, 5, 4, 3, 2, 1
         };
 
-        /// <summary>
-        /// Multiplier used to calculate how long Cassie countdown notifications play.
-        /// </summary>
-        [Description("Multiplier for calculating estimated Cassie duration during countdown notifications (does not control actual speech speed).")]
+        [Description("Multiplier for calculating estimated Cassie duration during countdown notifications.")]
         public double CassieNotifySpeed { get; set; } = 0.75;
 
-        /// <summary>
-        /// Estimation multiplier for the final Omega Warhead detonation Cassie message.
-        /// </summary>
-        [Description("Multiplier for estimating Cassie duration of final detonation message (does not affect actual voice speed).")]
+        [Description("Multiplier for estimating Cassie duration of final detonation message.")]
         public double CassieDetonationSpeed { get; set; } = 0.35;
 
-        /// <summary>
-        /// Extra buffer time (in seconds) added to each Cassie announcement to prevent overlapping.
-        /// </summary>
         [Description("Buffer time (in seconds) added to each Cassie message to avoid skips during countdown.")]
         public float CassieTimingBuffer { get; set; } = 0.65f;
 
-        /// <summary>
-        /// Gets or sets the delay (in seconds) before checkpoint doors open and lock.
-        /// </summary>
-        [Description("Delay before checkpoint doors open and lock (in seconds).")]
-        public float OpenAndLockCheckpointDoorsDelay { get; set; } = 225f;
+        [Description("T-Minus threshold (seconds REMAINING until detonation) when checkpoint doors open and permanently lock.")]
+        public float OpenAndLockCheckpointDoorsTMinus { get; set; } = 120f; // 345 - 225 = 120s
+        [Description("T-Minus threshold (seconds REMAINING until detonation) when the evacuation helicopter broadcast begins and arrival logic ticks.")]
+        public float HelicopterBroadcastTMinus { get; set; } = 95f; // 345 - 250 = 95s
 
-        /// <summary>
-        /// Gets or sets the delay (in seconds) before the helicopter broadcast begins.
-        /// </summary>
-        [Description("Delay before the helicopter broadcast begins (in seconds).")]
-        public float HelicopterBroadcastDelay { get; set; } = 250f;
-
-        /// <summary>
-        /// Gets or sets the delay (in seconds) before the Omega sequence starts.
-        /// </summary>
-        [Description("Delay before Omega sequence starts (in seconds).")]
+        [Description("Delay buffer (in seconds) executed from button press before the Omega sequence begins its cycle.")]
         public float DelayBeforeOmegaSequence { get; set; } = 0.15f;
         #endregion
 
         #region Zones Settings
-        /// <summary>
-        /// Gets or sets the size of the escape zone.
-        /// </summary>
         [Description("Size of the escape zone.")]
         public float EscapeZoneSize { get; set; } = 7.75f;
 
-        /// <summary>
-        /// Gets or sets the size of the breach shelter zone.
-        /// </summary>
         [Description("Size of the breach shelter zone.")]
         public float ShelterZoneSize { get; set; } = 7.75f;
         #endregion
 
         #region Visuals Settings
-        /// <summary>
-        /// Gets or sets the red channel of Omega room lighting (0.0 - 1.0).
-        /// </summary>
         [Description("Red channel of Omega room lighting (0.0 - 1.0).")]
         public float LightsColorR { get; set; } = 0.05f;
 
-        /// <summary>
-        /// Gets or sets the green channel of Omega room lighting (0.0 - 1.0).
-        /// </summary>
         [Description("Green channel of Omega room lighting (0.0 - 1.0).")]
         public float LightsColorG { get; set; } = 0.85f;
 
-        /// <summary>
-        /// Gets or sets the blue channel of Omega room lighting (0.0 - 1.0).
-        /// </summary>
         [Description("Blue channel of Omega room lighting (0.0 - 1.0).")]
         public float LightsColorB { get; set; } = 0.35f;
         #endregion
@@ -214,7 +155,6 @@
         #endregion
 
         #region Dead Man Switch Settings
-        
         [Description("Disables Dead Man Sequence if set to true.")]
         public bool DisableDeadManSwitch { get; set; } = false;
 
@@ -267,10 +207,10 @@
                 TimeToDetonation = 10f;
             }
 
-            // 3. Relational Structural Delays Guards (Prevents event execution post-blast)
-            OpenAndLockCheckpointDoorsDelay = Mathf.Clamp(OpenAndLockCheckpointDoorsDelay, 0f, TimeToDetonation - 1f);
-            HelicopterBroadcastDelay = Mathf.Clamp(HelicopterBroadcastDelay, 0f, TimeToDetonation - 1f);
-            DelayBeforeOmegaSequence = Mathf.Clamp(DelayBeforeOmegaSequence, 0f, TimeToDetonation - 1f);
+            // 3. Relational T-Minus Structural Guards (Prevents thresholds triggering beyond total time)
+            OpenAndLockCheckpointDoorsTMinus = Mathf.Clamp(OpenAndLockCheckpointDoorsTMinus, 1f, TimeToDetonation);
+            HelicopterBroadcastTMinus = Mathf.Clamp(HelicopterBroadcastTMinus, 1f, TimeToDetonation);
+            DelayBeforeOmegaSequence = Mathf.Max(0f, DelayBeforeOmegaSequence);
 
             // 4. Spatial Zone Grid Multipliers
             EscapeZoneSize = Mathf.Max(0.1f, EscapeZoneSize);
@@ -294,7 +234,7 @@
                 {
                     if (NotifyTimes[i] < NotifyTimes[i + 1])
                     {
-                        LogHelper.Warning("[OmegaWarhead Config] NotifyTimes list constraint violated (Not sorted in descending timeline order). Executing optimal array restructuring loop...");
+                        LogHelper.Warning("[OmegaWarhead Config] NotifyTimes list constraint violated. Re-sorting array descending...");
                         NotifyTimes.Sort((a, b) => b.CompareTo(a));
                         break;
                     }
@@ -328,9 +268,6 @@
             ValidateString(Permissions, nameof(Permissions));
         }
 
-        /// <summary>
-        /// White-space resilient configuration string tracking filter.
-        /// </summary>
         private void ValidateString(string value, string propertyName)
         {
             if (string.IsNullOrWhiteSpace(value))
