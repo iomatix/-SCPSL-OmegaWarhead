@@ -139,7 +139,7 @@
 
         #region UI and Audio Messages
         [Description("Priority for Cassie messages.")]
-        public float CassieMessagePriority { get; set; } = 7.51f;
+        public float CassieMessagePriority { get; set; } = 1.0f;
 
         [Description("Priority for important Cassie messages.")]
         public float CassieMessageImportantPriority { get; set; } = 10.1f;
