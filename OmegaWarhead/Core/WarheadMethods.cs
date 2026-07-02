@@ -92,8 +92,8 @@ namespace OmegaWarhead
 
             // Bound runtime coroutines directly to the explicit instance context mappings
             Timing.RunCoroutine(_plugin.OmegaManager.HandleCountdown((float)adjustedTime), CoroutineTags.Countdown);
-            Timing.RunCoroutine(_plugin.OmegaManager.HandleHelicopter(), CoroutineTags.Helicopter);
-            Timing.RunCoroutine(_plugin.OmegaManager.HandleCheckpointDoors(), CoroutineTags.Checkpoints);
+            Timing.RunCoroutine(_plugin.OmegaManager.HandleHelicopter((float)adjustedTime), CoroutineTags.Helicopter);
+            Timing.RunCoroutine(_plugin.OmegaManager.HandleCheckpointDoors((float)adjustedTime), CoroutineTags.Checkpoints);
             #endregion
         }
 
