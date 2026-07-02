@@ -315,8 +315,10 @@
             _omegaActivated = false;
             _omegaDetonated = true;
 
-            _plugin.RoundController.ExecuteScenario(_plugin.RoundController.GetScenario<DetonationEndingScenario>());
             _plugin.AudioManager.PlayEndingMusic();
+
+            _plugin.RoundController.ExecuteScenario(_plugin.RoundController.GetScenario<DetonationEndingScenario>());
+            
 
             // Permanent terminal jamming loop to block base game radio or broadcast interventions
             while (true)
