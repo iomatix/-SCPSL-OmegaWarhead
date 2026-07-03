@@ -89,7 +89,7 @@
         /// Recommended value: 0.45 to 1.5 seconds.
         /// </summary>
         [Description("Buffer time (in seconds) added to each Cassie message to avoid skips during countdown.")]
-        public float CassieTimingBuffer { get; set; } = 0.65f;
+        public float CassieTimingBuffer { get; set; } = 0.55f;
 
         /// <summary>
         /// Gets or sets the delay (in seconds) before checkpoint doors open and lock.
