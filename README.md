@@ -1,4 +1,4 @@
-# Omega-Warhead
+# Omega-Warhead - Now compatible with LabAPI and Exiled !
 
 [![Download Latest Release](https://img.shields.io/badge/Download-Latest%20Release-blue?style=for-the-badge)](https://github.com/iomatix/-SCPSL-OmegaWarhead/releases/latest)
 [![GitHub Downloads](https://img.shields.io/github/downloads/iomatix/-SCPSL-OmegaWarhead/latest/total?sort=date&style=for-the-badge)](https://github.com/iomatix/-SCPSL-OmegaWarhead/releases/latest)
@@ -37,7 +37,7 @@ If you appreciate my work, you can support me by [buying me a coffee](https://bu
 ### Contributors
 
 <a href="https://github.com/iomatix/-SCPSL-OmegaWarhead/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=iomatix/-SCPSL-BetterOmegaWarhead" />
+  <img src="https://contrib.rocks/image?repo=iomatix/-SCPSL-OmegaWarhead" />
 </a>
 
 ### Example Config:
@@ -162,6 +162,7 @@ permissions: 'omegawarhead'
 # Enable debug logging.
 debug: true
 ```
+
 
 
 

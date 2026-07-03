@@ -1,83 +1,84 @@
 namespace OmegaWarhead.Core.PlayerUtils
 {
-    #region Usings
-    using CustomPlayerEffects;
-    using LabApi.Features.Extensions;
-    using LabApi.Features.Wrappers;
-    using MEC;
-    using OmegaWarhead.Core.EscapeScenarioUtils;
-    using OmegaWarhead.Core.LoggingUtils;
-    using OmegaWarhead.Shared;
-    using PlayerRoles;
-    using Respawning;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using UnityEngine;
+    using MEC;
+    using PlayerRoles;
+    using Respawning;
+    using CustomPlayerEffects;
+    using LabApi.Features.Extensions;
+    using LabApi.Features.Wrappers;
+    using OmegaWarhead.Core.EscapeScenarioUtils;
+    using OmegaWarhead.Core.LoggingUtils;
+    using OmegaWarhead.Shared;
     using static OmegaWarhead.Core.PlayerUtils.PlayerUtility;
-    #endregion
 
     /// <summary>  
-    /// Contains core player-related coroutine logic requiring plugin context.  
+    /// Coordinates high-performance player structural states, air evacuation lifecycles, 
+    /// and blast exposure fate calculations inside the LabAPI framework.
     /// </summary>  
-    #region PlayerMethods Class
     public class PlayerMethods
     {
-        #region Fields & Constructor
+        #region Private Repositories
         private readonly Plugin _plugin;
-        private readonly HashSet<string> _activeSaveCoroutines = new HashSet<string>();
+        private readonly HashSet<string> _activeSaveCoroutines = new();
+        #endregion
 
+        #region Initialization
         /// <summary>
-        /// Initializes a new instance of the <see cref="PlayerMethods"/> class.
+        /// Initializes a new instance of the <see cref="PlayerMethods"/> class linked to a parent plugin context.
         /// </summary>
-        /// <param name="plugin">Reference to the core plugin instance.</param>
         public PlayerMethods(Plugin plugin) => _plugin = plugin;
         #endregion
 
-        #region Escape Handling
+        #region Generic Escape Sequence Core
         /// <summary>
         /// Handles a generic escape sequence defined by an <see cref="EscapeScenario"/>.
         /// </summary>
-        /// <param name="scenario">The escape scenario to handle.</param>
-        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleEscapeSequence(EscapeScenario scenario)
         {
-            LogHelper.Debug($"{scenario.Name} escape sequence started.");
-            LogHelper.Debug($"Escape zone set to: {scenario.EscapeZone}");
+            LogHelper.Debug(nameof(PlayerMethods), $"{scenario.Name} escape sequence initiated.");
+            LogHelper.Debug(nameof(PlayerMethods), $"Target spatial extraction coordinates set to: {scenario.EscapeZone}");
 
             DisableFactionSpawn();
 
-            // Broadcast the initial hint to all ready players immediately
+            // Broadcast the initial hint to all active players seamlessly
             foreach (Player player in Player.ReadyList)
             {
-                player.SendHint(scenario.InitialMessage, 6.0f);
+                if (player?.IsReady == true)
+                {
+                    player.SendHint(scenario.InitialMessage, 6.0f);
+                }
             }
 
-            // Wait for the initial delay (e.g., helicopter flying in)
+            // Stall execution pipeline for entry vehicles (e.g., helicopter travel animation time)
             yield return Timing.WaitForSeconds(scenario.InitialDelay);
 
-            // Trigger physical event (e.g., spawn chopper)
+            // Execute tactical physics event binding
             scenario.OnEscapeTriggered?.Invoke();
 
-            // Wait for the processing delay (e.g., boarding time)
+            // Stall execution pipeline for boarding structures (e.g., deployment time)
             yield return Timing.WaitForSeconds(scenario.ProcessingDelay);
 
-            // Now process the escape for all players efficiently in one pass
+            // Process extraction bounds checking for all units in a single linear sweep
             foreach (Player player in Player.ReadyList)
             {
-                ProcessPlayerEscape(player, scenario);
+                if (player?.IsReady == true && player.IsAlive)
+                {
+                    ProcessPlayerEscape(player, scenario);
+                }
             }
 
-            LogHelper.Debug($"{scenario.Name} escape sequence completed.");
+            LogHelper.Debug(nameof(PlayerMethods), $"{scenario.Name} escape sequence processing completed successfully.");
         }
 
         /// <summary>
-        /// Handles the helicopter escape sequence using the generic escape system.
+        /// Configures and executes the cinematic tactical helicopter extraction wave.
         /// </summary>
-        /// <returns>An enumerator for coroutine execution.</returns>
         public IEnumerator<float> HandleHelicopterEvacuation()
         {
-            #region Helicopter Scenario Setup
             var helicopterScenario = new EscapeScenario
             {
                 Name = "Helicopter",
@@ -90,46 +91,45 @@ namespace OmegaWarhead.Core.PlayerUtils
                 FinalDelay = 0.75f,
                 OnEscapeTriggered = () =>
                 {
-                    LogHelper.Debug("Summoning NTF chopper.");
-                    Exiled.API.Features.Respawn.SummonNtfChopper();
+                    LogHelper.Debug(nameof(PlayerMethods), "Dispatching target NTF air reinforcement vehicle to surface sector...");
+                    RespawnWaves.PrimaryMtfWave?.PlayRespawnEffect();
                 }
             };
-            #endregion
 
             return HandleEscapeSequence(helicopterScenario);
         }
 
         /// <summary>
-        /// Processes the escape logic for a single player.
+        /// Evaluates positioning matrices to determine single player extraction validity.
         /// </summary>
-        /// <param name="player">The player to process.</param>
-        /// <param name="scenario">The escape scenario defining the behavior.</param>
         private void ProcessPlayerEscape(Player player, EscapeScenario scenario)
         {
             if (!PlayerUtility.IsEligibleForEscape(player, scenario.EscapeZone, _plugin.Config.EscapeZoneSize))
                 return;
 
-            #region Escape Processing
-            // Cache the evacuation based on scenario type  
-            if (scenario.Name == "Helicopter")
+            // Securely commit extraction profile states into transient databases
+            if (scenario.Name is "Helicopter")
+            {
                 _plugin.CacheHandler.CachePlayerEvacuatedByHelicopter(player);
+            }
 
             ApplyEscapeEffects(player, scenario);
 
             var coroutine = Timing.CallDelayed(scenario.FinalDelay, () =>
             {
-                player.SetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
-                LogHelper.Debug($"Player {player.Nickname} has escaped by {scenario.Name.ToLower()}.");
+                // Verify entity connection persistence before mutating game roles
+                if (player?.IsReady == true)
+                {
+                    player.SetRole(RoleTypeId.Spectator, RoleChangeReason.Escaped);
+                    LogHelper.Debug(nameof(PlayerMethods), $"Player '{player.Nickname}' successfully committed to server Spectator state via extraction scenario: [{scenario.Name}].");
+                }
             });
             coroutine.Tag = CoroutineTags.Escape;
-            #endregion
         }
 
         /// <summary>
-        /// Applies teleportation, effects, and hint message during player escape.
+        /// Sets invulnerability hooks and shifts player layout fields post-extraction.
         /// </summary>
-        /// <param name="player">The escaping player.</param>
-        /// <param name="scenario">The scenario context.</param>
         private void ApplyEscapeEffects(Player player, EscapeScenario scenario)
         {
             player.IsGodModeEnabled = true;
@@ -141,56 +141,56 @@ namespace OmegaWarhead.Core.PlayerUtils
         }
         #endregion
 
-        #region Faction Management
+        #region Faction Restriction Management
         /// <summary>
-        /// Disables all enemy faction spawns (e.g., NTF, Chaos) to prevent reinforcement after an escape event.
+        /// Locks reinforcement capability indicators to block dead units from altering endgame metrics.
         /// </summary>
         public void DisableFactionSpawn()
         {
-            LogHelper.Debug("DisableFactionSpawn called.");
+            LogHelper.Debug(nameof(PlayerMethods), "Initializing systemic military deployment lockouts...");
 
-            // Direct faction manipulation avoids unnecessary role mapping loops
             Faction[] factionsToDisable = { Faction.FoundationStaff, Faction.FoundationEnemy };
 
             foreach (Faction faction in factionsToDisable)
             {
                 FactionInfluenceManager.Set(faction, 0f);
                 _plugin.CacheHandler.CacheDisabledFaction(faction);
-                LogHelper.Debug($"Disabled faction spawn: {faction}");
+                LogHelper.Debug(nameof(PlayerMethods), $"Deployment authorization vectors permanently revoked for tactical grouping: [{faction}].");
             }
 
-            LogHelper.Debug("DisableFactionSpawn completed.");
+            LogHelper.Debug(nameof(PlayerMethods), "Systemic deployment lockouts fully engaged.");
         }
         #endregion
 
-        #region Nuke Handling
+        #region Ghead Blast Allocation & Fate Calculation
         /// <summary>
-        /// Evaluates and applies consequences to all players when the Omega Warhead detonates.
+        /// Loops across active unit maps during atomic compression to trigger consequences or shelter states.
         /// </summary>
         public void HandlePlayersOnNuke()
         {
-            LogHelper.Debug("HandlePlayersOnNuke called.");
+            LogHelper.Debug(nameof(PlayerMethods), "Thermal blast calculations initiated across global entity array...");
 
             foreach (Player player in Player.ReadyList)
             {
+                // Defensive structural guard to avoid memory tracking on disconnected client artifacts
+                if (player?.IsReady != true) continue;
+
                 PlayerFate fate = DeterminePlayerFate(player);
                 ProcessPlayerFate(player, fate);
             }
 
-            LogHelper.Debug("HandlePlayersOnNuke completed.");
+            LogHelper.Debug(nameof(PlayerMethods), "Thermal blast wave propagation simulation completed.");
         }
 
         /// <summary>
-        /// Determines whether the player is saved or killed during the nuke event.
+        /// Audits positioning records and returns absolute categorical outcome records for an entity.
         /// </summary>
-        /// <param name="player">The player to evaluate.</param>
-        /// <returns>The fate of the player.</returns>
         private PlayerFate DeterminePlayerFate(Player player)
         {
             bool isInShelter = PlayerUtility.IsInShelter(player, _plugin.Config.ShelterZoneSize);
             bool isEvacuated = _plugin.CacheHandler.IsPlayerEvacuatedByHelicopters(player);
 
-            LogHelper.Debug($"Checking {player.Nickname}: In shelter: {isInShelter}, Evacuated: {isEvacuated}");
+            LogHelper.Debug(nameof(PlayerMethods), $"Diagnostics for '{player.Nickname}': Structural Shelter Protected = {isInShelter}, Air Evacuated = {isEvacuated}");
 
             if (isInShelter) return PlayerFate.SurvivedShelter;
             if (isEvacuated) return PlayerFate.EvacuatedByHelicopter;
@@ -199,40 +199,37 @@ namespace OmegaWarhead.Core.PlayerUtils
         }
 
         /// <summary>
-        /// Applies the result of a player's fate based on the determined value.
+        /// Routes target entities into execution threads or damage pipelines based on fate evaluation.
         /// </summary>
-        /// <param name="player">The affected player.</param>
-        /// <param name="fate">The fate of the player (Saved/Killed).</param>
         private void ProcessPlayerFate(Player player, PlayerFate fate)
         {
             _plugin.CacheHandler.CachePlayerFate(player, fate);
+
             switch (fate)
             {
                 case PlayerFate.SurvivedShelter:
                 case PlayerFate.EvacuatedByHelicopter:
-                    LogHelper.Debug($"Saving {player.Nickname}. Fate: {fate}");
+                    LogHelper.Debug(nameof(PlayerMethods), $"Redirecting survivor client '{player.Nickname}' into invulnerability thread loop. Outcome: [{fate}]");
 
                     string saveTag = $"{Shared.CoroutineTags.SavePlayerPrefix}{player.UserId}";
-                    Timing.KillCoroutines(saveTag); // Safety measure to prevent overlapping effects
+                    Timing.KillCoroutines(saveTag); // Mitigate visual effect stack overlaps
                     Timing.RunCoroutine(HandleSavePlayer(player), saveTag);
                     break;
 
                 case PlayerFate.KilledByWarhead:
-                    LogHelper.Debug($"Killing {player.Nickname} due to Omega Warhead exposure. Fate: {fate}");
+                    LogHelper.Debug(nameof(PlayerMethods), $"Vaporizing unshielded entity '{player.Nickname}' due to core terminal exposure. Outcome: [{fate}]");
                     ApplyNukeEffects(player);
                     break;
 
-                // Optional: default handler for unexpected fate values
                 default:
-                    LogHelper.Warning($"Unhandled fate for {player.Nickname}: {fate}");
+                    LogHelper.Warning(nameof(PlayerMethods), $"Anomalous outcome calculated for entity profile '{player.Nickname}': [{fate}]");
                     break;
             }
         }
 
         /// <summary>
-        /// Applies audio-visual effects to simulate nuke exposure and kills the player.
+        /// Triggers full visual flash rendering blocks and terminates entity processes.
         /// </summary>
-        /// <param name="player">The player to affect.</param>
         private void ApplyNukeEffects(Player player)
         {
             player.EnableEffect<Flashed>(duration: 0.75f);
@@ -244,10 +241,8 @@ namespace OmegaWarhead.Core.PlayerUtils
         }
 
         /// <summary>
-        /// Coroutine that visually affects and briefly saves the player from death.
+        /// Manages transient post-blast stabilization timelines for shelter survivors.
         /// </summary>
-        /// <param name="player">The player to save.</param>
-        /// <returns>An enumerator for coroutine execution.</returns>
         private IEnumerator<float> HandleSavePlayer(Player player)
         {
             if (player == null || string.IsNullOrEmpty(player.UserId)) yield break;
@@ -257,15 +252,15 @@ namespace OmegaWarhead.Core.PlayerUtils
 
             try
             {
-                LogHelper.Debug($"HandleSavePlayer coroutine started for {player.Nickname}.");
+                LogHelper.Debug(nameof(PlayerMethods), $"Invulnerability protection window opened for client: '{player.Nickname}'.");
 
                 player.IsGodModeEnabled = true;
                 player.EnableEffect<Flashed>(duration: 0.75f);
 
                 yield return Timing.WaitForSeconds(0.75f);
 
-                // Safety Measure: Ensure player is still valid and alive after the delay
-                if (player != null && player.IsAlive)
+                // Re-verify instance and client session health after temporal suspension delay
+                if (player?.IsReady == true && player.IsAlive)
                 {
                     player.IsGodModeEnabled = false;
                     player.EnableEffect<Blindness>(duration: 2.75f);
@@ -273,7 +268,7 @@ namespace OmegaWarhead.Core.PlayerUtils
                     player.EnableEffect<Deafened>(duration: 15.75f);
                 }
 
-                LogHelper.Debug($"HandleSavePlayer coroutine completed for {player.Nickname}.");
+                LogHelper.Debug(nameof(PlayerMethods), $"Invulnerability protection window closed cleanly for client: '{player?.Nickname}'.");
             }
             finally
             {
@@ -281,9 +276,10 @@ namespace OmegaWarhead.Core.PlayerUtils
             }
         }
         #endregion
-        #region Player Fate Ending
+
+        #region Statistical Summary Displays
         /// <summary>
-        /// Applies ending effects and messages to players based on their cached fate after a critical event.
+        /// Aggregates historical metrics from the round and formats custom post-apocalyptic summary layouts.
         /// </summary>
         public void HandleEndingByFate()
         {
@@ -294,6 +290,9 @@ namespace OmegaWarhead.Core.PlayerUtils
                 Player player = entry.Key;
                 PlayerFate fate = entry.Value;
 
+                // CRITICAL FIXED DEFENSIVE GUARD: Avoid calling methods on disconnected/null player references
+                if (player?.IsReady != true) continue;
+
                 player.EnableEffect<Flashed>(duration: 1.75f);
                 player.EnableEffect<Blurred>(duration: 15.75f);
                 player.EnableEffect<Deafened>(duration: 15.75f);
@@ -301,42 +300,45 @@ namespace OmegaWarhead.Core.PlayerUtils
                 switch (fate)
                 {
                     case PlayerFate.EvacuatedByHelicopter:
-                        player.SendHint(Plugin.Singleton.Config.EvacuatedMessage, 10f);
+                        player.SendHint(_plugin.Config.EvacuatedMessage, 10f);
                         escaped++;
                         break;
                     case PlayerFate.SurvivedShelter:
-                        player.SendHint(Plugin.Singleton.Config.SurvivorMessage, 10f);
+                        player.SendHint(_plugin.Config.SurvivorMessage, 10f);
                         survived++;
                         break;
                     case PlayerFate.KilledByWarhead:
-                        player.SendHint(Plugin.Singleton.Config.KilledMessage, 10f);
+                        player.SendHint(_plugin.Config.KilledMessage, 10f);
                         dead++;
                         break;
                 }
             }
 
-            // Memory Optimization: Format the broadcast string exactly once before the loop
+            // String Reallocation Optimization: Pre-format broadcast content structure outside the array loop
             string endingCode = UnityEngine.Random.Range(1000, 99999).ToString();
-            string formattedBroadcast = Plugin.Singleton.Config.EndingBroadcast
+            string formattedBroadcast = _plugin.Config.EndingBroadcast
                 .Replace("{survived}", survived.ToString())
                 .Replace("{escaped}", escaped.ToString())
                 .Replace("{dead}", dead.ToString())
                 .Replace("{code}", endingCode);
 
-
             var coroutine = Timing.CallDelayed(10f, () =>
             {
                 foreach (Player player in Player.ReadyList)
                 {
-                    player.SendHint(formattedBroadcast, duration: 15f);
+                    if (player?.IsReady == true)
+                    {
+                        player.SendHint(formattedBroadcast, duration: 15f);
+                    }
                 }
             });
             coroutine.Tag = CoroutineTags.Scenario;
         }
         #endregion
-        #region PlayerFate Enum
+
+        #region Historical Outcome Definitions
         /// <summary>
-        /// Represents the outcome of a player during a critical event.
+        /// Defines absolute categorical outcomes for an entity inside an atomic event environment.
         /// </summary>
         public enum PlayerFate
         {
@@ -347,10 +349,9 @@ namespace OmegaWarhead.Core.PlayerUtils
         }
         #endregion
 
-        #region Cleanup
-        
+        #region Dynamic Resource Reclamation
         /// <summary>
-        /// Cleans up all dynamic player-related coroutines.
+        /// Flushes tracking lists and explicitly terminates survivor tracking threads.
         /// </summary>
         public void Clean()
         {
@@ -359,9 +360,8 @@ namespace OmegaWarhead.Core.PlayerUtils
                 Timing.KillCoroutines($"{Shared.CoroutineTags.SavePlayerPrefix}{userId}");
             }
             _activeSaveCoroutines.Clear();
-            LogHelper.Debug("Cleaned up PlayerMethods dynamic coroutines.");
+            LogHelper.Debug(nameof(PlayerMethods), "All local dynamic player execution sequences successfully evacuated.");
         }
         #endregion
     }
-    #endregion
 }

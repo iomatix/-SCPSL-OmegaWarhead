@@ -1,11 +1,9 @@
 ﻿namespace OmegaWarhead.Commands
 {
-    using OmegaWarhead.Core.LoggingUtils;
-    using CommandSystem;
-    using Exiled.API.Enums;
-    using Exiled.API.Features;
-    using MEC;
     using System;
+    using System.Collections.Generic;
+    using CommandSystem;
+    using OmegaWarhead.Core.LoggingUtils;
 
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     [CommandHandler(typeof(GameConsoleCommandHandler))]
@@ -13,32 +11,39 @@
     {
         public override string Command => "activateomegawarhead";
         public override string[] Aliases => new[] { "activateomega", "activateow", "aow" };
-        public override string Description => "Activates the Omega Warhead.";
+        public override string Description => "Activates the alternative Omega Warhead facility detonation protocol.";
+
         public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (!HasPermission(sender, out response))
+            {
                 return true;
+            }
 
             if (Plugin.Singleton.OmegaManager.IsOmegaActive)
             {
-                response = "Omega Warhead is already active.";
+                response = "Omega Warhead detonation sequence is already active.";
                 return true;
             }
 
             float detonationTime = Plugin.Singleton.Config.TimeToDetonation;
+
             try
             {
-                if (arguments.Count >= 1)
+                // Cast to IList<string> to enable native indexing support under .NET Framework 4.8
+                IList<string> args = arguments;
+
+                if (args.Count >= 1)
                 {
-                    if (!float.TryParse(arguments.At(0), out float parsed))
+                    if (!float.TryParse(args[0], out float parsed))
                     {
-                        response = $"Unable to parse detonation time '{arguments.At(0)}'. Please provide a valid number.";
+                        response = $"Unable to parse custom detonation time '{args[0]}'. Please provide a valid numerical value.";
                         return true;
                     }
 
-                    if (parsed <= 0)
+                    if (parsed <= 0f)
                     {
-                        response = "Detonation time must be greater than 0 seconds.";
+                        response = "Detonation timeline constraints must be strictly greater than 0 seconds.";
                         return true;
                     }
 
@@ -47,12 +52,12 @@
             }
             catch (Exception ex)
             {
-                LogHelper.Warning($"Execute command arguments can not be parsed this time. Stack: {ex}");
+                LogHelper.Warning(nameof(Activate), $"Failed to evaluate custom override arguments. Defaulting to baseline. Stack: {ex.Message}");
             }
 
-            response = $"Omega Warhead starting activation with detonation in {detonationTime}s.";
+            response = $"Omega Warhead authorization accepted. Initializing alternative nuclear payload activation sequence: {detonationTime}s.";
             Plugin.Singleton.WarheadMethods.StartSequence(detonationTime);
             return false;
         }
-    };
+    }
 }

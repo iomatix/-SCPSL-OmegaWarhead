@@ -1,9 +1,10 @@
 ﻿namespace OmegaWarhead.Commands
 {
-    using System;
     using CommandSystem;
-    using Exiled.API.Features;
-    using Exiled.Permissions.Extensions;
+    using LabApi.Features.Permissions;
+    using LabApi.Features.Wrappers;
+    using System;
+    using System.Collections.Generic;
 
     public abstract class BaseCommand : ICommand
     {
@@ -20,7 +21,18 @@
                 permission = Plugin.Singleton.Config.Permissions;
             }
 
-            if (!sender.CheckPermission(permission))
+            // Resolve the native LabAPI Player wrapper context safely
+            Player player = Player.Get(sender);
+
+            // If the player wrapper is null, it means the command originated from the Server Console, 
+            // a local execution block, or an automated test suite. Always bypass permission checks.
+            if (player == null)
+            {
+                error = null;
+                return true;
+            }
+
+            if (!player.HasPermission(permission))
             {
                 error = $"You need '{permission}' permission to use this command!";
                 return false;
