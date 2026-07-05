@@ -1,11 +1,13 @@
-﻿namespace OmegaWarhead
-{
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using UnityEngine;
-    using OmegaWarhead.Core.LoggingUtils;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using LabApi.Extensions;
+using LabApi.Extensions.Misc;
 
+using Logger = LabApi.Extensions.Misc.iLogger;
+
+namespace OmegaWarhead
+{
     /// <summary>
     /// Configuration settings for OmegaWarhead inside the LabAPI execution environment.
     /// </summary>
@@ -36,7 +38,7 @@
         public float TimeToDetonation { get; set; } = 345f;
 
         [Description("Notification times (in seconds), descending order (e.g. 300,240,...,1).")]
-        public List<int> NotifyTimes { get; set; } = new List<int>()
+        public List<int> NotifyTimes { get; set; } = new()
         {
             300, 240, 180, 120, 60, 25, 15, 10, 5, 4, 3, 2, 1
         };
@@ -51,9 +53,10 @@
         public float CassieTimingBuffer { get; set; } = 0.55f;
 
         [Description("T-Minus threshold (seconds REMAINING until detonation) when checkpoint doors open and permanently lock.")]
-        public float OpenAndLockCheckpointDoorsTMinus { get; set; } = 120f; // 345 - 225 = 120s
+        public float OpenAndLockCheckpointDoorsTMinus { get; set; } = 120f;
+
         [Description("T-Minus threshold (seconds REMAINING until detonation) when the evacuation helicopter broadcast begins and arrival logic ticks.")]
-        public float HelicopterBroadcastTMinus { get; set; } = 95f; // 345 - 250 = 95s
+        public float HelicopterBroadcastTMinus { get; set; } = 95f;
 
         [Description("Delay buffer (in seconds) executed from button press before the Omega sequence begins its cycle.")]
         public float DelayBeforeOmegaSequence { get; set; } = 0.15f;
@@ -190,51 +193,51 @@
         {
             if (!IsEnabled)
             {
-                LogHelper.Warning("[OmegaWarhead Config] Core Engine is disabled. The plugin assembly will remain passive.");
+                Logger.Warn(nameof(Config), "Core Detonation Engine is disabled. The plugin assembly will remain passive.");
                 return;
             }
 
-            // 1. Core Randomization and Limits Clamping
-            ReplaceAlphaChance = Mathf.Clamp(ReplaceAlphaChance, 0, 100);
-            GeneratorsNumGuaranteeOmega = Mathf.Clamp(GeneratorsNumGuaranteeOmega, 0, 5);
-            GeneratorsIncreaseChanceBy = Mathf.Max(0f, GeneratorsIncreaseChanceBy);
-            TokensAddedOnDmsCancel = Mathf.Max(0, TokensAddedOnDmsCancel);
+            // 1. Core Randomization and Limits Clamping via Fluent API Primitives
+            ReplaceAlphaChance = ReplaceAlphaChance.Clamp(0, 100);
+            GeneratorsNumGuaranteeOmega = GeneratorsNumGuaranteeOmega.Clamp(0, 5);
+            GeneratorsIncreaseChanceBy = GeneratorsIncreaseChanceBy.LimitMin(0f);
+            TokensAddedOnDmsCancel = TokensAddedOnDmsCancel.LimitMin(0);
 
             // 2. Main Timeline Execution Baselines
             if (TimeToDetonation < 10f)
             {
-                LogHelper.Warning($"[OmegaWarhead Config] Critical TimeToDetonation ({TimeToDetonation}s) is too low for extraction scenarios. Normalizing to safe factory limit (10s).");
+                Logger.Warn(nameof(Config), $"Critical TimeToDetonation ({TimeToDetonation}s) evaluates below extraction minimum curves. Normalizing onto baseline limits (10s).");
                 TimeToDetonation = 10f;
             }
 
-            // 3. Relational T-Minus Structural Guards (Prevents thresholds triggering beyond total time)
-            OpenAndLockCheckpointDoorsTMinus = Mathf.Clamp(OpenAndLockCheckpointDoorsTMinus, 1f, TimeToDetonation);
-            HelicopterBroadcastTMinus = Mathf.Clamp(HelicopterBroadcastTMinus, 1f, TimeToDetonation);
-            DelayBeforeOmegaSequence = Mathf.Max(0f, DelayBeforeOmegaSequence);
+            // 3. Relational T-Minus Structural Guards (Prevents thresholds triggering beyond total bounds)
+            OpenAndLockCheckpointDoorsTMinus = OpenAndLockCheckpointDoorsTMinus.Clamp(1f, TimeToDetonation);
+            HelicopterBroadcastTMinus = HelicopterBroadcastTMinus.Clamp(1f, TimeToDetonation);
+            DelayBeforeOmegaSequence = DelayBeforeOmegaSequence.LimitMin(0f);
 
             // 4. Spatial Zone Grid Multipliers
-            EscapeZoneSize = Mathf.Max(0.1f, EscapeZoneSize);
-            ShelterZoneSize = Mathf.Max(0.1f, ShelterZoneSize);
+            EscapeZoneSize = EscapeZoneSize.LimitMin(0.1f);
+            ShelterZoneSize = ShelterZoneSize.LimitMin(0.1f);
 
             // 5. Native Cassie Speech-Speed Estimation Thresholds
-            CassieNotifySpeed = Math.Min(1.5, Math.Max(0.3, CassieNotifySpeed));
-            CassieDetonationSpeed = Math.Min(1.5, Math.Max(0.3, CassieDetonationSpeed));
+            CassieNotifySpeed = CassieNotifySpeed.Clamp(0.3, 1.5);
+            CassieDetonationSpeed = CassieDetonationSpeed.Clamp(0.3, 1.5);
 
-            // 6. Unified Timing Audio Buffer Pipeline
+            // 6. Unified Timing Audio Buffer Pipeline Checks
             if (CassieTimingBuffer < 0f || CassieTimingBuffer > 5f)
             {
-                LogHelper.Warning($"[OmegaWarhead Config] Extremal CassieTimingBuffer value detected ({CassieTimingBuffer}s). Reverting immediately to safe production default (0.65s).");
+                Logger.Warn(nameof(Config), $"Extremal CassieTimingBuffer variance detected ({CassieTimingBuffer}s). Reverting immediately to safe production fallback metrics (0.65s).");
                 CassieTimingBuffer = 0.65f;
             }
 
-            // 7. Descending Sequence Order Verification for Countdown List
-            if (NotifyTimes != null && NotifyTimes.Count > 1)
+            // 7. Descending Sequence Order Verification for Countdown Array Layout
+            if (NotifyTimes is not null && NotifyTimes.Count > 1)
             {
                 for (int i = 0; i < NotifyTimes.Count - 1; i++)
                 {
                     if (NotifyTimes[i] < NotifyTimes[i + 1])
                     {
-                        LogHelper.Warning("[OmegaWarhead Config] NotifyTimes list constraint violated. Re-sorting array descending...");
+                        Logger.Warn(nameof(Config), "NotifyTimes chronological array matrix alignment constraint violated. Re-sorting array descending...");
                         NotifyTimes.Sort((a, b) => b.CompareTo(a));
                         break;
                     }
@@ -242,9 +245,9 @@
             }
 
             // 8. Native Color Spectrum Pipeline Safeguards
-            LightsColorR = Mathf.Clamp(LightsColorR, 0f, 1f);
-            LightsColorG = Mathf.Clamp(LightsColorG, 0f, 1f);
-            LightsColorB = Mathf.Clamp(LightsColorB, 0f, 1f);
+            LightsColorR = LightsColorR.Clamp(0f, 1f);
+            LightsColorG = LightsColorG.Clamp(0f, 1f);
+            LightsColorB = LightsColorB.Clamp(0f, 1f);
 
             // 9. UI Localization Assets Security Validation Loop
             ValidateString(CassieMessageMiniWaveOnDmsCancel, nameof(CassieMessageMiniWaveOnDmsCancel));
@@ -272,7 +275,7 @@
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                LogHelper.Warning($"[OmegaWarhead Config Asset Disruption] Value mapping for property '{propertyName}' evaluates to null or blank space coordinates.");
+                Logger.Warn(nameof(Config), $"[Asset Disruption] Value mapping for property asset string metadata '{propertyName}' evaluates to null or empty coordinates.");
             }
         }
         #endregion
