@@ -4,6 +4,7 @@ using LabApi.Extensions.RoundManagement;
 using LabApi.Loader.Features.Plugins;
 using OmegaWarhead.Core.Audio;
 using OmegaWarhead.Core.PlayerUtils;
+using OmegaWarhead.Core.RoundScenarioUtils;
 using System;
 using Logger = LabApi.Extensions.Misc.iLogger;
 
@@ -68,6 +69,7 @@ namespace OmegaWarhead
                 .InitializeModule(() => OmegaManager = new OmegaWarheadManager(this))
                 .InitializeModule(() => AudioManager = new OmegaAudioManager(this));
 
+            RoundController.RegisterScenario(new DetonationEndingScenario(RoundController));
             EventHandler.RegisterEvents();
 
             Logger.Info(Name, "OmegaWarhead plugin infrastructure successfully built and enabled.");

@@ -71,7 +71,7 @@ namespace OmegaWarhead.Core.RoundScenarioUtils
                 .Run(CoroutineTags.Scenario);
 
             // Accessing the native framework controller's delayed termination loop
-            Controller.EndRoundGracefully(60.0f, coroutineTag: CoroutineTags.Scenario);
+            Controller.EndRoundGracefully(47.5f, coroutineTag: CoroutineTags.Scenario);
         }
 
         protected override void OnComplete()
