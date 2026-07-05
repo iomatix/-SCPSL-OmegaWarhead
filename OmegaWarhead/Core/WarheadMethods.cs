@@ -1,28 +1,28 @@
+using LabApi.Extensions;
+using LabApi.Features.Wrappers;
+using MEC;
+using OmegaWarhead.Shared;
+using System;
+using System.Linq;
+using UnityEngine;
+using Logger = LabApi.Extensions.Misc.iLogger;
+
 namespace OmegaWarhead
 {
-    using LabApi.Features.Wrappers;
-    using MEC;
-    using OmegaWarhead.Core.LoggingUtils;
-    using OmegaWarhead.Shared;
-    using System.Linq;
-    using UnityEngine;
-
     /// <summary>
-    /// Manages the activation, stopping, resetting, and detonation of the Omega Warhead sequence.
+    /// Manages the activation, stopping, resetting, and detonation lifecycle of the Omega Warhead sequence.
     /// </summary>
-    #region WarheadMethods Class
     public class WarheadMethods
     {
-        #region Fields
+        #region Private Repositories
         private readonly Plugin _plugin;
         #endregion
 
-        #region Constructor
+        #region Initialization
         /// <summary>
-        /// Initializes a new instance of the <see cref="WarheadMethods"/> class.
+        /// Initializes a new instance of the <see cref="WarheadMethods"/> class bound to a parent lifecycle scope.
         /// </summary>
-        /// <param name="plugin">Reference to the core plugin instance.</param>
-        public WarheadMethods(Plugin plugin) => _plugin = plugin;
+        public WarheadMethods(Plugin plugin) => _plugin = plugin ?? throw new ArgumentNullException(nameof(plugin));
         #endregion
 
         #region Sequence Management
@@ -32,65 +32,73 @@ namespace OmegaWarhead
         /// <param name="timeToDetonation">The time in seconds until detonation.</param>
         public void StartSequence(float timeToDetonation)
         {
+            if (_plugin.OmegaManager is null) return;
 
-            Plugin.Singleton.OmegaManager.IsOmegaActive = true;
-            LogHelper.Debug("Starting Omega Warhead sequence chain...");
+            _plugin.OmegaManager.IsOmegaActive = true;
+            Logger.Debug(nameof(WarheadMethods), "Starting Omega Warhead sequence chain...", _plugin.Config.Debug);
             Activate(timeToDetonation);
-
         }
 
         /// <summary>
         /// Initiates the core structural sequence for the alternative alternative nuclear detonation protocol.
         /// </summary>
+        /// <param name="timeToDetonation">The time in seconds until detonation.</param>
         public void Activate(float timeToDetonation)
         {
-            LogHelper.Debug(nameof(WarheadMethods), $"Activating Omega Warhead with detonation time: {timeToDetonation}s.");
+            Logger.Debug(nameof(WarheadMethods), $"Activating Omega Warhead with detonation time: {timeToDetonation}s.", _plugin.Config.Debug);
 
-            #region Round Configuration
-            // Lock round immediately to prevent automatic ending  
-            _plugin.RoundController.SetAutoRoundEndLock(true);
-            #endregion
+            // 1. Lock round immediately to prevent automatic ending transitions
+            _plugin.RoundController?.SetAutoRoundEndLock(true);
 
-            #region Light Configuration
+            // 2. Light Configuration Pipeline
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
-            LogHelper.Debug(nameof(WarheadMethods), $"Changing room lights to color: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}");
+            Logger.Debug(nameof(WarheadMethods), $"Changing room lights to color spectrum: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}", _plugin.Config.Debug);
 
-            var coroutine_light = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
+            var coroutineLight = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
             {
-                if (_plugin.OmegaManager.IsOmegaActive) Map.SetColorOfLights(lightColor);
+                // Replaced non-fluent map calls with collection-wide extensions targeting light controllers directly
+                if (_plugin.OmegaManager is not null && _plugin.OmegaManager.IsOmegaActive)
+                    Room.List.SetLightsColor(lightColor);
             });
-            coroutine_light.Tag = "Omega-Lights";
-            #endregion
+            coroutineLight.Tag = "Omega-Lights";
 
-            #region Notifications
-            var coroutine_core = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
+            // 3. Automated Broadcast and Vocal Notifications Pipeline
+            var coroutineCore = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
             {
-                if (_plugin.OmegaManager.IsOmegaActive)
+                if (_plugin.OmegaManager is not null && _plugin.OmegaManager.IsOmegaActive)
                 {
-                    NotificationUtility.SendImportantCassieMessage(_plugin.Config.StartingOmegaCassie, _plugin.Config.StartingOmegaMessage);
-                    NotificationUtility.BroadcastOmegaActivation();
-                    _plugin.AudioManager.PlayOmegaSiren();
+                    // Eradicated NotificationUtility completely, streaming directly via verified Fluent API tracks
+                    CassieExtensions.ProcessAndDispatchMessage(
+                        _plugin.Config.StartingOmegaCassie,
+                        _plugin.Config.StartingOmegaMessage,
+                        _plugin.Config.CassieMessageClearBeforeImportant,
+                        "pitch_1.05",
+                        _plugin.Config.CassieMessageImportantPriority,
+                        _plugin.Config.DisableCassieMessages
+                    );
+
+                    PlayerExtensions.BroadcastHintToAll(_plugin.Config.ActivatedMessage, 6f);
+                    _plugin.AudioManager?.PlayOmegaSiren();
                 }
             });
-            coroutine_core.Tag = "Omega-Core";
-            #endregion
+            coroutineCore.Tag = "Omega-Core";
 
-            #region Coroutine Setup
-            // FIX: Replaced obsolete static method call with clean instance-based property pipeline access
-            string[] countdownMessages = _plugin.OmegaManager.NotifyTimes
-                .Select(notifyTime => NotificationUtility.GetCassieCounterNotifyMessage(notifyTime))
+            // 4. Timeline Duration Processing & Coroutine Scheduling
+            // Utilizing phonetic countdown strings generated natively through fluent integer conversions
+            string[] countdownMessages = _plugin.Config.NotifyTimes
+                .Select(notifyTime => notifyTime.ToCassieCountdown("Seconds until Omega Warhead Detonation"))
                 .ToArray();
 
-            double messageDurationAdjustment = NotificationUtility.CalculateTotalMessagesDurations((float)_plugin.Config.CassieNotifySpeed, countdownMessages);
-            LogHelper.Debug(nameof(WarheadMethods), $"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.");
+            // Intersecting array listings to aggregate timeline bounds cleanly
+            double messageDurationAdjustment = CassieExtensions.CalculateTotalMessagesDurations(countdownMessages, (float)_plugin.Config.CassieNotifySpeed);
+            Logger.Debug(nameof(WarheadMethods), $"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.", _plugin.Config.Debug);
 
             double adjustedTime = timeToDetonation + messageDurationAdjustment;
 
-            // Bound runtime coroutines directly to the explicit instance context mappings
+            // Bound runtime coroutines directly to explicit instance context tracking tags safely
             Timing.RunCoroutine(_plugin.OmegaManager.HandleCountdown((float)adjustedTime), CoroutineTags.Countdown);
             Timing.RunCoroutine(_plugin.OmegaManager.HandleHelicopter((float)adjustedTime), CoroutineTags.Helicopter);
             Timing.RunCoroutine(_plugin.OmegaManager.HandleCheckpointDoors((float)adjustedTime), CoroutineTags.Checkpoints);
-            #endregion
         }
 
         /// <summary>
@@ -98,11 +106,20 @@ namespace OmegaWarhead
         /// </summary>
         public void StopSequence()
         {
-            Plugin.Singleton.OmegaManager.IsOmegaActive = false;
-            LogHelper.Debug("Stopping Omega Warhead sequence.");
+            if (_plugin.OmegaManager is null) return;
 
-            NotificationUtility.SendImportantCassieMessage(Plugin.Singleton.Config.StoppingOmegaCassie, _plugin.Config.StoppingOmegaMessage);
-            Plugin.Singleton.OmegaManager.Cleanup();
+            _plugin.OmegaManager.IsOmegaActive = false;
+            Logger.Debug(nameof(WarheadMethods), "Stopping Omega Warhead sequence.", _plugin.Config.Debug);
+
+            CassieExtensions.ProcessAndDispatchMessage(
+                _plugin.Config.StoppingOmegaCassie,
+                _plugin.Config.StoppingOmegaMessage,
+                _plugin.Config.CassieMessageClearBeforeImportant, "pitch_0.95",
+                _plugin.Config.CassieMessagePriority,
+                _plugin.Config.DisableCassieMessages
+            );
+
+            _plugin.OmegaManager.Cleanup();
         }
 
         /// <summary>
@@ -110,10 +127,9 @@ namespace OmegaWarhead
         /// </summary>
         public void ResetSequence()
         {
-            LogHelper.Debug("Resetting Omega Warhead state.");
-            Plugin.Singleton.OmegaManager.Init();
+            Logger.Debug(nameof(WarheadMethods), "Resetting Omega Warhead state.", _plugin.Config.Debug);
+            _plugin.OmegaManager?.Init();
         }
         #endregion
     }
-    #endregion
 }

@@ -1,9 +1,9 @@
 ﻿using LabApi.Extensions;
 using LabApi.Extensions.Plugin;
+using LabApi.Extensions.RoundManagement;
 using LabApi.Loader.Features.Plugins;
 using OmegaWarhead.Core.Audio;
 using OmegaWarhead.Core.PlayerUtils;
-using OmegaWarhead.Core.RoundScenarioUtils;
 using System;
 using Logger = LabApi.Extensions.Misc.iLogger;
 
@@ -60,7 +60,7 @@ namespace OmegaWarhead
             }
 
             PluginBuilder.Create(this)
-                .InitializeModule(() => RoundController = new RoundController(this))
+                .InitializeModule(() => RoundController = new RoundController())
                 .InitializeModule(() => EventHandler = new EventHandler(this))
                 .InitializeModule(() => CacheHandler = new CacheHandler(this))
                 .InitializeModule(() => PlayerMethods = new PlayerMethods(this))

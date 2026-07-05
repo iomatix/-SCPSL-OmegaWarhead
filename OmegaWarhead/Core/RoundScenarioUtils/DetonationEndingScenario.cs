@@ -1,94 +1,82 @@
-﻿namespace OmegaWarhead.Core.RoundScenarioUtils
-{
-    using LabApi.Features.Wrappers;
-    using MEC;
-    using OmegaWarhead.Core.LoggingUtils;
-    using OmegaWarhead.Shared;
+﻿using LabApi.Extensions;
+using LabApi.Extensions.RoundManagement;
+using LabApi.Features.Wrappers;
+using OmegaWarhead.Shared;
+using UnityEngine;
+using Logger = LabApi.Extensions.Misc.iLogger;
 
+namespace OmegaWarhead.Core.RoundScenarioUtils
+{
+    /// <summary>
+    /// Specific feature-content scenario handling the site vaporization aftermath sequence.
+    /// Inherits cleanly from the generic native framework base scenario class.
+    /// </summary>
     public class DetonationEndingScenario : RoundScenario
     {
         public DetonationEndingScenario(RoundController roundController) : base(roundController) { }
 
         public override void Execute()
         {
-            // Warhead detonation  
             ExecuteWarheadDetonation();
-
-            // Facility effects  
             ExecuteFacilityEffects();
-
-            // Light sequence  
             ExecuteLightSequence();
-
-            // Final cleanup and round end  
             ScheduleRoundEnd();
         }
 
-        private void ExecuteWarheadDetonation()
+        private static void ExecuteWarheadDetonation()
         {
             Warhead.Shake();
-
-            Plugin.Singleton.PlayerMethods.HandlePlayersOnNuke();
+            Plugin.Singleton.PlayerMethods?.HandlePlayersOnNuke();
         }
 
-        private void ExecuteFacilityEffects()
+        private static void ExecuteFacilityEffects()
         {
-            foreach (Room room in Room.List)
-            {
-                foreach (var door in room.Doors)
-                {
-                    if (door is BreakableDoor breakable && !breakable.IsBroken)
-                        breakable.TryBreak();
-                }
-
-                foreach (var lightController in room.AllLightControllers)
-                {
-                    lightController.LightsEnabled = false;
-                }
-            }
+            // Utilizing global batch commands straight out of the shared API assembly
+            MapExtensions.BreakAllFacilityDoors();
+            MapExtensions.SetAllLightsEnabled(false);
         }
 
         private void ExecuteLightSequence()
         {
-            for (float t = 0f; t < 20f; t += 2f)
+            // Building the red strobe timeline cleanly via the shared framework ActionChain engine
+            var strobeChain = this.CreateChain();
+
+            for (int i = 0; i < 10; i++)
             {
-                float delay = t;
-                var coroutine = Timing.CallDelayed(delay, () =>
-                {
-                    Map.SetColorOfLights(UnityEngine.Color.red);
-
-                    var coroutine_d1 = Timing.CallDelayed(0.5f, () => Map.TurnOffLights());
-                    coroutine_d1.Tag = "Omega-Scenario";
-
-                    var couroutine_d2 = Timing.CallDelayed(1.27f, () =>
-                    {
-                        Map.TurnOnLights();
-                        Map.SetColorOfLights(UnityEngine.Color.black);
-                    });
-                    couroutine_d2.Tag = "Omega-Scenario";
-                });
-                coroutine.Tag = CoroutineTags.Scenario;
+                strobeChain.Then(_ => Room.List.SetLightsColor(Color.red))
+                           .Wait(0.5f)
+                           .Then(_ => MapExtensions.SetAllLightsEnabled(false))
+                           .Wait(0.77f)
+                           .Then(_ =>
+                           {
+                               MapExtensions.SetAllLightsEnabled(true);
+                               Room.List.SetLightsColor(Color.black);
+                           })
+                           .Wait(0.73f);
             }
+
+            strobeChain.Run(CoroutineTags.Scenario);
         }
 
         private void ScheduleRoundEnd()
         {
-            var coroutine = Timing.CallDelayed(30f, () =>
-            {
-                Map.TurnOnLights();
-                Map.SetColorOfLights(UnityEngine.Color.gray);
-                Plugin.Singleton.PlayerMethods.HandleEndingByFate();
-            });
-            coroutine.Tag = CoroutineTags.Scenario;
+            this.CreateChain()
+                .Wait(30f)
+                .Then(_ =>
+                {
+                    MapExtensions.SetAllLightsEnabled(true);
+                    Room.List.SetLightsColor(Color.gray);
+                    Plugin.Singleton.PlayerMethods?.HandleEndingByFate();
+                })
+                .Run(CoroutineTags.Scenario);
 
-            _roundController.EndRoundGracefully(60f);
+            // Accessing the native framework controller's delayed termination loop
+            Controller.EndRoundGracefully(60.0f, coroutineTag: CoroutineTags.Scenario);
         }
 
         protected override void OnComplete()
         {
-            LogHelper.Info("Detonation ending scenario completed successfully");
-
-
+            Logger.Info(Plugin.Singleton.Name, "Detonation ending scenario completed successfully.");
             base.OnComplete();
         }
     }

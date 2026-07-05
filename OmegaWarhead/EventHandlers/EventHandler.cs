@@ -210,7 +210,7 @@ namespace OmegaWarhead
         /// </summary>
         public void OnChangingRole(LabApi.Events.Arguments.PlayerEvents.PlayerChangingRoleEventArgs ev)
         {
-            if (ev?.Player is null || ev.NewRole is null) return;
+            if (ev?.Player is null || ev?.NewRole is null) return;
 
             Faction faction = ev.NewRole.GetFaction();
             Logger.Debug(_plugin.Name, $"PlayerChangingRole filter executed for '{ev.Player.Nickname}'. Target Role: {ev.NewRole} (Faction Vector: {faction})", _plugin.Config.Debug);

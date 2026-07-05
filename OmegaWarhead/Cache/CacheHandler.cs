@@ -41,7 +41,7 @@ namespace OmegaWarhead
         /// </summary>
         public HashSet<Vector3> CacheShelterLocations()
         {
-            Logger.Debug(nameof(CacheHandler), "Executing spatial map analytics scan for active shelter zone facilities...", _plugin.Config.Debug); [cite: 2]
+            Logger.Debug(nameof(CacheHandler), "Executing spatial map analytics scan for active shelter zone facilities...", _plugin.Config.Debug);
 
             var shelterLocations = new HashSet<Vector3>();
 
@@ -53,7 +53,7 @@ namespace OmegaWarhead
                 }
             }
 
-            Logger.Debug(nameof(CacheHandler), $"Structural scan complete. Registered {shelterLocations.Count} emergency shelter facilities inside cache matrix.", _plugin.Config.Debug); [cite: 2]
+            Logger.Debug(nameof(CacheHandler), $"Structural scan complete. Registered {shelterLocations.Count} emergency shelter facilities inside cache matrix.", _plugin.Config.Debug);
             return shelterLocations;
         }
 
@@ -69,7 +69,7 @@ namespace OmegaWarhead
             if (evacuatedPlayer is null) return;
 
             CachedHeliSurvivors.Add(evacuatedPlayer);
-            Logger.Debug(nameof(CacheHandler), $"Player '{evacuatedPlayer.Nickname}' securely committed to helicopter airlift extraction logs.", _plugin.Config.Debug); [cite: 2]
+            Logger.Debug(nameof(CacheHandler), $"Player '{evacuatedPlayer.Nickname}' securely committed to helicopter airlift extraction logs.", _plugin.Config.Debug);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace OmegaWarhead
         public void CacheDisabledFaction(Faction faction)
         {
             CachedDisabledFactions.Add(faction);
-            Logger.Debug(nameof(CacheHandler), $"Faction authorization vector '{faction}' successfully committed to exclusion cache.", _plugin.Config.Debug); [cite: 2]
+            Logger.Debug(nameof(CacheHandler), $"Faction authorization vector '{faction}' successfully committed to exclusion cache.", _plugin.Config.Debug);
         }
 
         private HashSet<Faction> CachedDisabledFactions => _cachedDisabledFactions ??= new HashSet<Faction>();
@@ -122,7 +122,7 @@ namespace OmegaWarhead
             if (player is null) return;
 
             CachedPlayerFates[player] = fate;
-            Logger.Debug(nameof(CacheHandler), $"Committed historical lifecycle outcome for player '{player.Nickname}': [{fate}]", _plugin.Config.Debug); [cite: 2]
+            Logger.Debug(nameof(CacheHandler), $"Committed historical lifecycle outcome for player '{player.Nickname}': [{fate}]", _plugin.Config.Debug);
         }
 
         /// <summary>
@@ -150,7 +150,7 @@ namespace OmegaWarhead
         /// </summary>
         public void ResetCache()
         {
-            Logger.Debug(nameof(CacheHandler), "Global cache eviction cycle triggered. Dismantling memory graphs...", _plugin.Config.Debug); [cite: 2]
+            Logger.Debug(nameof(CacheHandler), "Global cache eviction cycle triggered. Dismantling memory graphs...", _plugin.Config.Debug);
 
             _cachedShelterLocations = null;
 
@@ -166,7 +166,7 @@ namespace OmegaWarhead
                         }
                         catch (Exception ex)
                         {
-                            Logger.Warn(nameof(CacheHandler), $"Failed to strip extraction invulnerability layer from '{player.Nickname}': {ex.Message}"); [cite: 2]
+                            Logger.Warn(nameof(CacheHandler), $"Failed to strip extraction invulnerability layer from '{player.Nickname}': {ex.Message}");
                         }
                     }
                 }
@@ -186,7 +186,7 @@ namespace OmegaWarhead
                 _cachedPlayerFates = null;
             }
 
-            Logger.Debug(nameof(CacheHandler), "All data repositories securely unlinked and cleared for Garbage Collection sweep.", _plugin.Config.Debug); [cite: 2]
+            Logger.Debug(nameof(CacheHandler), "All data repositories securely unlinked and cleared for Garbage Collection sweep.", _plugin.Config.Debug);
         }
         #endregion
     }
