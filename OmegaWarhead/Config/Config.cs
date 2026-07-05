@@ -1,9 +1,7 @@
-﻿using System;
+﻿using LabApi.Extensions;
+using LabApi.Loader.Features.Configuration;
 using System.Collections.Generic;
 using System.ComponentModel;
-using LabApi.Extensions;
-using LabApi.Extensions.Misc;
-
 using Logger = LabApi.Extensions.Misc.iLogger;
 
 namespace OmegaWarhead
@@ -11,7 +9,7 @@ namespace OmegaWarhead
     /// <summary>
     /// Configuration settings for OmegaWarhead inside the LabAPI execution environment.
     /// </summary>
-    public sealed class Config
+    public sealed class Config : LabApiConfig
     {
         #region Core Settings
         [Description("Plugin enabled?")]

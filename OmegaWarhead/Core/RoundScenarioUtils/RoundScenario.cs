@@ -1,6 +1,5 @@
 ﻿namespace OmegaWarhead.Core.RoundScenarioUtils
 {
-    using OmegaWarhead.Core.RoundScenarioUtils;
     public abstract class RoundScenario
     {
 

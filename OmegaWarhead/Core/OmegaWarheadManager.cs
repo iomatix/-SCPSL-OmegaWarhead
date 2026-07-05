@@ -1,17 +1,14 @@
 ﻿namespace OmegaWarhead
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using UnityEngine;
-    using MEC;
     using LabApi.Events.Arguments.WarheadEvents;
-    using LabApi.Features.Wrappers;
     using LabApi.Features.Enums;
+    using LabApi.Features.Wrappers;
+    using MEC;
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Core.RoundScenarioUtils;
-    using OmegaWarhead.NotificationUtils;
     using OmegaWarhead.Shared;
+    using System.Collections.Generic;
+    using System.Linq;
 
     /// <summary>
     /// Core operational controller managing the alternative Omega Warhead sequence, countdown execution timelines, 
@@ -331,7 +328,7 @@
             _plugin.AudioManager.PlayEndingMusic();
 
             _plugin.RoundController.ExecuteScenario(_plugin.RoundController.GetScenario<DetonationEndingScenario>());
-            
+
 
             // Permanent terminal jamming loop to block base game radio or broadcast interventions
             while (true)

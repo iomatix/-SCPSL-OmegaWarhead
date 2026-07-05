@@ -1,19 +1,16 @@
 namespace OmegaWarhead.Core.PlayerUtils
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using UnityEngine;
-    using MEC;
-    using PlayerRoles;
-    using Respawning;
     using CustomPlayerEffects;
-    using LabApi.Features.Extensions;
     using LabApi.Features.Wrappers;
+    using MEC;
     using OmegaWarhead.Core.EscapeScenarioUtils;
     using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Shared;
-    using static OmegaWarhead.Core.PlayerUtils.PlayerUtility;
+    using PlayerRoles;
+    using Respawning;
+    using System.Collections.Generic;
+    using System.Linq;
+    using UnityEngine;
 
     /// <summary>  
     /// Coordinates high-performance player structural states, air evacuation lifecycles, 

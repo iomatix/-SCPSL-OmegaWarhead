@@ -1,13 +1,9 @@
 namespace OmegaWarhead
 {
-    using CustomPlayerEffects;
     using LabApi.Features.Wrappers;
     using MEC;
-    using OmegaWarhead.Core.AudioUtils;
     using OmegaWarhead.Core.LoggingUtils;
-    using OmegaWarhead.NotificationUtils;
     using OmegaWarhead.Shared;
-    using System;
     using System.Linq;
     using UnityEngine;
 

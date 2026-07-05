@@ -1,14 +1,8 @@
 ﻿namespace OmegaWarhead.Core.RoundScenarioUtils
 {
-    using OmegaWarhead.Core.LoggingUtils;
-    using OmegaWarhead.NotificationUtils;
     using LabApi.Features.Wrappers;
     using MEC;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
+    using OmegaWarhead.Core.LoggingUtils;
     using OmegaWarhead.Shared;
 
     public class DetonationEndingScenario : RoundScenario

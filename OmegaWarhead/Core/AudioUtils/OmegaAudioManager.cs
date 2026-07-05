@@ -1,13 +1,13 @@
 ﻿namespace OmegaWarhead.Core.Audio
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Reflection;
     using AudioManagerAPI.Defaults;
     using AudioManagerAPI.Features.Enums;
     using AudioManagerAPI.Features.Management;
     using OmegaWarhead.Core.AudioUtils;
     using OmegaWarhead.Core.LoggingUtils;
+    using System;
+    using System.Collections.Generic;
+    using System.Reflection;
 
     /// <summary>
     /// Coordinates embedded audio resource deployment pipelines and manages dynamic playback sessions 

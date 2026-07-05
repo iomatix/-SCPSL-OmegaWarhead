@@ -1,11 +1,13 @@
-﻿namespace OmegaWarhead.Commands
-{
-    using CommandSystem;
-    using LabApi.Features.Permissions;
-    using LabApi.Features.Wrappers;
-    using System;
-    using System.Collections.Generic;
+﻿using CommandSystem;
+using LabApi.Features.Permissions;
+using LabApi.Features.Wrappers;
+using System;
 
+namespace OmegaWarhead.Commands
+{
+    /// <summary>
+    /// Abstract base command architecture providing safe permission verification gates and native LabAPI player context mapping.
+    /// </summary>
     public abstract class BaseCommand : ICommand
     {
         public abstract string Command { get; }
@@ -14,19 +16,17 @@
 
         public abstract bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response);
 
+        /// <summary>
+        /// Defensively verifies if the command sender passes specific administrative configuration permissions.
+        /// </summary>
         protected bool HasPermission(ICommandSender sender, out string error, string permission = null)
         {
-            if (permission == null)
-            {
-                permission = Plugin.Singleton.Config.Permissions;
-            }
-
-            // Resolve the native LabAPI Player wrapper context safely
+            permission ??= Plugin.Singleton.Config.Permissions;
             Player player = Player.Get(sender);
 
-            // If the player wrapper is null, it means the command originated from the Server Console, 
-            // a local execution block, or an automated test suite. Always bypass permission checks.
-            if (player == null)
+            // If the command source wrapper evaluates to null, it means it originated from the native 
+            // Server Console or a secure automated service layer. Always bypass authorization checks.
+            if (player is null)
             {
                 error = null;
                 return true;
@@ -34,7 +34,7 @@
 
             if (!player.HasPermission(permission))
             {
-                error = $"You need '{permission}' permission to use this command!";
+                error = $"Transhandling Rejected: You do not possess the required administrative clearance ({permission}) to call this command.";
                 return false;
             }
 

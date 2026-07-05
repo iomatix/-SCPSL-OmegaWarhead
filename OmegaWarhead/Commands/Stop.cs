@@ -1,8 +1,8 @@
-﻿namespace OmegaWarhead.Commands
-{
-    using System;
-    using CommandSystem;
+﻿using CommandSystem;
+using System;
 
+namespace OmegaWarhead.Commands
+{
     [CommandHandler(typeof(RemoteAdminCommandHandler))]
     [CommandHandler(typeof(GameConsoleCommandHandler))]
     public class Stop : BaseCommand
@@ -14,20 +14,18 @@
         public override bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             if (!HasPermission(sender, out response))
-            {
-                return true;
-            }
+                return false;
 
             if (!Plugin.Singleton.OmegaManager.IsOmegaActive)
             {
-                response = "Omega Warhead sequence is currently passive. Abort operation rejected.";
-                return true;
+                response = "Execution Aborted: The Omega Warhead subsystem is currently resting in a passive state. Sequence cancellation rejected.";
+                return false;
             }
 
-            Plugin.Singleton.WarheadMethods.StopSequence();
+            Plugin.Singleton.WarheadMethods?.StopSequence();
 
-            response = "Omega Warhead countdown successfully terminated. Subsystem status reverted to nominal.";
-            return false;
+            response = "SUCCESS: Omega Warhead sequence terminated cleanly. Core parameters stabilized and returned to nominal status.";
+            return true;
         }
     }
 }

@@ -1,14 +1,14 @@
-﻿namespace OmegaWarhead
-{
-    using System;
-    using System.Collections.Generic;
-    using UnityEngine;
-    using MapGeneration;
-    using PlayerRoles;
-    using LabApi.Features.Wrappers;
-    using OmegaWarhead.Core.LoggingUtils;
-    using static OmegaWarhead.Core.PlayerUtils.PlayerMethods;
+﻿using LabApi.Features.Wrappers;
+using MapGeneration;
+using PlayerRoles;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+using static OmegaWarhead.Core.PlayerUtils.PlayerMethods;
+using Logger = LabApi.Extensions.Misc.iLogger;
 
+namespace OmegaWarhead
+{
     /// <summary>
     /// Handles deterministic caching of runtime entities and environmental coordinates for the OmegaWarhead system.
     /// Fully decoupled from global static state targets to guarantee memory isolation and absolute leak prevention.
@@ -27,7 +27,7 @@
         /// <summary>
         /// Initializes a new instance of the <see cref="CacheHandler"/> class linked to a parent lifecycle scope.
         /// </summary>
-        public CacheHandler(Plugin plugin) => _plugin = plugin;
+        public CacheHandler(Plugin plugin) => _plugin = plugin ?? throw new ArgumentNullException(nameof(plugin));
         #endregion
 
         #region Shelter Coordinates Cache
@@ -41,7 +41,7 @@
         /// </summary>
         public HashSet<Vector3> CacheShelterLocations()
         {
-            LogHelper.Debug(nameof(CacheHandler), "Executing spatial map analytics scan for active shelter zone facilities...");
+            Logger.Debug(nameof(CacheHandler), "Executing spatial map analytics scan for active shelter zone facilities...", _plugin.Config.Debug); [cite: 2]
 
             var shelterLocations = new HashSet<Vector3>();
 
@@ -53,7 +53,7 @@
                 }
             }
 
-            LogHelper.Debug(nameof(CacheHandler), $"Structural scan complete. Registered {shelterLocations.Count} emergency shelter facilities inside cache matrix.");
+            Logger.Debug(nameof(CacheHandler), $"Structural scan complete. Registered {shelterLocations.Count} emergency shelter facilities inside cache matrix.", _plugin.Config.Debug); [cite: 2]
             return shelterLocations;
         }
 
@@ -66,10 +66,10 @@
         /// </summary>
         public void CachePlayerEvacuatedByHelicopter(Player evacuatedPlayer)
         {
-            if (evacuatedPlayer == null) return;
+            if (evacuatedPlayer is null) return;
 
             CachedHeliSurvivors.Add(evacuatedPlayer);
-            LogHelper.Debug(nameof(CacheHandler), $"Player '{evacuatedPlayer.Nickname}' securely committed to helicopter airlift extraction logs.");
+            Logger.Debug(nameof(CacheHandler), $"Player '{evacuatedPlayer.Nickname}' securely committed to helicopter airlift extraction logs.", _plugin.Config.Debug); [cite: 2]
         }
 
         /// <summary>
@@ -80,7 +80,7 @@
         /// <summary>
         /// Evaluates whether a target player entity matches an active airlift extraction signature.
         /// </summary>
-        public bool IsPlayerEvacuatedByHelicopters(Player player) => player != null && CachedHeliSurvivors.Contains(player);
+        public bool IsPlayerEvacuatedByHelicopters(Player player) => player is not null && CachedHeliSurvivors.Contains(player);
 
         private HashSet<Player> CachedHeliSurvivors => _cachedHeliSurvivors ??= new HashSet<Player>();
         #endregion
@@ -102,7 +102,7 @@
         public void CacheDisabledFaction(Faction faction)
         {
             CachedDisabledFactions.Add(faction);
-            LogHelper.Debug(nameof(CacheHandler), $"Faction authorization vector '{faction}' successfully committed to exclusion cache.");
+            Logger.Debug(nameof(CacheHandler), $"Faction authorization vector '{faction}' successfully committed to exclusion cache.", _plugin.Config.Debug); [cite: 2]
         }
 
         private HashSet<Faction> CachedDisabledFactions => _cachedDisabledFactions ??= new HashSet<Faction>();
@@ -119,10 +119,10 @@
         /// </summary>
         public void CachePlayerFate(Player player, PlayerFate fate)
         {
-            if (player == null) return;
+            if (player is null) return;
 
             CachedPlayerFates[player] = fate;
-            LogHelper.Debug(nameof(CacheHandler), $"Committed historical lifecycle outcome for player '{player.Nickname}': [{fate}]");
+            Logger.Debug(nameof(CacheHandler), $"Committed historical lifecycle outcome for player '{player.Nickname}': [{fate}]", _plugin.Config.Debug); [cite: 2]
         }
 
         /// <summary>
@@ -130,7 +130,7 @@
         /// </summary>
         public PlayerFate GetCachedPlayerFate(Player player)
         {
-            if (player != null && CachedPlayerFates.TryGetValue(player, out PlayerFate fate))
+            if (player is not null && CachedPlayerFates.TryGetValue(player, out PlayerFate fate))
                 return fate;
 
             return PlayerFate.Unknown;
@@ -150,11 +150,11 @@
         /// </summary>
         public void ResetCache()
         {
-            LogHelper.Debug(nameof(CacheHandler), "Global cache eviction cycle triggered. Dismantling memory graphs...");
+            Logger.Debug(nameof(CacheHandler), "Global cache eviction cycle triggered. Dismantling memory graphs...", _plugin.Config.Debug); [cite: 2]
 
             _cachedShelterLocations = null;
 
-            if (_cachedHeliSurvivors != null)
+            if (_cachedHeliSurvivors is not null)
             {
                 foreach (Player player in _cachedHeliSurvivors)
                 {
@@ -166,7 +166,7 @@
                         }
                         catch (Exception ex)
                         {
-                            LogHelper.Warning(nameof(CacheHandler), $"Failed to strip extraction invulnerability layer from '{player.Nickname}': {ex.Message}");
+                            Logger.Warn(nameof(CacheHandler), $"Failed to strip extraction invulnerability layer from '{player.Nickname}': {ex.Message}"); [cite: 2]
                         }
                     }
                 }
@@ -174,19 +174,19 @@
                 _cachedHeliSurvivors = null;
             }
 
-            if (_cachedDisabledFactions != null)
+            if (_cachedDisabledFactions is not null)
             {
                 _cachedDisabledFactions.Clear();
                 _cachedDisabledFactions = null;
             }
 
-            if (_cachedPlayerFates != null)
+            if (_cachedPlayerFates is not null)
             {
                 _cachedPlayerFates.Clear();
                 _cachedPlayerFates = null;
             }
 
-            LogHelper.Debug(nameof(CacheHandler), "All data repositories securely unlinked and cleared for Garbage Collection sweep.");
+            Logger.Debug(nameof(CacheHandler), "All data repositories securely unlinked and cleared for Garbage Collection sweep.", _plugin.Config.Debug); [cite: 2]
         }
         #endregion
     }
