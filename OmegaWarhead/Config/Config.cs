@@ -87,7 +87,7 @@ namespace OmegaWarhead
         public float CassieMessageImportantPriority { get; set; } = 10.1f;
 
         [Description("Hint message displayed when the evacuation helicopter is inbound to the landing zone.")]
-        public string HelicopterIncomingMessage { get; set; } = "Evacuation helicopter is in coming";
+        public string HelicopterIncomingMessage { get; set; } = "Evacuation helicopter is incoming!";
 
         [Description("Hint message shown when helicopter escape is successful.")]
         public string HelicopterEscapeMessage { get; set; } = "You escaped in the helicopter.";
