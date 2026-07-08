@@ -87,7 +87,7 @@ namespace OmegaWarhead
         public float CassieMessageImportantPriority { get; set; } = 10.1f;
 
         [Description("Hint message displayed when the evacuation helicopter is inbound to the landing zone.")]
-        public string HelicopterIncomingMessage { get; set; } = "Incoming evacuation helicopter!";
+        public string HelicopterIncomingMessage { get; set; } = "Evacuation helicopter is in coming";
 
         [Description("Hint message shown when helicopter escape is successful.")]
         public string HelicopterEscapeMessage { get; set; } = "You escaped in the helicopter.";
@@ -116,19 +116,19 @@ namespace OmegaWarhead
         public string ActivatedMessage { get; set; } = "<b><color=#ff0040>OMEGA WARHEAD ACTIVATED</color></b>\nPLEASE EVACUATE IMMEDIATELY";
 
         [Description("Cassie message when Omega is stopped.")]
-        public string StoppingOmegaCassie { get; set; } = "pitch_0.9 Omega Warhead detonation has been stopped";
+        public string StoppingOmegaCassie { get; set; } = "$pitch_0.95 Omega Warhead  $pitch_0.91 detonation $pitch_0.98 has been stopped";
 
         [Description("Cassie message when Omega is activated.")]
-        public string StartingOmegaCassie { get; set; } = "pitch_0.2 .g3 .g3 .g3 pitch_0.9 attention . attention . activating omega warhead . Please evacuate in the . breach shelter or in the helicopter . please evacuate immediately .";
+        public string StartingOmegaCassie { get; set; } = "$pitch_0.2 .g3 .g3 .g3 $pitch_0.95 attention . $pitch_0.93 attention . $pitch_0.97 activating $pitch_0.92 omega $pitch_0.95 warhead . $pitch_0.98 Please evacuate in the . breach shelter or in the helicopter . please evacuate $pitch_0.93 immediately .";
 
         [Description("Cassie message during detonation.")]
-        public string DetonatingOmegaCassie { get; set; } = "pitch_0.65 Detonating OMEGA pitch_0.5 Warhead";
+        public string DetonatingOmegaCassie { get; set; } = "$pitch_0.8 Detonating $pitch_0.65 OMEGA $pitch_0.5 Warhead";
 
         [Description("Cassie message announcing incoming helicopter.")]
-        public string HeliIncomingCassie { get; set; } = "pitch_0.25 .g3 .g3 .g3 pitch_0.9 attention . attention . the helicopter is in coming . Please evacuate . Attention . the helicopter is in coming . Please evacuate immediately";
+        public string HeliIncomingCassie { get; set; } = "$pitch_0.25 .g3 .g3 .g3 $pitch_0.95 attention . $pitch_0.93 attention . $pitch_0.97 the $pitch_0.9 helicopter $pitch_0.95 is in coming . $pitch_0.95 Please evacuate . $pitch_0.9 Attention . $pitch_0.95 the helicopter is in coming . Please evacuate $pitch_0.85 immediately";
 
         [Description("Cassie message announcing checkpoint unlock.")]
-        public string CheckpointUnlockCassie { get; set; } = "pitch_0.25 .g3 .g3 .g3 pitch_0.9 attention . attention . the checkpoint doors are open . Attention . the checkpoint doors are open . Please evacuate immediately";
+        public string CheckpointUnlockCassie { get; set; } = "$pitch_0.25 .g3 .g3 .g3 $pitch_0.95 attention . $pitch_0.91 attention . $pitch_0.95 the $pitch_0.9 checkpoint doors $pitch_0.95 are open . $pitch_0.9 Attention . $pitch_0.95 the checkpoint doors are open . Please evacuate $pitch_0.9 immediately";
 
         [Description("Message when Omega is stopped.")]
         public string StoppingOmegaMessage { get; set; } = "Omega Warhead detonation has been successfully aborted";
