@@ -19,7 +19,7 @@ namespace OmegaWarhead
         public override string Author => "iomatix";
         public override string Name => "OmegaWarhead";
         public override string Description => "Advanced facility alternative detonation and escape sequence control engine.";
-        public override Version Version => new Version(10, 1, 0);
+        public override Version Version => new Version(10, 1, 1);
         public override Version RequiredApiVersion => new Version(1, 0, 0);
         #endregion
 
