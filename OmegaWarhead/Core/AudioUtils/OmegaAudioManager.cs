@@ -1,8 +1,6 @@
 ﻿using AudioManagerAPI.Defaults;
 using AudioManagerAPI.Features.Enums;
 using AudioManagerAPI.Features.Management;
-using LabApi.Extensions;
-using OmegaWarhead.Core.AudioUtils;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -10,6 +8,15 @@ using Logger = LabApi.Extensions.Misc.iLogger;
 
 namespace OmegaWarhead.Core.Audio
 {
+    /// <summary>
+    /// Defines the internal audio keys specific to the OmegaWarhead subsystem.
+    /// </summary>
+    public enum OmegaAudioKey
+    {
+        Siren,
+        EndingMusic
+    }
+
     /// <summary>
     /// Coordinates embedded audio resource deployment pipelines and manages dynamic playback sessions 
     /// via the external SCPSL-AudioManagerAPI ecosystem.
@@ -23,11 +30,11 @@ namespace OmegaWarhead.Core.Audio
         private int _sirenSessionId;
         private int _endingMusicSessionId;
 
-        // Optimized target-typed dictionary mapping configuration rules securely
-        private readonly Dictionary<OmegaWarheadAudio, (string key, string resourceName)> _audioConfig = new()
+        // Target-typed dictionary mapping configuration rules securely using the local enum context
+        private readonly Dictionary<OmegaAudioKey, (string key, string resourceName)> _audioConfig = new()
         {
-            { OmegaWarheadAudio.Siren, ("siren", "OmegaWarhead.Shared.Audio.Files.omegawarhead.siren.wav") },
-            { OmegaWarheadAudio.EndingMusic, ("endingmusic", "OmegaWarhead.Shared.Audio.Files.omegawarhead.endingmusic.wav") }
+            { OmegaAudioKey.Siren, ("siren", "OmegaWarhead.Shared.Audio.Files.omegawarhead.siren.wav") },
+            { OmegaAudioKey.EndingMusic, ("endingmusic", "OmegaWarhead.Shared.Audio.Files.omegawarhead.endingmusic.wav") }
         };
         #endregion
 
@@ -108,17 +115,19 @@ namespace OmegaWarhead.Core.Audio
                 return 0;
             }
 
-            // Completely evicted custom local extensions, calling your core framework EnumExtensions natively
-            string audioKey = OmegaWarheadAudio.Siren.ToAudioKey();
+            // Extract the standardized string identifier directly from the internal config map
+            string audioKey = _audioConfig[OmegaAudioKey.Siren].key;
 
             try
             {
-                _sirenSessionId = _audioManager.PlayGlobalAudio(
+                // Architectural Upgrade: Execute via the generic pipeline using a cached static filter delegate
+                _sirenSessionId = _audioManager.PlayGlobalAudio<object>(
                     key: audioKey,
+                    state: null,
+                    validPlayersFilter: (player, _) => player != null && player.IsReady,
                     loop: true,
                     volume: 0.8f,
                     priority: AudioPriority.High,
-                    validPlayersFilter: null, // Broadcast structural waves globally to all connected endpoints
                     queue: false,
                     fadeInDuration: 1.5f,
                     persistent: true,
@@ -173,18 +182,19 @@ namespace OmegaWarhead.Core.Audio
                 return 0;
             }
 
-            // MASTER-LEVEL ARCHITECTURE ALIGNMENT:
-            // Utilizing framework-wide ToAudioKey formatting tokens natively across external engine layers
-            string audioKey = OmegaWarheadAudio.EndingMusic.ToAudioKey();
+            // Extract the standardized string identifier directly from the internal config map
+            string audioKey = _audioConfig[OmegaAudioKey.EndingMusic].key;
 
             try
             {
-                _endingMusicSessionId = _audioManager.PlayGlobalAudio(
+                // Architectural Upgrade: Execute via the generic pipeline using a cached static filter delegate
+                _endingMusicSessionId = _audioManager.PlayGlobalAudio<object>(
                     key: audioKey,
+                    state: null,
+                    validPlayersFilter: (player, _) => player != null && player.IsReady,
                     loop: false,
                     volume: 0.9f,
                     priority: AudioPriority.High,
-                    validPlayersFilter: null,
                     queue: false,
                     fadeInDuration: 2f,
                     persistent: false,
