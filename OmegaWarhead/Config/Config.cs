@@ -2,7 +2,9 @@
 using LabApi.Loader.Features.Configuration;
 using System.Collections.Generic;
 using System.ComponentModel;
-using UnityEngine; // Zapewnia obsługę struktur Vector3
+using System.Linq;
+using System.Reflection;
+using UnityEngine;
 using Logger = LabApi.Extensions.Misc.iLogger;
 
 namespace OmegaWarhead
@@ -191,6 +193,9 @@ namespace OmegaWarhead
         #endregion
 
         #region High-Performance Validation Engine
+        /// <summary>
+        /// Validates, normalizes, and structurally clamps all configuration variables to guarantee deterministic execution.
+        /// </summary>
         public void Validate()
         {
             if (!IsEnabled)
@@ -199,76 +204,62 @@ namespace OmegaWarhead
                 return;
             }
 
+            // 1. Core Randomization and Limits Clamping via Fluent API Primitives
             ReplaceAlphaChance = ReplaceAlphaChance.Clamp(0, 100);
             GeneratorsNumGuaranteeOmega = GeneratorsNumGuaranteeOmega.Clamp(0, 5);
             GeneratorsIncreaseChanceBy = GeneratorsIncreaseChanceBy.LimitMin(0f);
             TokensAddedOnDmsCancel = TokensAddedOnDmsCancel.LimitMin(0);
 
+            // 2. Main Timeline Execution Baselines
             if (TimeToDetonation < 10f)
             {
                 Logger.Warn(nameof(Config), $"Critical TimeToDetonation ({TimeToDetonation}s) evaluates below extraction minimum curves. Normalizing onto baseline limits (10s).");
                 TimeToDetonation = 10f;
             }
 
+            // 3. Relational T-Minus Structural Guards
             OpenAndLockCheckpointDoorsTMinus = OpenAndLockCheckpointDoorsTMinus.Clamp(1f, TimeToDetonation);
             HelicopterBroadcastTMinus = HelicopterBroadcastTMinus.Clamp(1f, TimeToDetonation);
             DelayBeforeOmegaSequence = DelayBeforeOmegaSequence.LimitMin(0f);
 
+            // 4. Spatial Zone Grid Multipliers
             EscapeZoneSize = EscapeZoneSize.LimitMin(0.1f);
             ShelterZoneSize = ShelterZoneSize.LimitMin(0.1f);
 
+            // 5. Native Cassie Speech-Speed Estimation Thresholds
             CassieNotifySpeed = CassieNotifySpeed.Clamp(0.3, 1.5);
             CassieDetonationSpeed = CassieDetonationSpeed.Clamp(0.3, 1.5);
 
+            // 6. Unified Timing Audio Buffer Pipeline Checks
             if (CassieTimingBuffer < 0f || CassieTimingBuffer > 5f)
             {
                 Logger.Warn(nameof(Config), $"Extremal CassieTimingBuffer variance detected ({CassieTimingBuffer}s). Reverting immediately to safe production fallback metrics (0.65s).");
                 CassieTimingBuffer = 0.65f;
             }
 
-            if (NotifyTimes is not null && NotifyTimes.Count > 1)
+            // 7. Optimized Chronological Array Order Verification via LINQ Declarative Pipes
+            if (NotifyTimes is { Count: > 1 } && NotifyTimes.Zip(NotifyTimes.Skip(1), (current, next) => current < next).Any(isInvalid => isInvalid))
             {
-                for (int i = 0; i < NotifyTimes.Count - 1; i++)
-                {
-                    if (NotifyTimes[i] < NotifyTimes[i + 1])
-                    {
-                        Logger.Warn(nameof(Config), "NotifyTimes chronological array matrix alignment constraint violated. Re-sorting array descending...");
-                        NotifyTimes.Sort((a, b) => b.CompareTo(a));
-                        break;
-                    }
-                }
+                Logger.Warn(nameof(Config), "NotifyTimes chronological array matrix alignment constraint violated. Re-sorting array descending...");
+                NotifyTimes.Sort((a, b) => b.CompareTo(a));
             }
 
+            // 8. Native Color Spectrum Pipeline Safeguards
             LightsColorR = LightsColorR.Clamp(0f, 1f);
             LightsColorG = LightsColorG.Clamp(0f, 1f);
             LightsColorB = LightsColorB.Clamp(0f, 1f);
 
-            ValidateString(CassieMessageMiniWaveOnDmsCancel, nameof(CassieMessageMiniWaveOnDmsCancel));
-            ValidateString(HelicopterIncomingMessage, nameof(HelicopterIncomingMessage));
-            ValidateString(HelicopterEscapeMessage, nameof(HelicopterEscapeMessage));
-            ValidateString(ActivatedMessage, nameof(ActivatedMessage));
-            ValidateString(StoppingOmegaCassie, nameof(StoppingOmegaCassie));
-            ValidateString(StartingOmegaCassie, nameof(StartingOmegaCassie));
-            ValidateString(DetonatingOmegaCassie, nameof(DetonatingOmegaCassie));
-            ValidateString(HeliIncomingCassie, nameof(HeliIncomingCassie));
-            ValidateString(CheckpointUnlockCassie, nameof(CheckpointUnlockCassie));
-            ValidateString(StoppingOmegaMessage, nameof(StoppingOmegaMessage));
-            ValidateString(StartingOmegaMessage, nameof(StartingOmegaMessage));
-            ValidateString(DetonatingOmegaMessage, nameof(DetonatingOmegaMessage));
-            ValidateString(HeliIncomingMessage, nameof(HeliIncomingMessage));
-            ValidateString(CheckpointUnlockMessage, nameof(CheckpointUnlockMessage));
-            ValidateString(SurvivorMessage, nameof(SurvivorMessage));
-            ValidateString(EvacuatedMessage, nameof(EvacuatedMessage));
-            ValidateString(KilledMessage, nameof(KilledMessage));
-            ValidateString(EndingBroadcast, nameof(EndingBroadcast));
-            ValidateString(Permissions, nameof(Permissions));
-        }
+            // 9. Reflection-Driven Automated UI and Localization Assets Security Validation Loop (DRY Compliant)
+            var stringProperties = typeof(Config)
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.PropertyType == typeof(string));
 
-        private void ValidateString(string value, string propertyName)
-        {
-            if (string.IsNullOrWhiteSpace(value))
+            foreach (var property in stringProperties)
             {
-                Logger.Warn(nameof(Config), $"[Asset Disruption] Value mapping for property asset string metadata '{propertyName}' evaluates to null or empty coordinates.");
+                if (string.IsNullOrWhiteSpace((string)property.GetValue(this)))
+                {
+                    Logger.Warn(nameof(Config), $"[Asset Disruption] Value mapping for property asset string metadata '{property.Name}' evaluates to null or empty coordinates.");
+                }
             }
         }
         #endregion

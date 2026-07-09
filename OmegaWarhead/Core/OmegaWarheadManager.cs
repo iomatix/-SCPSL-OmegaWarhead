@@ -172,12 +172,16 @@ namespace OmegaWarhead
         public IEnumerator<float> HandleCountdown(float timeToDetonation)
         {
             double warheadStartTime = Timing.LocalTime + timeToDetonation;
-            var validNotifyTimes = NotifyTimes.Where(t => t <= timeToDetonation).OrderByDescending(t => t);
 
-            // FIXED: Local state variable to guarantee atomic execution of environmental changes
-            bool lightsDimmed = false;
+            // MASTER-LEVEL OPTIMIZATION: Cache rooms once at startup to eliminate GC allocation entirely in the hot path
+            List<Room> cachedRooms = Room.List.ToList();
 
-            foreach (int notifyTime in validNotifyTimes)
+            // Segment notification times into absolute standard alerts and relative final countdown execution tracks
+            var standardAlerts = NotifyTimes.Where(t => t > 5 && t <= timeToDetonation).OrderByDescending(t => t);
+            var finalCountdown = NotifyTimes.Where(t => t <= 5 && t <= timeToDetonation).OrderByDescending(t => t);
+
+            // PHASE 1: Absolute Timeline Tracking for Standard Alerts
+            foreach (int notifyTime in standardAlerts)
             {
                 if (!IsOmegaActive) yield break;
 
@@ -187,24 +191,12 @@ namespace OmegaWarhead
                 double msgDuration = CassieExtensions.CalculateCassieMessageDuration(message, _plugin.Config.CassieNotifySpeed);
                 double buffer = _plugin.Config.CassieTimingBuffer;
 
-                if (notifyTime > 5)
+                double targetStart = warheadStartTime - notifyTime - msgDuration - buffer;
+                double now = Timing.LocalTime;
+
+                if (now < targetStart)
                 {
-                    double targetStart = warheadStartTime - notifyTime - msgDuration - buffer;
-                    double now = Timing.LocalTime;
-
-                    if (now > targetStart) continue;
-
-                    double wait = targetStart - now;
-                    if (wait > 0)
-                        yield return Timing.WaitForSeconds((float)wait);
-                }
-                else
-                {
-                    double targetStart = warheadStartTime - notifyTime;
-                    double wait = targetStart - Timing.LocalTime;
-
-                    if (wait > 0)
-                        yield return Timing.WaitForSeconds((float)wait);
+                    yield return Timing.WaitForSeconds((float)(targetStart - now));
                 }
 
                 if (!IsOmegaActive) yield break;
@@ -218,17 +210,53 @@ namespace OmegaWarhead
                     _plugin.Config.DisableCassieMessages
                 );
 
-                // FIXED: Optimized environmental lighting cascade to prevent catastrophic CPU/Network flood
-                if (notifyTime <= 5 && !lightsDimmed)
+                yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
+            }
+
+            // PHASE 2: Cinematic Relative Pacing Loop for Final Cadence (5 down to 1)
+            // This approach fully fixes the overlapping bug while restoring the iconic second-by-second flicker!
+            foreach (int notifyTime in finalCountdown)
+            {
+                if (!IsOmegaActive) yield break;
+
+                string message = notifyTime.ToCassieCountdown("Seconds until Omega Warhead Detonation");
+                if (string.IsNullOrEmpty(message)) continue;
+
+                // Synchronize the entry point of the final sequence with the remaining absolute time
+                if (notifyTime == 5)
                 {
-                    foreach (Room room in Room.List)
+                    double targetStart = warheadStartTime - 5;
+                    double now = Timing.LocalTime;
+                    if (targetStart > now)
                     {
-                        room.TurnOffLights(0.75f);
+                        yield return Timing.WaitForSeconds((float)(targetStart - now));
                     }
-                    lightsDimmed = true;
-                    yield return Timing.WaitForSeconds(0.75f);
                 }
 
+                if (!IsOmegaActive) yield break;
+
+                // Dispatch textual/vocal hints deterministically without timeline shifts
+                CassieExtensions.ProcessAndDispatchMessage(
+                    message,
+                    $"Warhead -> {notifyTime}...",
+                    _plugin.Config.CassieMessageClearBeforeWarheadMessage,
+                    "pitch_0.95",
+                    _plugin.Config.CassieMessagePriority,
+                    _plugin.Config.DisableCassieMessages
+                );
+
+                // Execute the environmental lighting flicker utilizing high-performance memory cache array
+                foreach (Room room in cachedRooms)
+                {
+                    room.TurnOffLights(0.75f);
+                }
+
+                // Dramatic structural pause for the light flicker duration
+                yield return Timing.WaitForSeconds(0.75f);
+
+                // Standardized step delay matching verbal execution width to enforce absolute rhythmic precision
+                double msgDuration = CassieExtensions.CalculateCassieMessageDuration(message, _plugin.Config.CassieNotifySpeed);
+                double buffer = _plugin.Config.CassieTimingBuffer;
                 yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
             }
 

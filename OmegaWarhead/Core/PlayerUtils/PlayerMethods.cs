@@ -8,7 +8,6 @@ using Respawning;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Logger = LabApi.Extensions.Misc.iLogger;
 
 namespace OmegaWarhead.Core.PlayerUtils
