@@ -2,6 +2,7 @@
 using LabApi.Loader.Features.Configuration;
 using System.Collections.Generic;
 using System.ComponentModel;
+using UnityEngine; // Zapewnia obsługę struktur Vector3
 using Logger = LabApi.Extensions.Misc.iLogger;
 
 namespace OmegaWarhead
@@ -66,6 +67,12 @@ namespace OmegaWarhead
 
         [Description("Size of the breach shelter zone.")]
         public float ShelterZoneSize { get; set; } = 7.75f;
+
+        [Description("The exact world coordinates for the helicopter escape zone trigger.")]
+        public Vector3 HelicopterEscapeZone { get; set; } = new Vector3(127f, 295.5f, -43f);
+
+        [Description("The target position where players are teleported upon successful helicopter evacuation.")]
+        public Vector3 HelicopterTeleportPosition { get; set; } = new Vector3(39f, 1015f, 32f);
         #endregion
 
         #region Visuals Settings
@@ -184,9 +191,6 @@ namespace OmegaWarhead
         #endregion
 
         #region High-Performance Validation Engine
-        /// <summary>
-        /// Validates, normalizes, and structurally clamps all configuration variables to guarantee deterministic execution.
-        /// </summary>
         public void Validate()
         {
             if (!IsEnabled)
@@ -195,40 +199,33 @@ namespace OmegaWarhead
                 return;
             }
 
-            // 1. Core Randomization and Limits Clamping via Fluent API Primitives
             ReplaceAlphaChance = ReplaceAlphaChance.Clamp(0, 100);
             GeneratorsNumGuaranteeOmega = GeneratorsNumGuaranteeOmega.Clamp(0, 5);
             GeneratorsIncreaseChanceBy = GeneratorsIncreaseChanceBy.LimitMin(0f);
             TokensAddedOnDmsCancel = TokensAddedOnDmsCancel.LimitMin(0);
 
-            // 2. Main Timeline Execution Baselines
             if (TimeToDetonation < 10f)
             {
                 Logger.Warn(nameof(Config), $"Critical TimeToDetonation ({TimeToDetonation}s) evaluates below extraction minimum curves. Normalizing onto baseline limits (10s).");
                 TimeToDetonation = 10f;
             }
 
-            // 3. Relational T-Minus Structural Guards (Prevents thresholds triggering beyond total bounds)
             OpenAndLockCheckpointDoorsTMinus = OpenAndLockCheckpointDoorsTMinus.Clamp(1f, TimeToDetonation);
             HelicopterBroadcastTMinus = HelicopterBroadcastTMinus.Clamp(1f, TimeToDetonation);
             DelayBeforeOmegaSequence = DelayBeforeOmegaSequence.LimitMin(0f);
 
-            // 4. Spatial Zone Grid Multipliers
             EscapeZoneSize = EscapeZoneSize.LimitMin(0.1f);
             ShelterZoneSize = ShelterZoneSize.LimitMin(0.1f);
 
-            // 5. Native Cassie Speech-Speed Estimation Thresholds
             CassieNotifySpeed = CassieNotifySpeed.Clamp(0.3, 1.5);
             CassieDetonationSpeed = CassieDetonationSpeed.Clamp(0.3, 1.5);
 
-            // 6. Unified Timing Audio Buffer Pipeline Checks
             if (CassieTimingBuffer < 0f || CassieTimingBuffer > 5f)
             {
                 Logger.Warn(nameof(Config), $"Extremal CassieTimingBuffer variance detected ({CassieTimingBuffer}s). Reverting immediately to safe production fallback metrics (0.65s).");
                 CassieTimingBuffer = 0.65f;
             }
 
-            // 7. Descending Sequence Order Verification for Countdown Array Layout
             if (NotifyTimes is not null && NotifyTimes.Count > 1)
             {
                 for (int i = 0; i < NotifyTimes.Count - 1; i++)
@@ -242,12 +239,10 @@ namespace OmegaWarhead
                 }
             }
 
-            // 8. Native Color Spectrum Pipeline Safeguards
             LightsColorR = LightsColorR.Clamp(0f, 1f);
             LightsColorG = LightsColorG.Clamp(0f, 1f);
             LightsColorB = LightsColorB.Clamp(0f, 1f);
 
-            // 9. UI Localization Assets Security Validation Loop
             ValidateString(CassieMessageMiniWaveOnDmsCancel, nameof(CassieMessageMiniWaveOnDmsCancel));
             ValidateString(HelicopterIncomingMessage, nameof(HelicopterIncomingMessage));
             ValidateString(HelicopterEscapeMessage, nameof(HelicopterEscapeMessage));

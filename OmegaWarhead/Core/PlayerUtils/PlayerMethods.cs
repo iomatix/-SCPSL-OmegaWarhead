@@ -37,13 +37,13 @@ namespace OmegaWarhead.Core.PlayerUtils
         /// </summary>
         public IEnumerator<float> HandleHelicopterEvacuation()
         {
-            // Creating a framework data contract directly mapping onto your properties
+            // FIXED: Decoupled hardcoded positions and routed parameters straight through the plugin Config data contract
             var helicopterScenario = new LabApi.Extensions.Escape.EscapeScenario
             {
                 Name = "Helicopter",
-                EscapeZone = new Vector3(127f, 295.5f, -43f),
+                EscapeZone = _plugin.Config.HelicopterEscapeZone,
                 EscapeRadius = _plugin.Config.EscapeZoneSize,
-                TeleportPosition = new Vector3(39f, 1015f, 32f),
+                TeleportPosition = _plugin.Config.HelicopterTeleportPosition,
 
                 InitialHint = _plugin.Config.HelicopterIncomingMessage,
                 InitialHintDuration = 6f,
@@ -67,7 +67,6 @@ namespace OmegaWarhead.Core.PlayerUtils
                 }
             };
 
-            // Feeding the contract straight into your asynchronous routine
             return LabApi.Extensions.Escape.EscapeEngine.RunScenarioRoutine(helicopterScenario);
         }
         #endregion
@@ -164,9 +163,6 @@ namespace OmegaWarhead.Core.PlayerUtils
         /// </summary>
         private static void ApplyNukeEffects(Player player)
         {
-            // FLUENT API ALIGNMENT: 
-            // Executing sensory shocks and baseline damage vectors instantly, pausing execution for pacing, 
-            // and applying the final killing blow securely 0.75 seconds later using our fluent ActionChain system.
             player.CreateChain()
                 .Then(p =>
                 {
@@ -224,7 +220,6 @@ namespace OmegaWarhead.Core.PlayerUtils
 
             if (_plugin.CacheHandler is null) return;
 
-            // Fluent API Alignment: Utilizing C# 9.0 Tuple Deconstruction straight over mapped fates
             foreach (var (player, fate) in _plugin.CacheHandler.GetCachedPlayerFates())
             {
                 if (player?.IsReady != true) continue;
