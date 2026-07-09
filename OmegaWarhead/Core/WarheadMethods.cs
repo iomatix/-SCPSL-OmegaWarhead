@@ -60,7 +60,7 @@ namespace OmegaWarhead
                 if (_plugin.OmegaManager is not null && _plugin.OmegaManager.IsOmegaActive)
                     Room.List.SetLightsColor(lightColor);
             });
-            coroutineLight.Tag = "Omega-Lights";
+            coroutineLight.Tag = CoroutineTags.Lights;
 
             // 3. Automated Broadcast and Vocal Notifications Pipeline
             var coroutineCore = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>

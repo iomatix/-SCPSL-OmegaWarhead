@@ -11,8 +11,7 @@
         public const string HeliEvacuation = "Omega-HeliEvacuation";
         public const string Escape = "Omega-Escape";
         public const string Scenario = "Omega-Scenario";
-
-        // Prefixes for dynamic processes
+        public const string Lights = "Omega-Lights";
 
         /// <summary>
         /// This is used for player-specific processes. The actual tag will be "OmegaSavePlayer-{PlayerID}" to ensure uniqueness per player.
@@ -28,8 +27,8 @@
         /// This array is useful for cleaning up all static processes at once, such as when the warhead is defused or the round ends.
         /// </summary>
         public static readonly string[] AllStaticTags =
-        {
-           Core, Detonation, Countdown, Helicopter, Checkpoints, HeliEvacuation, Escape, Scenario, Temp
+                {
+           Core, Detonation, Countdown, Helicopter, Checkpoints, HeliEvacuation, Escape, Scenario, Lights, Temp // FIXED: Embedded within static destruction matrix
         };
     }
 }

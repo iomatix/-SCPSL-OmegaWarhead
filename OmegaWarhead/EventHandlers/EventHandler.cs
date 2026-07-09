@@ -2,7 +2,6 @@
 using LabApi.Features.Wrappers;
 using PlayerRoles;
 using System;
-using System.Linq;
 using Logger = LabApi.Extensions.Misc.iLogger;
 using PlayerHandler = LabApi.Events.Handlers.PlayerEvents;
 using ServerHandler = LabApi.Events.Handlers.ServerEvents;
@@ -148,9 +147,15 @@ namespace OmegaWarhead
                     Warhead.OpenBlastDoors();
                 }
 
-                // High-Performance LINQ Faction Extraction Mapping
-                int ntfCount = Player.List.Count(p => p.Role.GetFaction() is Faction.FoundationStaff);
-                int ciCount = Player.List.Count(p => p.Role.GetFaction() is Faction.FoundationEnemy);
+                int ntfCount = 0;
+                int ciCount = 0;
+
+                foreach (Player player in Player.List)
+                {
+                    Faction faction = player.Role.GetFaction();
+                    if (faction is Faction.FoundationStaff) ntfCount++;
+                    else if (faction is Faction.FoundationEnemy) ciCount++;
+                }
 
                 Faction targetFaction = ntfCount < ciCount ? Faction.FoundationStaff : Faction.FoundationEnemy;
                 Logger.Debug(_plugin.Name, $"Strategic tactical evaluation complete. Target Balance Vector: {targetFaction} (Staff Load: {ntfCount} vs Enemy Load: {ciCount})", _plugin.Config.Debug);
