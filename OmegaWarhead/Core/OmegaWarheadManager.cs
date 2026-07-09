@@ -88,6 +88,9 @@ namespace OmegaWarhead
 
             Logger.Debug(nameof(OmegaWarheadManager), "All background coroutines bound to static tags have been structurally terminated.", _plugin.Config.Debug);
             _plugin.PlayerMethods?.Clean();
+
+            // FIXED: Force cache eviction on cleanup to prevent permanent faction block out during mid-round stop sequences
+            _plugin.CacheHandler?.ResetCache();
         }
         #endregion
 
@@ -102,7 +105,6 @@ namespace OmegaWarhead
                 return;
             }
 
-            // Replaced manual LINQ allocation sweeps with high-performance native Map extensions
             int activeGenerators = MapExtensions.GetEngagedGeneratorsCount();
             Logger.Debug(nameof(OmegaWarheadManager), $"Current online generator grid load: {activeGenerators}/{_plugin.Config.GeneratorsNumGuaranteeOmega}", _plugin.Config.Debug);
 
@@ -172,12 +174,13 @@ namespace OmegaWarhead
             double warheadStartTime = Timing.LocalTime + timeToDetonation;
             var validNotifyTimes = NotifyTimes.Where(t => t <= timeToDetonation).OrderByDescending(t => t);
 
+            // FIXED: Local state variable to guarantee atomic execution of environmental changes
+            bool lightsDimmed = false;
+
             foreach (int notifyTime in validNotifyTimes)
             {
                 if (!IsOmegaActive) yield break;
 
-                // MASTER-LEVEL ARCHITECTURE ALIGNMENT:
-                // Utilizing the high-clarity phonetic countdown builder embedded natively within Fluent extensions
                 string message = notifyTime.ToCassieCountdown("Seconds until Omega Warhead Detonation");
                 if (string.IsNullOrEmpty(message)) continue;
 
@@ -215,13 +218,14 @@ namespace OmegaWarhead
                     _plugin.Config.DisableCassieMessages
                 );
 
-                if (notifyTime <= 5)
+                // FIXED: Optimized environmental lighting cascade to prevent catastrophic CPU/Network flood
+                if (notifyTime <= 5 && !lightsDimmed)
                 {
-                    // Dim environmental lighting grids across all rooms smoothly using a rapid iteration cascade
                     foreach (Room room in Room.List)
                     {
                         room.TurnOffLights(0.75f);
                     }
+                    lightsDimmed = true;
                     yield return Timing.WaitForSeconds(0.75f);
                 }
 
@@ -291,9 +295,6 @@ namespace OmegaWarhead
                 _plugin.Config.DisableCassieMessages
             );
 
-            // MASTER-LEVEL ARCHITECTURE ALIGNMENT:
-            // Complete elimination of nested loops and string checks.
-            // Using a single fluent filter and mass-action execution cascade safely.
             Door.List.WhereNameIn(
                 DoorName.LczCheckpointA,
                 DoorName.LczCheckpointB,
@@ -331,7 +332,6 @@ namespace OmegaWarhead
             _plugin.AudioManager?.PlayEndingMusic();
             _plugin.RoundController?.ExecuteScenario(_plugin.RoundController.GetScenario<DetonationEndingScenario>());
 
-            // Permanent terminal jamming loop to block base game radio or broadcast interventions
             while (true)
             {
                 if (_plugin.Config.CassieMessageClearBeforeWarheadMessage)
