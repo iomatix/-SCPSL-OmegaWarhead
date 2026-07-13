@@ -80,11 +80,11 @@ namespace OmegaWarhead
 
             _plugin.AudioManager?.StopOmegaSiren();
 
-            // Revert room lighting spectrum channels using collection-wide extensions fluently
-            Room.List.SetLightsColor(Color.white);
-
             // Prevent thread leaking by systematically killing background operations atomically via collection pipes
             CoroutineTags.AllStaticTags.KillCoroutines();
+
+            // Revert room lighting spectrum channels using collection-wide extensions fluently
+            Room.List.SetLightsColor(Color.white);
 
             Logger.Debug(nameof(OmegaWarheadManager), "All background coroutines bound to static tags have been structurally terminated.", _plugin.Config.Debug);
             _plugin.PlayerMethods?.Clean();
