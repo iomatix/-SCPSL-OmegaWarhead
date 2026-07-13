@@ -188,7 +188,7 @@ namespace OmegaWarhead
                 string message = notifyTime.ToCassieCountdown("Seconds until Omega Warhead Detonation");
                 if (string.IsNullOrEmpty(message)) continue;
 
-                double msgDuration = CassieExtensions.CalculateCassieMessageDuration(message, _plugin.Config.CassieNotifySpeed);
+                double msgDuration = CassieExtensions.CalculateCassieMessageDuration(message);
                 double buffer = _plugin.Config.CassieTimingBuffer;
 
                 double targetStart = warheadStartTime - notifyTime - msgDuration - buffer;
@@ -205,7 +205,6 @@ namespace OmegaWarhead
                     message,
                     $"Warhead -> {notifyTime}...",
                     _plugin.Config.CassieMessageClearBeforeWarheadMessage,
-                    "pitch_0.95",
                     _plugin.Config.CassieMessagePriority,
                     _plugin.Config.DisableCassieMessages
                 );
@@ -240,7 +239,6 @@ namespace OmegaWarhead
                     message,
                     $"Warhead -> {notifyTime}...",
                     _plugin.Config.CassieMessageClearBeforeWarheadMessage,
-                    "pitch_0.95",
                     _plugin.Config.CassieMessagePriority,
                     _plugin.Config.DisableCassieMessages
                 );
@@ -255,7 +253,7 @@ namespace OmegaWarhead
                 yield return Timing.WaitForSeconds(0.75f);
 
                 // Standardized step delay matching verbal execution width to enforce absolute rhythmic precision
-                double msgDuration = CassieExtensions.CalculateCassieMessageDuration(message, _plugin.Config.CassieNotifySpeed);
+                double msgDuration = CassieExtensions.CalculateCassieMessageDuration(message);
                 double buffer = _plugin.Config.CassieTimingBuffer;
                 yield return Timing.WaitForSeconds((float)(msgDuration + buffer));
             }
@@ -263,14 +261,13 @@ namespace OmegaWarhead
             if (!IsOmegaActive) yield break;
 
             string finalSirenMessage = ".G5 Pitch_1.75 .G5 .G5 .G5 .G5 .G5";
-            double sirenDuration = CassieExtensions.CalculateCassieMessageDuration(finalSirenMessage, _plugin.Config.CassieNotifySpeed);
+            double sirenDuration = CassieExtensions.CalculateCassieMessageDuration(finalSirenMessage);
             double finalBuffer = _plugin.Config.CassieTimingBuffer;
 
             CassieExtensions.ProcessAndDispatchMessage(
                 finalSirenMessage,
                 "Warhead...",
                 _plugin.Config.CassieMessageClearBeforeWarheadMessage,
-                "pitch_0.95",
                 _plugin.Config.CassieMessagePriority,
                 _plugin.Config.DisableCassieMessages
             );
@@ -296,7 +293,7 @@ namespace OmegaWarhead
             CassieExtensions.ProcessAndDispatchMessage(
                 _plugin.Config.HeliIncomingCassie,
                 _plugin.Config.HelicopterIncomingMessage,
-                _plugin.Config.CassieMessageClearBeforeImportant, "pitch_1.05",
+                _plugin.Config.CassieMessageClearBeforeImportant,
                 _plugin.Config.CassieMessageImportantPriority,
                 _plugin.Config.DisableCassieMessages
             );
@@ -318,7 +315,6 @@ namespace OmegaWarhead
                 _plugin.Config.CheckpointUnlockCassie,
                 _plugin.Config.CheckpointUnlockMessage,
                 _plugin.Config.CassieMessageClearBeforeImportant,
-                "pitch_1.05",
                 _plugin.Config.CassieMessageImportantPriority,
                 _plugin.Config.DisableCassieMessages
             );
@@ -336,7 +332,7 @@ namespace OmegaWarhead
         public IEnumerator<float> HandleDetonation()
         {
             string detonationMessage = _plugin.Config.DetonatingOmegaCassie;
-            double messageDuration = CassieExtensions.CalculateCassieMessageDuration(detonationMessage, _plugin.Config.CassieDetonationSpeed);
+            double messageDuration = CassieExtensions.CalculateCassieMessageDuration(detonationMessage);
             float buffer = _plugin.Config.CassieTimingBuffer;
 
             Logger.Debug(nameof(OmegaWarheadManager), $"Broadcasting final detonation transmission. Calculated execution block width: {messageDuration}s", _plugin.Config.Debug);
@@ -345,7 +341,6 @@ namespace OmegaWarhead
                 detonationMessage,
                 _plugin.Config.DetonatingOmegaMessage,
                 _plugin.Config.CassieMessageClearBeforeWarheadMessage,
-                "pitch_0.65",
                 _plugin.Config.CassieMessagePriority,
                 _plugin.Config.DisableCassieMessages
             );

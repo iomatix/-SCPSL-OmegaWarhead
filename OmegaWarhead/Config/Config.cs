@@ -44,14 +44,8 @@ namespace OmegaWarhead
             300, 240, 180, 120, 60, 25, 15, 10, 5, 4, 3, 2, 1
         };
 
-        [Description("Multiplier for calculating estimated Cassie duration during countdown notifications.")]
-        public double CassieNotifySpeed { get; set; } = 0.75;
-
-        [Description("Multiplier for estimating Cassie duration of final detonation message.")]
-        public double CassieDetonationSpeed { get; set; } = 0.35;
-
         [Description("Buffer time (in seconds) added to each Cassie message to avoid skips during countdown.")]
-        public float CassieTimingBuffer { get; set; } = 0.55f;
+        public float CassieTimingBuffer { get; set; } = 0.45f;
 
         [Description("T-Minus threshold (seconds REMAINING until detonation) when checkpoint doors open and permanently lock.")]
         public float OpenAndLockCheckpointDoorsTMinus { get; set; } = 120f;
@@ -226,30 +220,26 @@ namespace OmegaWarhead
             EscapeZoneSize = EscapeZoneSize.LimitMin(0.1f);
             ShelterZoneSize = ShelterZoneSize.LimitMin(0.1f);
 
-            // 5. Native Cassie Speech-Speed Estimation Thresholds
-            CassieNotifySpeed = CassieNotifySpeed.Clamp(0.3, 1.5);
-            CassieDetonationSpeed = CassieDetonationSpeed.Clamp(0.3, 1.5);
-
-            // 6. Unified Timing Audio Buffer Pipeline Checks
+            // 5. Unified Timing Audio Buffer Pipeline Checks
             if (CassieTimingBuffer < 0f || CassieTimingBuffer > 5f)
             {
                 Logger.Warn(nameof(Config), $"Extremal CassieTimingBuffer variance detected ({CassieTimingBuffer}s). Reverting immediately to safe production fallback metrics (0.65s).");
                 CassieTimingBuffer = 0.65f;
             }
 
-            // 7. Optimized Chronological Array Order Verification via LINQ Declarative Pipes
+            // 6.. Optimized Chronological Array Order Verification via LINQ Declarative Pipes
             if (NotifyTimes is { Count: > 1 } && NotifyTimes.Zip(NotifyTimes.Skip(1), (current, next) => current < next).Any(isInvalid => isInvalid))
             {
                 Logger.Warn(nameof(Config), "NotifyTimes chronological array matrix alignment constraint violated. Re-sorting array descending...");
                 NotifyTimes.Sort((a, b) => b.CompareTo(a));
             }
 
-            // 8. Native Color Spectrum Pipeline Safeguards
+            // 7. Native Color Spectrum Pipeline Safeguards
             LightsColorR = LightsColorR.Clamp(0f, 1f);
             LightsColorG = LightsColorG.Clamp(0f, 1f);
             LightsColorB = LightsColorB.Clamp(0f, 1f);
 
-            // 9. Reflection-Driven Automated UI and Localization Assets Security Validation Loop (DRY Compliant)
+            // 8. Reflection-Driven Automated UI and Localization Assets Security Validation Loop (DRY Compliant)
             var stringProperties = typeof(Config)
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .Where(p => p.PropertyType == typeof(string));

@@ -137,7 +137,6 @@ namespace OmegaWarhead
                     _plugin.Config.CassieMessageMiniWaveOnDmsCancel,
                     string.Empty,
                     _plugin.Config.CassieMessageClearBeforeWarheadMessage,
-                    "pitch_0.95",
                     _plugin.Config.CassieMessagePriority,
                     _plugin.Config.DisableCassieMessages
                 );

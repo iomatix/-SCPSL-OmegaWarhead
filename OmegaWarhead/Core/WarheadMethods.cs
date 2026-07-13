@@ -72,7 +72,6 @@ namespace OmegaWarhead
                         _plugin.Config.StartingOmegaCassie,
                         _plugin.Config.StartingOmegaMessage,
                         _plugin.Config.CassieMessageClearBeforeImportant,
-                        "pitch_1.05",
                         _plugin.Config.CassieMessageImportantPriority,
                         _plugin.Config.DisableCassieMessages
                     );
@@ -90,7 +89,7 @@ namespace OmegaWarhead
                 .ToArray();
 
             // Intersecting array listings to aggregate timeline bounds cleanly
-            double messageDurationAdjustment = CassieExtensions.CalculateTotalMessagesDurations(countdownMessages, (float)_plugin.Config.CassieNotifySpeed);
+            double messageDurationAdjustment = CassieExtensions.CalculateTotalMessagesDurations(countdownMessages);
             Logger.Debug(nameof(WarheadMethods), $"Adjusting timeToDetonation by {messageDurationAdjustment}s for Cassie messages.", _plugin.Config.Debug);
 
             double adjustedTime = timeToDetonation + messageDurationAdjustment;
@@ -114,7 +113,7 @@ namespace OmegaWarhead
             CassieExtensions.ProcessAndDispatchMessage(
                 _plugin.Config.StoppingOmegaCassie,
                 _plugin.Config.StoppingOmegaMessage,
-                _plugin.Config.CassieMessageClearBeforeImportant, "pitch_0.95",
+                _plugin.Config.CassieMessageClearBeforeImportant,
                 _plugin.Config.CassieMessagePriority,
                 _plugin.Config.DisableCassieMessages
             );
