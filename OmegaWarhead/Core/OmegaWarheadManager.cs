@@ -364,6 +364,18 @@ namespace OmegaWarhead
                 yield return Timing.WaitForSeconds(0.175f);
             }
         }
+
+        public IEnumerator<float> HandleLightsColorLoop(Color targetColor)
+        {
+            yield return Timing.WaitForSeconds(_plugin.Config.DelayBeforeOmegaSequence);
+
+            while (IsOmegaActive)
+            {
+                Room.List.SetLightsColor(targetColor);
+
+                yield return Timing.WaitForSeconds(1.15f);
+            }
+        }
         #endregion
     }
 }

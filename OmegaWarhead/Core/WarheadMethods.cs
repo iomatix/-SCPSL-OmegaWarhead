@@ -3,6 +3,7 @@ using LabApi.Features.Wrappers;
 using MEC;
 using OmegaWarhead.Shared;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Logger = LabApi.Extensions.Misc.iLogger;
@@ -54,16 +55,10 @@ namespace OmegaWarhead
             Color lightColor = new Color(_plugin.Config.LightsColorR, _plugin.Config.LightsColorG, _plugin.Config.LightsColorB);
             Logger.Debug(nameof(WarheadMethods), $"Changing room lights to color spectrum: R={lightColor.r}, G={lightColor.g}, B={lightColor.b}", _plugin.Config.Debug);
 
-            var coroutineLight = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
-            {
-                // Replaced non-fluent map calls with collection-wide extensions targeting light controllers directly
-                if (_plugin.OmegaManager is not null && _plugin.OmegaManager.IsOmegaActive)
-                    Room.List.SetLightsColor(lightColor);
-            });
-            coroutineLight.Tag = CoroutineTags.Lights;
+            Timing.RunCoroutine(_plugin.OmegaManager.HandleLightsColorLoop(lightColor), CoroutineTags.Lights);
 
-            // 3. Automated Broadcast and Vocal Notifications Pipeline
-            var coroutineCore = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
+        // 3. Automated Broadcast and Vocal Notifications Pipeline
+        var coroutineCore = Timing.CallDelayed(_plugin.Config.DelayBeforeOmegaSequence, () =>
             {
                 if (_plugin.OmegaManager is not null && _plugin.OmegaManager.IsOmegaActive)
                 {
@@ -127,6 +122,7 @@ namespace OmegaWarhead
         public void ResetSequence()
         {
             Logger.Debug(nameof(WarheadMethods), "Resetting Omega Warhead state.", _plugin.Config.Debug);
+
             _plugin.OmegaManager?.Init();
         }
         #endregion
