@@ -19,7 +19,7 @@ namespace OmegaWarhead
         public override string Author => "iomatix";
         public override string Name => "OmegaWarhead";
         public override string Description => "Advanced facility alternative detonation and escape sequence control engine.";
-        public override Version Version => new Version(10, 1, 4);
+        public override Version Version => new Version(10, 2, 0);
         public override Version RequiredApiVersion => new Version(1, 0, 0);
         #endregion
 
@@ -72,7 +72,7 @@ namespace OmegaWarhead
             RoundController.RegisterScenario(new DetonationEndingScenario(RoundController));
             EventHandler.RegisterEvents();
 
-            Logger.Info(Name, "OmegaWarhead plugin infrastructure successfully built and enabled.");
+            Logger.Info(nameof(Plugin), $"{Name} (v{Version}) has been initialized successfully.");
             OmegaManager?.Init();
         }
 
