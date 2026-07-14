@@ -91,7 +91,7 @@ namespace OmegaWarhead
 
             try
             {
-                Shared.CoroutineTags.AllStaticTags.KillCoroutines();
+                Shared.CoroutineTags.AllStaticTags.Kill();
                 Logger.Debug(Name, "Cleared active execution threads and coroutines via structural tags successfully.", Config?.Debug ?? false);
             }
             catch (Exception ex)

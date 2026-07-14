@@ -81,7 +81,7 @@ namespace OmegaWarhead
             _plugin.AudioManager?.StopOmegaSiren();
 
             // Prevent thread leaking by systematically killing background operations atomically via collection pipes
-            CoroutineTags.AllStaticTags.KillCoroutines();
+            CoroutineTags.AllStaticTags.Kill();
 
             // Revert room lighting spectrum channels using collection-wide extensions fluently
             Room.List.SetLightsColor(Color.white);
