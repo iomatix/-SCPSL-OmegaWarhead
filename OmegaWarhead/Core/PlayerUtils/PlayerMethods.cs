@@ -141,7 +141,7 @@ namespace OmegaWarhead.Core.PlayerUtils
                     Logger.Debug(nameof(PlayerMethods), $"Redirecting survivor client '{player.Nickname}' into invulnerability thread loop. Outcome: [{fate}]", _plugin.Config.Debug);
 
                     string saveTag = $"{CoroutineTags.SavePlayerPrefix}{player.UserId}";
-                    saveTag.KillCoroutine();
+                    saveTag.Kill();
 
                     Timing.RunCoroutine(HandleSavePlayer(player), saveTag);
                     break;
@@ -272,7 +272,7 @@ namespace OmegaWarhead.Core.PlayerUtils
         {
             foreach (var userId in _activeSaveCoroutines.ToList())
             {
-                $"{CoroutineTags.SavePlayerPrefix}{userId}".KillCoroutine();
+                $"{CoroutineTags.SavePlayerPrefix}{userId}".Kill();
             }
             _activeSaveCoroutines.Clear();
             Logger.Debug(nameof(PlayerMethods), "All local dynamic player execution sequences successfully evacuated.", _plugin.Config.Debug);

@@ -82,7 +82,7 @@ namespace OmegaWarhead
         public void OnRoundStart(LabApi.Events.Arguments.ServerEvents.RoundStartingEventArgs ev)
         {
             Logger.Debug(_plugin.Name, "RoundStarting sequence captured. Refreshing operational databases...", _plugin.Config.Debug);
-            Shared.CoroutineTags.AllStaticTags.KillCoroutines();
+            Shared.CoroutineTags.AllStaticTags.Kill();
 
             _plugin.CacheHandler?.ResetCache();
             _plugin.OmegaManager?.Init();
@@ -94,7 +94,7 @@ namespace OmegaWarhead
         public void OnRoundEnd(LabApi.Events.Arguments.ServerEvents.RoundEndedEventArgs ev)
         {
             Logger.Debug(_plugin.Name, $"RoundEnded sequence captured. Leading Team: {ev.LeadingTeam}. Shutting down sub-engines...", _plugin.Config.Debug);
-            Shared.CoroutineTags.AllStaticTags.KillCoroutines();
+            Shared.CoroutineTags.AllStaticTags.Kill();
 
             _plugin.CacheHandler?.ResetCache();
             _plugin.OmegaManager?.Disable();
