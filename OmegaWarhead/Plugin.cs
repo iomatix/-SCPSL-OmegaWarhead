@@ -72,8 +72,8 @@ namespace OmegaWarhead
             RoundController.RegisterScenario(new DetonationEndingScenario(RoundController));
             EventHandler.RegisterEvents();
 
-            Logger.Info(nameof(Plugin), $"{Name} (v{Version}) has been initialized successfully.");
             OmegaManager?.Init();
+            Logger.Info(nameof(Plugin), $"{Name} (v{Version}) has been initialized successfully.");
         }
 
         public override void Disable()
