@@ -84,7 +84,7 @@ namespace OmegaWarhead
             CoroutineTags.AllStaticTags.Kill();
 
             // Revert room lighting spectrum channels using collection-wide extensions fluently
-            Room.List.SetLightsColor(Color.white);
+            Room.List.SetLightsColor(Color.clear);
 
             Logger.Debug(nameof(OmegaWarheadManager), "All background coroutines bound to static tags have been structurally terminated.", _plugin.Config.Debug);
             _plugin.PlayerMethods?.Clean();
